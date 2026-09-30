@@ -14,6 +14,10 @@ import { AppError } from './shared/errors/index.js';
 import { authRoutes } from './api/routes/auth.routes.js';
 import { productRoutes } from './api/routes/product.routes.js';
 import { orderRoutes } from './api/routes/order.routes.js';
+import { userRoutes } from './api/routes/user.routes.js';
+import { tableRoutes } from './api/routes/table.routes.js';
+import { stockRoutes } from './api/routes/stock.routes.js';
+import { PostgresConnection } from './infrastructure/database/postgres/index.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -120,24 +124,35 @@ export async function buildApp() {
 
   app.get('/ready', async (request, reply) => {
     // Check database connection
-    const dbHealthy = true; // TODO: implement actual health check
-    if (!dbHealthy) {
+    try {
+      const db = PostgresConnection.getInstance();
+      const dbHealthy = await db.healthCheck();
+      if (!dbHealthy) {
+        return reply.status(503).send({
+          status: 'not_ready',
+          checks: { database: false },
+        });
+      }
+      return { status: 'ready', checks: { database: true } };
+    } catch {
       return reply.status(503).send({
         status: 'not_ready',
         checks: { database: false },
       });
     }
-    return { status: 'ready', checks: { database: true } };
   });
 
   // ============== ROUTES ==============
 
-  // Auth routes
+  // Auth routes (public)
   await app.register(authRoutes, { prefix: '/api/v1/auth' });
 
   // Protected routes (require auth)
+  await app.register(userRoutes, { prefix: '/api/v1/users' });
   await app.register(productRoutes, { prefix: '/api/v1/products' });
   await app.register(orderRoutes, { prefix: '/api/v1/orders' });
+  await app.register(tableRoutes, { prefix: '/api/v1/tables' });
+  await app.register(stockRoutes, { prefix: '/api/v1/stock' });
 
   // ============== GRACEFUL SHUTDOWN ==============
 
