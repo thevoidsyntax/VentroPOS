@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simplified DDD project structure
 - Backend scaffolding (Fastify + TypeScript)
 
+### Fixed
+- Database migrations with RLS policies
+- Stock use cases implementation
+- User use cases implementation
+- Table use cases implementation
+- All missing routes (User, Table, Stock)
+- Unit tests for domain logic
+
 ---
 
 ## [1.0.0] - TBD
