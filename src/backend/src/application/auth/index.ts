@@ -1,9 +1,13 @@
 // Auth Application Service - Login/Register/Token Use Cases
-// Simplified DDD: Keeping use cases focused and testable
+/**
+ * @module application/auth
+ * @description Authentication and authorization use cases
+ */
 
 import type { User } from '../../domain/entities/index.js';
 import type { IUserRepository, ITenantRepository } from '../../domain/repositories/index.js';
-import { InvalidCredentialsError, DuplicateError, UnauthorizedError, TokenExpiredError } from '../../shared/errors/index.js';
+import { InvalidCredentialsError, DuplicateError, UnauthorizedError, TokenExpiredError, ValidationError } from '../../shared/errors/index.js';
+import { validatePasswordStrength, isCommonPassword } from '../../shared/utils/password.js';
 
 export interface AuthTokens {
   accessToken: string;
@@ -27,6 +31,9 @@ export interface RegisterInput {
   ownerName: string;
 }
 
+/**
+ * Register a new tenant with owner user
+ */
 export class RegisterUseCase {
   constructor(
     private tenantRepo: ITenantRepository,
@@ -35,6 +42,19 @@ export class RegisterUseCase {
   ) {}
 
   async execute(input: RegisterInput): Promise<{ tenantId: string; user: Omit<User, 'passwordHash'> }> {
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(input.password);
+    if (!passwordValidation.valid) {
+      throw new ValidationError('Password does not meet requirements', {
+        errors: passwordValidation.errors,
+      });
+    }
+
+    // Check if password is common
+    if (isCommonPassword(input.password)) {
+      throw new ValidationError('Password is too common, please choose a stronger password');
+    }
+
     // Check if email already exists (globally)
     const existingUser = await this.userRepo.findByEmail('system', input.email);
     if (existingUser) {
@@ -82,6 +102,9 @@ export interface LoginInput {
   password: string;
 }
 
+/**
+ * Authenticate user and generate tokens
+ */
 export class LoginUseCase {
   constructor(
     private userRepo: IUserRepository,

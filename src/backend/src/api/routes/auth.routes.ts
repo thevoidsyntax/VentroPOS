@@ -1,5 +1,8 @@
 // Auth Routes - API Endpoints
 // Simplified DDD: Routes delegate to Application Services
+/**
+ * @module api/routes/auth
+ */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcrypt';
@@ -10,6 +13,9 @@ import { config } from '../../shared/config/index.js';
 import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware } from '../middleware/index.js';
 
+/**
+ * Auth routes - handles authentication endpoints
+ */
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   // Initialize repositories and services
   const tenantRepo = new PostgresTenantRepository();
@@ -72,9 +78,15 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
   const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepo);
 
-  // ============== REGISTER ==============
+  // ============== REGISTER (Rate Limited) ==============
   fastify.post('/register', {
     schema: registerSchema,
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: '1 hour',
+      },
+    },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { tenantName, email, password, ownerName } = request.body as {
       tenantName: string;
@@ -109,9 +121,15 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     }
   });
 
-  // ============== LOGIN ==============
+  // ============== LOGIN (Rate Limited) ==============
   fastify.post('/login', {
     schema: loginSchema,
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '1 minute',
+      },
+    },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { email, password } = request.body as {
       email: string;

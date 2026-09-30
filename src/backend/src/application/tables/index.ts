@@ -1,19 +1,21 @@
 // Tables Application Service - Table Management Use Cases
-// Simplified DDD: Restaurant table operations
+/**
+ * Table Management Use Cases
+ * Handles restaurant table operations for POS system
+ *
+ * @module application/tables
+ * @version 1.0.0
+ */
 
 import type { Table } from '../../domain/entities/index.js';
 import type { ITableRepository } from '../../domain/repositories/index.js';
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
 
-// ============== CREATE TABLE ==============
-
-export interface CreateTableInput {
-  tableNumber: string;
-  capacity?: number;
-  positionX?: number;
-  positionY?: number;
-}
-
+/**
+ * Create a new restaurant table
+ * @param input - Table creation parameters
+ * @returns Created table instance
+ */
 export class CreateTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -28,8 +30,10 @@ export class CreateTableUseCase {
   }
 }
 
-// ============== GET TABLES ==============
-
+/**
+ * Get all tables for a tenant
+ * @returns Array of tables
+ */
 export class GetTablesUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -38,8 +42,12 @@ export class GetTablesUseCase {
   }
 }
 
-// ============== GET TABLE BY ID ==============
-
+/**
+ * Get a specific table by ID
+ * @param tableId - Table UUID
+ * @returns Table instance
+ * @throws NotFoundError if table doesn't exist
+ */
 export class GetTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -54,16 +62,12 @@ export class GetTableUseCase {
   }
 }
 
-// ============== UPDATE TABLE ==============
-
-export interface UpdateTableInput {
-  tableNumber?: string;
-  capacity?: number;
-  positionX?: number;
-  positionY?: number;
-  status?: Table['status'];
-}
-
+/**
+ * Update table properties
+ * @param tableId - Table UUID
+ * @param input - Update parameters
+ * @returns Updated table
+ */
 export class UpdateTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -74,7 +78,6 @@ export class UpdateTableUseCase {
       throw new NotFoundError(`Table with id '${tableId}'`);
     }
 
-    // Cannot change number of occupied table
     if (input.tableNumber && table.status === 'occupied') {
       throw new BusinessRuleError('Cannot change number of occupied table');
     }
@@ -89,8 +92,11 @@ export class UpdateTableUseCase {
   }
 }
 
-// ============== DELETE TABLE ==============
-
+/**
+ * Delete a table
+ * @param tableId - Table UUID
+ * @throws BusinessRuleError if table is occupied
+ */
 export class DeleteTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -101,7 +107,6 @@ export class DeleteTableUseCase {
       throw new NotFoundError(`Table with id '${tableId}'`);
     }
 
-    // Cannot delete occupied table
     if (table.status === 'occupied') {
       throw new BusinessRuleError('Cannot delete occupied table');
     }
@@ -110,8 +115,11 @@ export class DeleteTableUseCase {
   }
 }
 
-// ============== OCCUPY TABLE ==============
-
+/**
+ * Mark table as occupied (customer seated)
+ * @param tableId - Table UUID
+ * @returns Updated table
+ */
 export class OccupyTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -130,8 +138,11 @@ export class OccupyTableUseCase {
   }
 }
 
-// ============== RELEASE TABLE ==============
-
+/**
+ * Release table back to available status
+ * @param tableId - Table UUID
+ * @returns Updated table
+ */
 export class ReleaseTableUseCase {
   constructor(private tableRepo: ITableRepository) {}
 
@@ -150,8 +161,10 @@ export class ReleaseTableUseCase {
   }
 }
 
-// ============== GET TABLE LAYOUT ==============
-
+/**
+ * Get table layout for visual display
+ * @returns Tables with position data and grid bounds
+ */
 export interface TableLayoutItem {
   table: Table;
   gridX: number;

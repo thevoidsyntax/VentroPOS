@@ -1,7 +1,6 @@
 // Repository Implementations - PostgreSQL
 // Infrastructure Layer: Implements Domain Repository Interfaces
 
-import type { pg } from 'pg';
 import type {
   ITenantRepository,
   IUserRepository,
@@ -25,8 +24,6 @@ import type {
   OrderItem,
   Transaction,
   StockLog,
-  AuditLog,
-  CreateUserInput,
 } from '../../../domain/entities/index.js';
 import { DatabaseError, DuplicateError } from '../../../shared/errors/index.js';
 
