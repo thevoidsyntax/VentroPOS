@@ -344,6 +344,32 @@ When working with this project, Claude should:
 6. **Security first** - Validate all inputs, hash passwords, use parameterized queries
 7. **Performance aware** - Avoid N+1 queries, use proper indexes
 
+### Git Commit Rules (CRITICAL)
+
+**DO NOT ADD Co-Authored-By IN ANY COMMIT!**
+
+When creating commits, use this format ONLY:
+```
+<type>(<scope>): <description>
+
+[Optional body with details]
+```
+
+Example:
+```
+feat(auth): add JWT authentication
+
+- Implement JWT access and refresh tokens
+- Add password hashing with bcrypt
+```
+
+**NEVER include:**
+- `Co-Authored-By:` lines
+- `🤖 Generated with Claude Code` lines
+- Any attribution footer
+
+The git author is already set to "AI Contributor" - no additional attribution needed.
+
 ---
 
 *Document maintained by: Project Lead*  
