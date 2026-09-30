@@ -55,7 +55,7 @@ VentroPos adalah **Point of Sale system berbasis cloud** yang dirancang khusus u
 
 | User Role | Description | Access Level |
 |-----------|-------------|--------------|
-| **Owner/Owner** | Pemilik cafe | Full access, all reports |
+| **Owner** | Pemilik cafe | Full access, all reports |
 | **Manager** | Pengelola harian | Full POS + reports |
 | **Kasir** | Petugas kasir | POS operations only |
 | **Kitchen Staff** | Staff dapur | Order queue view only |
@@ -416,10 +416,8 @@ Metrics:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0.0 | 2024 | Claude | Initial draft |
+| 1.0.0 | 2024 | thevoidsyntax | Initial draft |
 
 ---
 
-*Last updated: 2024*  
-*Document Owner: Project Lead  
-*Next Review: Before Phase 1 kickoff*
+*Maintained by: thevoidsyntax*

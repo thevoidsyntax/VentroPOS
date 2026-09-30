@@ -79,7 +79,7 @@ VentroPos adalah sistem Point of Sale (POS) berbasis cloud yang dirancang khusus
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/ventro-pos.git
+git clone https://github.com/thevoidsyntax/ventro-pos.git
 cd ventro-pos
 
 # Install backend dependencies
@@ -117,11 +117,11 @@ docker-compose up -d
 ventro-pos/
 ├── docs/                      # Documentation
 │   ├── prd/                   # Product Requirements
-│   ├── roadmap/                # Phase roadmaps
+│   ├── roadmap/               # Phase roadmaps
 │   └── adr/                   # Architecture Decisions
 ├── src/
 │   ├── backend/               # API server
-│   └── frontend/              # React PWA
+│   └── frontend/               # React PWA
 ├── docker/                    # Docker configs
 ├── CHANGELOG.md               # Version history
 ├── README.md                  # This file
@@ -161,7 +161,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Developer:** Solo Developer
+- **Developer:** [thevoidsyntax](https://github.com/thevoidsyntax)
 
 ## 🙏 Acknowledgments
 

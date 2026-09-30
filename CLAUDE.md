@@ -365,12 +365,11 @@ feat(auth): add JWT authentication
 
 **NEVER include:**
 - `Co-Authored-By:` lines
-- `🤖 Generated with Claude Code` lines
-- Any attribution footer
+- Any attribution footer beyond the git author
 
-The git author is already set to "AI Contributor" - no additional attribution needed.
+The git author is set to your GitHub identity - no additional attribution needed.
 
 ---
 
-*Document maintained by: Project Lead*  
+*Maintained by: thevoidsyntax*  
 *Last updated: 2024*

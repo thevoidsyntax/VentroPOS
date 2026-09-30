@@ -550,5 +550,5 @@ Each phase must pass these gates before moving to next:
 
 ---
 
-*Document maintained by: Project Lead*  
+*Maintained by: thevoidsyntax*  
 *Last updated: 2024*
