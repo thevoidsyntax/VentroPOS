@@ -15,7 +15,7 @@
 │                                                                  │
 │  PHASE 1 ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   │
 │  Foundation (Backend + DB + Auth)                              │
-│  Est: 2-3 weeks | Status: 🔴 Not Started                      │
+│  Est: 2-3 weeks | Status: 🟡 In Progress                  │
 │                                                                  │
 │  PHASE 2 ░░░░░░░░░░░░░░░██████████████████░░░░░░░░░░░░░░░░░░░   │
 │  Core POS (Cart + Checkout)                                    │

@@ -1,0 +1,66 @@
+# VentroPos Development Stack
+# Docker Compose for local development
+
+services:
+  # Backend API
+  api:
+    build:
+      context: ./src/backend
+      dockerfile: ../../docker/Dockerfile
+    container_name: ventropos-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://ventropos:ventropos123@postgres:5432/ventropos
+      - JWT_SECRET=dev-secret-key-change-in-production-min32chars
+      - JWT_ACCESS_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - CORS_ORIGIN=*
+      - LOG_LEVEL=debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src/backend/src:/app/src:ro
+    command: npm run dev
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ventropos-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=ventropos
+      - POSTGRES_PASSWORD=ventropos123
+      - POSTGRES_DB=ventropos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ventropos -d ventropos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for caching - future)
+  redis:
+    image: redis:7-alpine
+    container_name: ventropos-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
