@@ -1,8 +1,19 @@
 # VentroPos - Project Instructions
 
-> **Project:** VentroPos - Point of Sale System for Cafe  
-> **Version:** 1.0.0  
+> **Project:** VentroPos - Point of Sale System for Cafe
+> **Version:** 1.0.0
 > **Last Updated:** 2024
+
+---
+
+## 📖 First Read (Otomatisasi Chat Baru)
+
+Ketika memulai chat baru untuk project ini, Claude WAJIB membaca:
+
+1. **`docs/roadmap/PROGRESS.md`** — Progress tracker, phase saat ini, next steps
+2. **`CHANGELOG.md`** — Recent changes dan fix history
+
+Setelah membaca kedua file tersebut, baru tanya atau lanjut development.
 
 ---
 
@@ -23,11 +34,27 @@ VentroPos adalah sistem Point of Sale berbasis cloud untuk cafe dan restoran kec
 
 ## 🎯 Development Phases
 
-Project dibagi menjadi 6 fase:
-
 ```
-Phase 1: Foundation      → Backend, DB, Auth (Current)
-Phase 2: Core POS        → Cart, Checkout, Orders
+Phase 1: Foundation      → Backend, DB, Auth (✅ DONE ~95%)
+Phase 2: Core POS        → Cart, Checkout, Orders (⬜ NEXT)
+Phase 3: Inventory       → Stock Management
+Phase 4: Reporting       → Dashboard & Reports
+Phase 5: Hardware       → Printer, Scanner, EDC
+Phase 6: Polish & Launch → PWA, Security Audit, Deploy
+```
+
+**Progress tracker:** `docs/roadmap/PROGRESS.md`
+
+---
+
+## 📁 Important Files
+
+| File | Purpose |
+|------|---------|
+| `docs/roadmap/PROGRESS.md` | Development progress tracker |
+| `CHANGELOG.md` | Version history & recent changes |
+| `README.md` | Public overview |
+| `CLAUDE.md` | Developer instructions (this file) |
 Phase 3: Inventory       → Stock Management
 Phase 4: Reporting       → Dashboard & Reports
 Phase 5: Hardware        → Printer, Scanner, EDC
