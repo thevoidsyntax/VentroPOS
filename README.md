@@ -23,7 +23,7 @@ VentroPos adalah sistem Point of Sale (POS) berbasis cloud untuk cafe dan restor
 
 ```
 ✅ Phase 1: Foundation     ~95%   (Backend, DB, Auth - DONE)
-⬜ Phase 2: Core POS     0%     (Cart, Checkout, Orders - NEXT)
+✅ Phase 2: Core POS       95%    (Cart, Checkout, Orders - DONE)
 ⬜ Phase 3: Inventory     0%     (Stock Management)
 ⬜ Phase 4: Reporting     0%     (Dashboard & Reports)
 ⬜ Phase 5: Hardware     0%     (Printer, Scanner, EDC)
@@ -34,14 +34,20 @@ VentroPos adalah sistem Point of Sale (POS) berbasis cloud untuk cafe dan restor
 - PostgreSQL database dengan RLS
 - JWT authentication dengan refresh tokens
 - CRUD API untuk Users, Products, Categories, Tables
-- Unit tests (34 passing)
 - Security audit passed
 
-### Next: Phase 2 - Core POS
-- Shopping cart functionality
-- Checkout flow
-- Multiple payment methods
-- Order management
+### Phase 2 Status: ✅ DONE
+- Shopping cart & order creation dengan modifiers
+- Checkout flow dengan multiple payment methods (cash, QRIS, debit, credit)
+- Split bill support
+- Idempotency key untuk prevent duplicate checkout
+- Order status management (pending → paid/voided/held)
+- Stock deduction on checkout
+- Modifier CRUD API (size, extras, topping, custom)
+- Unit tests (59 passing)
+
+### Next: Phase 3 - Inventory
+- Stock management & restock
 
 ## 🛠️ Tech Stack
 
@@ -77,20 +83,21 @@ VentroPos/
 
 ## 📝 Recent Changes
 
+### Phase 2: Core POS - Completed
+- **Order item modifiers storage** - Modifiers now persist to `order_item_modifiers` table
+- **Transaction splits storage** - Split bill payments persist to `transaction_splits` table
+- **Idempotency key** - Checkout prevents duplicate on network retry
+- **Modifier CRUD API** - `/api/v1/modifiers/groups` and `/api/v1/modifiers/groups/:id/modifiers`
+- **Unit tests** - 59 tests passing (25 new tests added)
+
 ### [Security] - Latest
 - Fix SQL injection in tenant context
 - CORS wildcard rejection in production
 - JWT secret weak pattern validation
 - Stock validation at order creation
 
-### [Fixed]
-- Missing requireManager import
-- Missing table input types
-- TypeScript compilation errors
-- ESLint peer dependency conflicts
-
 ### [Tests]
-- 34 unit tests passing
+- 59 unit tests passing (up from 34)
 - Type coverage >80%
 
 ## 🔒 Security

@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   CreateModifierGroupUseCase,
   GetModifierGroupsUseCase,
+  GetModifierGroupUseCase,
   UpdateModifierGroupUseCase,
   DeleteModifierGroupUseCase,
   CreateModifierUseCase,
@@ -83,8 +84,8 @@ describe('ModifierGroupUseCases', () => {
     it('should create modifier group with custom selections', async () => {
       vi.mocked(mockModifierGroupRepo.create).mockResolvedValue({
         ...mockModifierGroup,
-        minSelections: 1,
-        maxSelections: 3,
+        minSelections: 0,
+        maxSelections: 5,
       });
 
       const result = await createUseCase.execute('tenant-1', {
