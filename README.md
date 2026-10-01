@@ -1,33 +1,29 @@
-# VentroPos - POS Cerdas untuk Cafe Nusantara
+# VentroPos - Cloud POS for Small & Medium Business
 
-> **Version:** 1.0.0  
-> **Status:** Development  
-> **License:** MIT  
+> **Version:** 1.0.0
+> **Status:** Development
+> **License:** MIT
 > **Last Updated:** 2024
-
----
-
-## 📋 Table of Contents
-
-1. [Overview](#-overview)
-2. [Progress Tracker](#-progress-tracker)
-3. [Phase Specifications](#-phase-specifications)
-4. [API Reference](#-api-reference)
-5. [Database Schema](#-database-schema)
-6. [Tech Stack](#-tech-stack)
-7. [Development](#-development)
-8. [Recent Changes](#-recent-changes)
 
 ---
 
 ## 🎯 Overview
 
-VentroPos adalah sistem Point of Sale (POS) berbasis cloud untuk cafe dan restoran kecil-menengah di Indonesia. Sistem ini menggabungkan kemudahan penggunaan dengan kemampuan multi-tenant yang robust.
+VentroPos is a cloud-based Point of Sale (POS) system designed for small to medium businesses. Built with multi-tenancy support, it enables single deployment to serve multiple outlets with robust data isolation.
 
 **Key Features:**
-- 🛒 Shopping Cart dengan modifiers
+- 🛒 Shopping Cart with customizable modifiers
 - 💳 Multi-Payment (Cash, QRIS, Debit, Credit, Split Bill)
-- 📦 Inventory Management dengan real-time stock tracking
+- 📦 Inventory Management with real-time stock tracking
+- 📊 Reporting Dashboard with sales analytics
+- 🖨️ Hardware Integration (Printers, Scanners, EDC)
+- 📱 PWA-ready (Tablet, Mobile, Desktop)
+
+**Target Market:**
+- Retail & Food & Beverage businesses
+- Single or multi-location operations
+- Small to medium enterprises (SME)
+- Global (i18n-ready architecture)
 - 📊 Reporting Dashboard
 - 🖨️ Hardware Integration (Printer, Scanner, EDC)
 - 📱 PWA-ready (Tablet, Mobile, Desktop)
