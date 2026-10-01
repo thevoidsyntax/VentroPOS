@@ -11,10 +11,11 @@ import type {
   IIdempotencyKeyRepository,
 } from '../../domain/repositories/index.js';
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
+import { config } from '../../shared/config/index.js';
 
 // ============== CONSTANTS ==============
-/** Indonesia PPN tax rate (11%) */
-const TAX_RATE = 0.11;
+/** Default Indonesia PPN tax rate (11%) - configurable via TAX_RATE env var */
+const TAX_RATE = config.tax.rate;
 
 // ============== CART DTOs ==============
 

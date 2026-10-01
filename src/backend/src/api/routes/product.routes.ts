@@ -13,10 +13,7 @@ import {
   UpdateCategoryUseCase,
   DeleteCategoryUseCase,
 } from '../../application/products/index.js';
-import {
-  PostgresProductRepository,
-  PostgresCategoryRepository,
-} from '../../infrastructure/database/repositories/index.js';
+import { productRepository, categoryRepository } from '../../infrastructure/database/repositories/container.js';
 import {
   createProductSchema,
   updateProductSchema,
@@ -30,19 +27,16 @@ import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware, requireManager } from '../middleware/index.js';
 
 export async function productRoutes(fastify: FastifyInstance): Promise<void> {
-  const productRepo = new PostgresProductRepository();
-  const categoryRepo = new PostgresCategoryRepository();
+  const createProductUseCase = new CreateProductUseCase(productRepository, categoryRepository);
+  const getProductsUseCase = new GetProductsUseCase(productRepository);
+  const getProductUseCase = new GetProductUseCase(productRepository);
+  const updateProductUseCase = new UpdateProductUseCase(productRepository);
+  const deleteProductUseCase = new DeleteProductUseCase(productRepository);
 
-  const createProductUseCase = new CreateProductUseCase(productRepo, categoryRepo);
-  const getProductsUseCase = new GetProductsUseCase(productRepo);
-  const getProductUseCase = new GetProductUseCase(productRepo);
-  const updateProductUseCase = new UpdateProductUseCase(productRepo);
-  const deleteProductUseCase = new DeleteProductUseCase(productRepo);
-
-  const createCategoryUseCase = new CreateCategoryUseCase(categoryRepo);
-  const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepo);
-  const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepo);
-  const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepo);
+  const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
+  const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
+  const updateCategoryUseCase = new UpdateCategoryUseCase(categoryRepository);
+  const deleteCategoryUseCase = new DeleteCategoryUseCase(categoryRepository);
 
   // ============== CATEGORIES ==============
   fastify.get('/categories', {

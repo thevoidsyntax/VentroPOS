@@ -49,6 +49,22 @@ abstract class BaseRepository {
     const rows = await this.query<T>(text, params);
     return rows[0] ?? null;
   }
+
+  protected async transaction<T>(callback: (client: pg.PoolClient) => Promise<T>): Promise<T> {
+    const pool = await this.db();
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await callback(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 // ============== TENANT REPOSITORY ==============
@@ -143,12 +159,21 @@ export class PostgresUserRepository extends BaseRepository implements IUserRepos
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
-  async findAll(tenantId: string): Promise<User[]> {
+  async findAll(tenantId: string, page = 1, limit = 100): Promise<User[]> {
+    const offset = (page - 1) * limit;
     const rows = await this.query<User>(
-      'SELECT * FROM users WHERE tenant_id = $1 ORDER BY created_at DESC',
-      [tenantId]
+      'SELECT * FROM users WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
+      [tenantId, limit, offset]
     );
     return rows.map(r => this.mapRow(r));
+  }
+
+  async count(tenantId: string): Promise<number> {
+    const rows = await this.query<{ count: string }>(
+      'SELECT COUNT(*) as count FROM users WHERE tenant_id = $1',
+      [tenantId]
+    );
+    return parseInt(rows[0]?.count ?? '0');
   }
 
   async update(tenantId: string, id: string, data: Partial<User>): Promise<User> {
@@ -317,8 +342,12 @@ export class PostgresCategoryRepository extends BaseRepository implements ICateg
     return rows[0] ?? null;
   }
 
-  async findAll(tenantId: string): Promise<Category[]> {
-    return this.query<Category>('SELECT * FROM categories WHERE tenant_id = $1 ORDER BY sort_order ASC, name ASC', [tenantId]);
+  async findAll(tenantId: string, page = 1, limit = 100): Promise<Category[]> {
+    const offset = (page - 1) * limit;
+    return this.query<Category>(
+      'SELECT * FROM categories WHERE tenant_id = $1 ORDER BY sort_order ASC, name ASC LIMIT $2 OFFSET $3',
+      [tenantId, limit, offset]
+    );
   }
 
   async update(tenantId: string, id: string, data: Partial<Category>): Promise<Category> {
@@ -363,8 +392,12 @@ export class PostgresTableRepository extends BaseRepository implements ITableRep
     return rows[0] ?? null;
   }
 
-  async findAll(tenantId: string): Promise<Table[]> {
-    return this.query<Table>('SELECT * FROM restaurant_tables WHERE tenant_id = $1 ORDER BY table_number ASC', [tenantId]);
+  async findAll(tenantId: string, page = 1, limit = 100): Promise<Table[]> {
+    const offset = (page - 1) * limit;
+    return this.query<Table>(
+      'SELECT * FROM restaurant_tables WHERE tenant_id = $1 ORDER BY table_number ASC LIMIT $2 OFFSET $3',
+      [tenantId, limit, offset]
+    );
   }
 
   async update(tenantId: string, id: string, data: Partial<Table>): Promise<Table> {
@@ -439,7 +472,8 @@ export class PostgresModifierGroupRepository extends BaseRepository implements I
     return this.mapRow(rows[0]);
   }
 
-  async findAll(tenantId: string): Promise<ModifierGroup[]> {
+  async findAll(tenantId: string, page = 1, limit = 100): Promise<ModifierGroup[]> {
+    const offset = (page - 1) * limit;
     const rows = await this.query<{
       id: string;
       tenant_id: string;
@@ -450,7 +484,7 @@ export class PostgresModifierGroupRepository extends BaseRepository implements I
       max_selections: number;
       created_at: Date;
       updated_at: Date;
-    }>('SELECT * FROM modifier_groups WHERE tenant_id = $1 ORDER BY name ASC', [tenantId]);
+    }>('SELECT * FROM modifier_groups WHERE tenant_id = $1 ORDER BY name ASC LIMIT $2 OFFSET $3', [tenantId, limit, offset]);
     return rows.map(r => this.mapRow(r));
   }
 
@@ -634,42 +668,71 @@ export class PostgresModifierRepository extends BaseRepository implements IModif
 
 export class PostgresOrderRepository extends BaseRepository implements IOrderRepository {
   async create(tenantId: string, data: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order> {
-    const rows = await this.query<Order>(
-      `INSERT INTO orders (tenant_id, table_id, user_id, order_number, status, subtotal, tax_amount, discount_amount, total_amount, notes, customer_name)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-      [tenantId, data.tableId, data.userId, data.orderNumber, data.status, data.subtotal, data.taxAmount, data.discountAmount, data.totalAmount, data.notes, data.customerName]
-    );
-
-    const order = rows[0];
-
-    // Insert order items with modifiers
-    for (const item of data.items) {
-      const itemRows = await this.query<{ id: string }>(
-        `INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, notes)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
-         RETURNING id`,
-        [order.id, item.productId, item.productName, item.quantity, item.unitPrice, item.totalPrice, item.notes]
+    // Use transaction to ensure atomic order + items + modifiers insert
+    return this.transaction(async (client) => {
+      const orderResult = await client.query<Order>(
+        `INSERT INTO orders (tenant_id, table_id, user_id, order_number, status, subtotal, tax_amount, discount_amount, total_amount, notes, customer_name)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+        [tenantId, data.tableId, data.userId, data.orderNumber, data.status, data.subtotal, data.taxAmount, data.discountAmount, data.totalAmount, data.notes, data.customerName]
       );
 
-      const orderItemId = itemRows[0].id;
+      const order = orderResult.rows[0];
 
-      // Insert order item modifiers
-      for (const modifier of item.modifiers ?? []) {
-        await this.query(
-          `INSERT INTO order_item_modifiers (order_item_id, modifier_id, modifier_name, price_adjustment)
-           VALUES ($1, $2, $3, $4)`,
-          [orderItemId, modifier.modifierId, modifier.modifierName, modifier.priceAdjustment]
+      // Batch insert order items
+      if (data.items.length > 0) {
+        const itemValues: string[] = [];
+        const itemParams: unknown[] = [];
+        let paramIndex = 1;
+
+        for (const item of data.items) {
+          itemValues.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+          itemParams.push(order.id, item.productId, item.productName, item.quantity, item.unitPrice, item.totalPrice, item.notes ?? null);
+        }
+
+        await client.query(
+          `INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, notes)
+           VALUES ${itemValues.join(', ')}`,
+          itemParams
         );
-      }
-    }
 
-    return { ...order, items: data.items };
+        // Batch insert modifiers for each item (requires knowing item IDs)
+        const itemRows = await client.query<{ id: string; sort_order: number }>(
+          `SELECT id, ROW_NUMBER() OVER (ORDER BY created_at) as sort_order FROM order_items WHERE order_id = $1`,
+          [order.id]
+        );
+
+        const modifierValues: string[] = [];
+        const modifierParams: unknown[] = [];
+        let modParamIndex = 1;
+
+        for (const item of data.items) {
+          const itemRow = itemRows.rows.find(r => r.sort_order === data.items.indexOf(item) + 1);
+          if (!itemRow || !item.modifiers?.length) continue;
+
+          for (const modifier of item.modifiers) {
+            modifierValues.push(`($${modParamIndex++}, $${modParamIndex++}, $${modParamIndex++}, $${modParamIndex++})`);
+            modifierParams.push(itemRow.id, modifier.modifierId, modifier.modifierName, modifier.priceAdjustment);
+          }
+        }
+
+        if (modifierValues.length > 0) {
+          await client.query(
+            `INSERT INTO order_item_modifiers (order_item_id, modifier_id, modifier_name, price_adjustment)
+             VALUES ${modifierValues.join(', ')}`,
+            modifierParams
+          );
+        }
+      }
+
+      return { ...order, items: data.items };
+    });
   }
 
   async findById(tenantId: string, id: string): Promise<Order | null> {
     const rows = await this.query<Order>('SELECT * FROM orders WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
     if (!rows[0]) return null;
 
+    // Single query with JOIN to get items and modifiers
     const items = await this.query<{
       id: string;
       order_id: string;
@@ -679,38 +742,59 @@ export class PostgresOrderRepository extends BaseRepository implements IOrderRep
       unit_price: number;
       total_price: number;
       notes: string | null;
-    }>('SELECT * FROM order_items WHERE order_id = $1', [id]);
+      modifier_id: string | null;
+      modifier_name: string | null;
+      modifier_price_adjustment: number | null;
+      modifier_row_id: string | null;
+    }>(`
+      SELECT
+        oi.id, oi.order_id, oi.product_id, oi.product_name, oi.quantity,
+        oi.unit_price, oi.total_price, oi.notes,
+        oim.id as modifier_row_id, oim.modifier_id, oim.modifier_name, oim.price_adjustment as modifier_price_adjustment
+      FROM order_items oi
+      LEFT JOIN order_item_modifiers oim ON oi.id = oim.order_item_id
+      WHERE oi.order_id = $1
+      ORDER BY oi.created_at, oim.created_at
+    `, [id]);
 
-    // Fetch modifiers for each item
-    const itemsWithModifiers = await Promise.all(
-      items.map(async (item) => {
-        const modifiers = await this.query<{
-          id: string;
-          modifier_id: string;
-          modifier_name: string;
-          price_adjustment: number;
-        }>('SELECT * FROM order_item_modifiers WHERE order_item_id = $1', [item.id]);
+    // Group items with their modifiers
+    const itemMap = new Map<string, {
+      id: string;
+      orderId: string;
+      productId: string;
+      productName: string;
+      quantity: number;
+      unitPrice: number;
+      totalPrice: number;
+      notes?: string;
+      modifiers: { id: string; modifierId: string; modifierName: string; priceAdjustment: number }[];
+    }>();
 
-        return {
-          id: item.id,
-          orderId: item.order_id,
-          productId: item.product_id,
-          productName: item.product_name,
-          quantity: item.quantity,
-          unitPrice: item.unit_price,
-          totalPrice: item.total_price,
-          notes: item.notes ?? undefined,
-          modifiers: modifiers.map((m) => ({
-            id: m.id,
-            modifierId: m.modifier_id,
-            modifierName: m.modifier_name,
-            priceAdjustment: m.price_adjustment,
-          })),
-        };
-      })
-    );
+    for (const row of items) {
+      if (!itemMap.has(row.id)) {
+        itemMap.set(row.id, {
+          id: row.id,
+          orderId: row.order_id,
+          productId: row.product_id,
+          productName: row.product_name,
+          quantity: row.quantity,
+          unitPrice: row.unit_price,
+          totalPrice: row.total_price,
+          notes: row.notes ?? undefined,
+          modifiers: [],
+        });
+      }
+      if (row.modifier_row_id) {
+        itemMap.get(row.id)!.modifiers.push({
+          id: row.modifier_row_id,
+          modifierId: row.modifier_id!,
+          modifierName: row.modifier_name!,
+          priceAdjustment: row.modifier_price_adjustment!,
+        });
+      }
+    }
 
-    return { ...rows[0], items: itemsWithModifiers };
+    return { ...rows[0], items: Array.from(itemMap.values()) };
   }
 
   async findByOrderNumber(tenantId: string, orderNumber: string): Promise<Order | null> {
@@ -788,6 +872,63 @@ export class PostgresOrderRepository extends BaseRepository implements IOrderRep
 
 export class PostgresTransactionRepository extends BaseRepository implements ITransactionRepository {
   async create(tenantId: string, data: Omit<Transaction, 'id' | 'createdAt'>): Promise<Transaction> {
+    return this.transaction(async (client) => {
+      const rows = await client.query<{
+        id: string;
+        tenant_id: string;
+        order_id: string;
+        amount: number;
+        change_amount: number;
+        payment_method: string;
+        payment_details: string;
+        reference_number: string | null;
+        user_id: string;
+        created_at: Date;
+      }>(
+        `INSERT INTO transactions (tenant_id, order_id, amount, change_amount, payment_method, payment_details, reference_number, user_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING id, tenant_id, order_id, amount, change_amount, payment_method, payment_details, reference_number, user_id, created_at`,
+        [tenantId, data.orderId, data.amount, data.changeAmount, data.paymentMethod, JSON.stringify(data.paymentDetails), data.referenceNumber, data.userId]
+      );
+
+      const transactionId = rows.rows[0].id;
+
+      // Batch insert split payments if any
+      if (data.splits && data.splits.length > 0) {
+        const splitValues: string[] = [];
+        const splitParams: unknown[] = [];
+        let paramIndex = 1;
+
+        for (const split of data.splits) {
+          splitValues.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+          splitParams.push(transactionId, split.paymentMethod, split.amount, split.referenceNumber);
+        }
+
+        await client.query(
+          `INSERT INTO transaction_splits (transaction_id, payment_method, amount, reference_number)
+           VALUES ${splitValues.join(', ')}`,
+          splitParams
+        );
+      }
+
+      return {
+        id: rows.rows[0].id,
+        tenantId: rows.rows[0].tenant_id,
+        orderId: rows.rows[0].order_id,
+        amount: rows.rows[0].amount,
+        changeAmount: rows.rows[0].change_amount,
+        paymentMethod: rows.rows[0].payment_method as PaymentMethod,
+        paymentDetails: JSON.parse(rows.rows[0].payment_details),
+        referenceNumber: rows.rows[0].reference_number ?? undefined,
+        userId: rows.rows[0].user_id,
+        splits: data.splits,
+        createdAt: rows.rows[0].created_at,
+      };
+    });
+  }
+
+  async findById(tenantId: string, id: string): Promise<Transaction | null> {
+    // Single query with LEFT JOIN to get transaction and splits together
     const rows = await this.query<{
       id: string;
       tenant_id: string;
@@ -799,88 +940,114 @@ export class PostgresTransactionRepository extends BaseRepository implements ITr
       reference_number: string | null;
       user_id: string;
       created_at: Date;
+      split_id: string | null;
+      split_payment_method: string | null;
+      split_amount: number | null;
+      split_reference_number: string | null;
     }>(
-      `INSERT INTO transactions (tenant_id, order_id, amount, change_amount, payment_method, payment_details, reference_number, user_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, tenant_id, order_id, amount, change_amount, payment_method, payment_details, reference_number, user_id, created_at`,
-      [tenantId, data.orderId, data.amount, data.changeAmount, data.paymentMethod, JSON.stringify(data.paymentDetails), data.referenceNumber, data.userId]
+      `SELECT
+        t.id, t.tenant_id, t.order_id, t.amount, t.change_amount, t.payment_method,
+        t.payment_details, t.reference_number, t.user_id, t.created_at,
+        s.id as split_id, s.payment_method as split_payment_method,
+        s.amount as split_amount, s.reference_number as split_reference_number
+       FROM transactions t
+       LEFT JOIN transaction_splits s ON s.transaction_id = t.id
+       WHERE t.id = $1 AND t.tenant_id = $2`,
+      [id, tenantId]
     );
 
-    const transactionId = rows[0].id;
+    if (!rows[0]) return null;
 
-    // Insert split payments if any
-    if (data.splits && data.splits.length > 0) {
-      for (const split of data.splits) {
-        await this.query(
-          `INSERT INTO transaction_splits (transaction_id, payment_method, amount, reference_number)
-           VALUES ($1, $2, $3, $4)`,
-          [transactionId, split.paymentMethod, split.amount, split.referenceNumber]
-        );
+    const row = rows[0];
+
+    // Group splits
+    const splits: Transaction['splits'] = [];
+    for (const r of rows) {
+      if (r.split_id) {
+        splits.push({
+          id: r.split_id,
+          transactionId: id,
+          paymentMethod: r.split_payment_method as PaymentMethod,
+          amount: r.split_amount!,
+          referenceNumber: r.split_reference_number ?? undefined,
+        });
       }
     }
 
     return {
-      id: rows[0].id,
-      tenantId: rows[0].tenant_id,
-      orderId: rows[0].order_id,
-      amount: rows[0].amount,
-      changeAmount: rows[0].change_amount,
-      paymentMethod: rows[0].payment_method as PaymentMethod,
-      paymentDetails: JSON.parse(rows[0].payment_details),
-      referenceNumber: rows[0].reference_number ?? undefined,
-      userId: rows[0].user_id,
-      splits: data.splits,
-      createdAt: rows[0].created_at,
-    };
-  }
-
-  async findById(tenantId: string, id: string): Promise<Transaction | null> {
-    const rows = await this.query<Transaction>('SELECT * FROM transactions WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
-    if (!rows[0]) return null;
-
-    // Fetch splits
-    const splits = await this.query<{
-      id: string;
-      payment_method: string;
-      amount: number;
-      reference_number: string | null;
-    }>('SELECT * FROM transaction_splits WHERE transaction_id = $1', [id]);
-
-    return {
-      ...rows[0],
-      splits: splits.map((s) => ({
-        id: s.id,
-        transactionId: id,
-        paymentMethod: s.payment_method as PaymentMethod,
-        amount: s.amount,
-        referenceNumber: s.reference_number ?? undefined,
-      })),
+      id: row.id,
+      tenantId: row.tenant_id,
+      orderId: row.order_id,
+      amount: row.amount,
+      changeAmount: row.change_amount,
+      paymentMethod: row.payment_method as PaymentMethod,
+      paymentDetails: JSON.parse(row.payment_details),
+      referenceNumber: row.reference_number ?? undefined,
+      userId: row.user_id,
+      splits,
+      createdAt: row.created_at,
     };
   }
 
   async findByOrderId(tenantId: string, orderId: string): Promise<Transaction | null> {
-    const rows = await this.query<Transaction>('SELECT * FROM transactions WHERE order_id = $1 AND tenant_id = $2', [orderId, tenantId]);
+    // Single query with LEFT JOIN to get transaction and splits together
+    const rows = await this.query<{
+      id: string;
+      tenant_id: string;
+      order_id: string;
+      amount: number;
+      change_amount: number;
+      payment_method: string;
+      payment_details: string;
+      reference_number: string | null;
+      user_id: string;
+      created_at: Date;
+      split_id: string | null;
+      split_payment_method: string | null;
+      split_amount: number | null;
+      split_reference_number: string | null;
+    }>(
+      `SELECT
+        t.id, t.tenant_id, t.order_id, t.amount, t.change_amount, t.payment_method,
+        t.payment_details, t.reference_number, t.user_id, t.created_at,
+        s.id as split_id, s.payment_method as split_payment_method,
+        s.amount as split_amount, s.reference_number as split_reference_number
+       FROM transactions t
+       LEFT JOIN transaction_splits s ON s.transaction_id = t.id
+       WHERE t.order_id = $1 AND t.tenant_id = $2`,
+      [orderId, tenantId]
+    );
+
     if (!rows[0]) return null;
 
-    const transactionId = rows[0].id;
+    const row = rows[0];
 
-    // Fetch splits
-    const splits = await this.query<{
-      id: string;
-      payment_method: string;
-      amount: number;
-      reference_number: string | null;
-    }>('SELECT * FROM transaction_splits WHERE transaction_id = $1', [transactionId]);
+    // Group splits
+    const splits: Transaction['splits'] = [];
+    for (const r of rows) {
+      if (r.split_id) {
+        splits.push({
+          id: r.split_id,
+          transactionId: row.id,
+          paymentMethod: r.split_payment_method as PaymentMethod,
+          amount: r.split_amount!,
+          referenceNumber: r.split_reference_number ?? undefined,
+        });
+      }
+    }
 
     return {
-      ...rows[0],
-      splits: splits.map((s) => ({
-        id: s.id,
-        transactionId,
-        paymentMethod: s.payment_method as PaymentMethod,
-        amount: s.amount,
-        referenceNumber: s.reference_number ?? undefined,
-      })),
+      id: row.id,
+      tenantId: row.tenant_id,
+      orderId: row.order_id,
+      amount: row.amount,
+      changeAmount: row.change_amount,
+      paymentMethod: row.payment_method as PaymentMethod,
+      paymentDetails: JSON.parse(row.payment_details),
+      referenceNumber: row.reference_number ?? undefined,
+      userId: row.user_id,
+      splits,
+      createdAt: row.created_at,
     };
   }
 

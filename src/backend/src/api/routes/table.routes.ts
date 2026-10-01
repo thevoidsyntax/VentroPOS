@@ -12,22 +12,20 @@ import {
   ReleaseTableUseCase,
   GetTableLayoutUseCase,
 } from '../../application/tables/index.js';
-import { PostgresTableRepository } from '../../infrastructure/database/repositories/index.js';
+import { tableRepository } from '../../infrastructure/database/repositories/container.js';
 import { createTableSchema, updateTableSchema, tableIdParamsSchema } from '../schemas/index.js';
 import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware, requireManager } from '../middleware/index.js';
 
 export async function tableRoutes(fastify: FastifyInstance): Promise<void> {
-  const tableRepo = new PostgresTableRepository();
-
-  const createTableUseCase = new CreateTableUseCase(tableRepo);
-  const getTablesUseCase = new GetTablesUseCase(tableRepo);
-  const getTableUseCase = new GetTableUseCase(tableRepo);
-  const updateTableUseCase = new UpdateTableUseCase(tableRepo);
-  const deleteTableUseCase = new DeleteTableUseCase(tableRepo);
-  const occupyTableUseCase = new OccupyTableUseCase(tableRepo);
-  const releaseTableUseCase = new ReleaseTableUseCase(tableRepo);
-  const getTableLayoutUseCase = new GetTableLayoutUseCase(tableRepo);
+  const createTableUseCase = new CreateTableUseCase(tableRepository);
+  const getTablesUseCase = new GetTablesUseCase(tableRepository);
+  const getTableUseCase = new GetTableUseCase(tableRepository);
+  const updateTableUseCase = new UpdateTableUseCase(tableRepository);
+  const deleteTableUseCase = new DeleteTableUseCase(tableRepository);
+  const occupyTableUseCase = new OccupyTableUseCase(tableRepository);
+  const releaseTableUseCase = new ReleaseTableUseCase(tableRepository);
+  const getTableLayoutUseCase = new GetTableLayoutUseCase(tableRepository);
 
   // ============== LIST TABLES ==============
   fastify.get('/', {

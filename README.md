@@ -93,31 +93,32 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 
 ---
 
-### Phase 3: Inventory (Next)
+### Phase 3: Inventory (In Progress)
 
 **Objectives:**
-- Stock level tracking per product
-- Low stock alerts (threshold-based)
-- Stock adjustment (manual correction)
-- Stock history/log
-- Restock management
-- Stock opname support
+- [x] Stock level tracking per product
+- [x] Low stock alerts (threshold-based)
+- [x] Stock adjustment (manual correction)
+- [x] Stock history/log
+- [x] Stock overview API
+- [ ] Restock management
+- [ ] Stock opname support
 
 **Deliverables:**
 ```
 Stock APIs:
-GET  /api/v1/stock                    - Stock overview
-GET  /api/v1/stock/alerts             - Low stock alerts
-POST /api/v1/stock/adjust            - Manual adjustment
-POST /api/v1/stock/restock           - Restock items
-GET  /api/v1/stock/:productId/history - Stock history
+GET  /api/v1/stock/overview      - Stock overview ✅
+GET  /api/v1/stock/alerts        - Low stock alerts ✅
+POST /api/v1/stock/adjust        - Manual adjustment ✅
+POST /api/v1/stock/receive        - Receive/restock ✅
+GET  /api/v1/stock/history       - Stock history ✅
 ```
 
 **Phase Gate:**
-- [ ] All tests passing
-- [ ] npm audit: 0 vulnerabilities
-- [ ] tsc --noEmit: no errors
-- [ ] Documentation updated
+- [x] All tests passing
+- [x] npm audit: 0 vulnerabilities
+- [x] tsc --noEmit: no errors
+- [x] Documentation updated
 
 ---
 
@@ -232,6 +233,48 @@ http://localhost:3000/api/v1
 
 ---
 
+## Architecture
+
+### Project Structure
+
+```
+src/backend/           # Fastify API server
+├── src/api/          # Routes, middleware, schemas (Delivery Layer)
+├── src/application/   # Use cases, application services (Application Layer)
+├── src/domain/       # Entities, repositories interfaces (Domain Layer)
+├── src/infrastructure/ # DB, auth implementations (Infrastructure Layer)
+└── src/shared/       # Config, errors, utils (Shared Kernel)
+```
+
+### Design Patterns
+
+- **DDD-lite**: Clean separation between Domain, Application, and Infrastructure layers
+- **Repository Pattern**: Abstract data access through interfaces
+- **Use Case Pattern**: Business logic encapsulated in application services
+- **Multi-tenancy**: PostgreSQL Row-Level Security (RLS) for data isolation
+
+---
+
+## Code Quality
+
+### Quality Gates
+
+| Check | Status | Notes |
+|-------|--------|-------|
+| ESLint | ✅ Configured | TypeScript + Prettier support |
+| TypeScript | ✅ Strict | No `any` types |
+| Tests | ✅ 59 passing | Vitest unit tests |
+| npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
+
+### Performance Optimizations
+
+- **Batch Inserts**: Order items and modifiers inserted in bulk
+- **JOIN Queries**: Single query for order items + modifiers (no N+1)
+- **Database Transactions**: Atomic order creation
+- **Pagination**: LIMIT/OFFSET on all findAll queries
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -244,6 +287,7 @@ http://localhost:3000/api/v1
 | ORM/Query | Knex 3.x + pg 8.x |
 | Logging | Pino 9.x |
 | Testing | Vitest 2.x |
+| Linting | ESLint 8.x + @typescript-eslint |
 | Frontend | React 18 (Phase 4+) |
 
 ### Dependencies Status
@@ -252,6 +296,7 @@ http://localhost:3000/api/v1
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
 Tests: 59 passing ✅
+ESLint: Configured ✅
 ```
 
 ---
@@ -277,8 +322,9 @@ npm run dev
 npm run dev          # Development server
 npm run build        # TypeScript build
 npm start            # Production server
-npm test             # Run tests
-npm run lint         # ESLint
+npm test             # Run tests (59 passing)
+npm run lint         # ESLint check
+npm run test:coverage # Test coverage report
 ```
 
 ### Environment Variables
@@ -290,11 +336,24 @@ JWT_REFRESH_SECRET=your-refresh-secret-key
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:5173
+TAX_RATE=0.11           # Indonesia PPN (default)
+BCRYPT_ROUNDS=12      # Password hashing rounds
+LOG_LEVEL=info         # Pino log level
 ```
 
 ---
 
 ## Changelog
+
+### Audit Fixes Applied
+- ESLint configuration with TypeScript support
+- N+1 query fixes (batch inserts, JOIN queries)
+- Database transaction wrapper for atomic operations
+- Date validation in API endpoints
+- Repository singleton container (DI pattern)
+- Configurable TAX_RATE via environment variable
+- Pagination added to repository findAll methods
+- Startup logger with proper process.exit() guards
 
 ### Phase 2: Core POS
 - Order item modifiers persistence

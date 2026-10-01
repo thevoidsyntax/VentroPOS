@@ -10,13 +10,13 @@ import {
   GetOrdersUseCase,
 } from '../../application/orders/index.js';
 import {
-  PostgresOrderRepository,
-  PostgresProductRepository,
-  PostgresTransactionRepository,
-  PostgresTableRepository,
-  PostgresStockLogRepository,
-  PostgresIdempotencyKeyRepository,
-} from '../../infrastructure/database/repositories/index.js';
+  orderRepository,
+  productRepository,
+  transactionRepository,
+  tableRepository,
+  stockLogRepository,
+  idempotencyKeyRepository,
+} from '../../infrastructure/database/repositories/container.js';
 import {
   createOrderSchema,
   updateOrderStatusSchema,
@@ -30,24 +30,17 @@ import { authMiddleware, requireKasir, requireManager } from '../middleware/inde
 import type { Order } from '../../domain/entities/index.js';
 
 export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
-  const orderRepo = new PostgresOrderRepository();
-  const productRepo = new PostgresProductRepository();
-  const transactionRepo = new PostgresTransactionRepository();
-  const tableRepo = new PostgresTableRepository();
-  const stockLogRepo = new PostgresStockLogRepository();
-  const idempotencyRepo = new PostgresIdempotencyKeyRepository();
-
   const createOrderUseCase = new CreateOrderUseCase(
-    orderRepo, productRepo, tableRepo, stockLogRepo
+    orderRepository, productRepository, tableRepository, stockLogRepository
   );
   const checkoutUseCase = new CheckoutUseCase(
-    orderRepo, transactionRepo, productRepo, stockLogRepo, idempotencyRepo
+    orderRepository, transactionRepository, productRepository, stockLogRepository, idempotencyKeyRepository
   );
-  const updateOrderStatusUseCase = new UpdateOrderStatusUseCase(orderRepo);
+  const updateOrderStatusUseCase = new UpdateOrderStatusUseCase(orderRepository);
   const voidOrderUseCase = new VoidOrderUseCase(
-    orderRepo, productRepo, stockLogRepo
+    orderRepository, productRepository, stockLogRepository
   );
-  const getOrdersUseCase = new GetOrdersUseCase(orderRepo);
+  const getOrdersUseCase = new GetOrdersUseCase(orderRepository);
 
   // ============== GET ORDERS ==============
   fastify.get('/', {
@@ -76,8 +69,20 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
       filters.status = query.status.split(',') as Order['status'][];
     }
     if (query.tableId) filters.tableId = query.tableId;
-    if (query.fromDate) filters.fromDate = new Date(query.fromDate);
-    if (query.toDate) filters.toDate = new Date(query.toDate);
+    if (query.fromDate) {
+      const fromDate = new Date(query.fromDate);
+      if (isNaN(fromDate.getTime())) {
+        return reply.status(400).send({ success: false, error: { code: 'INVALID_DATE', message: 'Invalid fromDate format' } });
+      }
+      filters.fromDate = fromDate;
+    }
+    if (query.toDate) {
+      const toDate = new Date(query.toDate);
+      if (isNaN(toDate.getTime())) {
+        return reply.status(400).send({ success: false, error: { code: 'INVALID_DATE', message: 'Invalid toDate format' } });
+      }
+      filters.toDate = toDate;
+    }
     if (query.page) filters.page = query.page;
     if (query.limit) filters.limit = query.limit;
 
@@ -130,7 +135,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
 
-    const order = await orderRepo.findById(request.tenantId!, id);
+    const order = await orderRepository.findById(request.tenantId!, id);
     if (!order) {
       return reply.status(404).send({
         success: false,

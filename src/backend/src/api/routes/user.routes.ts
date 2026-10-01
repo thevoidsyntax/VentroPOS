@@ -11,21 +11,19 @@ import {
   DeactivateUserUseCase,
   AdminResetPasswordUseCase,
 } from '../../application/users/index.js';
-import { PostgresUserRepository } from '../../infrastructure/database/repositories/index.js';
+import { userRepository } from '../../infrastructure/database/repositories/container.js';
 import { createUserSchema, updateUserSchema, userIdParamsSchema } from '../schemas/index.js';
 import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware, requireManager } from '../middleware/index.js';
 
 export async function userRoutes(fastify: FastifyInstance): Promise<void> {
-  const userRepo = new PostgresUserRepository();
-
-  const createUserUseCase = new CreateUserUseCase(userRepo);
-  const getUsersUseCase = new GetUsersUseCase(userRepo);
-  const getUserUseCase = new GetUserUseCase(userRepo);
-  const updateUserUseCase = new UpdateUserUseCase(userRepo);
-  const updatePasswordUseCase = new UpdatePasswordUseCase(userRepo);
-  const deactivateUserUseCase = new DeactivateUserUseCase(userRepo);
-  const adminResetPasswordUseCase = new AdminResetPasswordUseCase(userRepo);
+  const createUserUseCase = new CreateUserUseCase(userRepository);
+  const getUsersUseCase = new GetUsersUseCase(userRepository);
+  const getUserUseCase = new GetUserUseCase(userRepository);
+  const updateUserUseCase = new UpdateUserUseCase(userRepository);
+  const updatePasswordUseCase = new UpdatePasswordUseCase(userRepository);
+  const deactivateUserUseCase = new DeactivateUserUseCase(userRepository);
+  const adminResetPasswordUseCase = new AdminResetPasswordUseCase(userRepository);
 
   // ============== LIST USERS ==============
   fastify.get('/', {

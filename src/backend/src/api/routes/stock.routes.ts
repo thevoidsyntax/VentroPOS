@@ -9,10 +9,7 @@ import {
   GetStockHistoryUseCase,
   GetStockOverviewUseCase,
 } from '../../application/stock/index.js';
-import {
-  PostgresProductRepository,
-  PostgresStockLogRepository,
-} from '../../infrastructure/database/repositories/index.js';
+import { productRepository, stockLogRepository } from '../../infrastructure/database/repositories/container.js';
 import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware, requireManager } from '../middleware/index.js';
 
@@ -56,14 +53,11 @@ const stockHistoryQuerySchema = {
 };
 
 export async function stockRoutes(fastify: FastifyInstance): Promise<void> {
-  const productRepo = new PostgresProductRepository();
-  const stockLogRepo = new PostgresStockLogRepository();
-
-  const getStockAlertsUseCase = new GetStockAlertsUseCase(productRepo);
-  const receiveStockUseCase = new ReceiveStockUseCase(productRepo, stockLogRepo);
-  const adjustStockUseCase = new AdjustStockUseCase(productRepo, stockLogRepo);
-  const getStockHistoryUseCase = new GetStockHistoryUseCase(productRepo, stockLogRepo);
-  const getStockOverviewUseCase = new GetStockOverviewUseCase(productRepo);
+  const getStockAlertsUseCase = new GetStockAlertsUseCase(productRepository);
+  const receiveStockUseCase = new ReceiveStockUseCase(productRepository, stockLogRepository);
+  const adjustStockUseCase = new AdjustStockUseCase(productRepository, stockLogRepository);
+  const getStockHistoryUseCase = new GetStockHistoryUseCase(productRepository, stockLogRepository);
+  const getStockOverviewUseCase = new GetStockOverviewUseCase(productRepository);
 
   // ============== GET STOCK OVERVIEW ==============
   fastify.get('/overview', {
@@ -153,12 +147,34 @@ export async function stockRoutes(fastify: FastifyInstance): Promise<void> {
       toDate?: string;
     };
 
+    let fromDate: Date | undefined;
+    let toDate: Date | undefined;
+
+    if (query.fromDate) {
+      fromDate = new Date(query.fromDate);
+      if (isNaN(fromDate.getTime())) {
+        return reply.status(400).send({
+          success: false,
+          error: { code: 'INVALID_DATE', message: 'Invalid fromDate format' },
+        });
+      }
+    }
+    if (query.toDate) {
+      toDate = new Date(query.toDate);
+      if (isNaN(toDate.getTime())) {
+        return reply.status(400).send({
+          success: false,
+          error: { code: 'INVALID_DATE', message: 'Invalid toDate format' },
+        });
+      }
+    }
+
     try {
       const result = await getStockHistoryUseCase.execute(request.tenantId!, {
         productId: query.productId,
         type: query.type,
-        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
-        toDate: query.toDate ? new Date(query.toDate) : undefined,
+        fromDate,
+        toDate,
       });
       return reply.send({ success: true, data: result });
     } catch (error) {
