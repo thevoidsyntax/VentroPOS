@@ -17,6 +17,7 @@ import { orderRoutes } from './api/routes/order.routes.js';
 import { userRoutes } from './api/routes/user.routes.js';
 import { tableRoutes } from './api/routes/table.routes.js';
 import { stockRoutes } from './api/routes/stock.routes.js';
+import { modifierRoutes } from './api/routes/modifier.routes.js';
 import { PostgresConnection } from './infrastructure/database/postgres/index.js';
 
 export async function buildApp() {
@@ -153,6 +154,7 @@ export async function buildApp() {
   await app.register(orderRoutes, { prefix: '/api/v1/orders' });
   await app.register(tableRoutes, { prefix: '/api/v1/tables' });
   await app.register(stockRoutes, { prefix: '/api/v1/stock' });
+  await app.register(modifierRoutes, { prefix: '/api/v1/modifiers' });
 
   // ============== GRACEFUL SHUTDOWN ==============
 

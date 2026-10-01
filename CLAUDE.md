@@ -11,7 +11,6 @@
 Ketika memulai chat baru, baca terlebih dahulu:
 
 1. **`README.md`** — Progress tracker, overview, recent changes
-2. Cek git status untuk state terbaru
 
 ---
 
@@ -45,6 +44,71 @@ src/backend/           # Fastify API server
 - **Database:** PostgreSQL 15+ (RLS)
 - **Auth:** JWT + Refresh Tokens
 - **Validation:** Zod
+- **Frontend:** React 18 (future - Phase 2+)
+
+---
+
+## 📌 Phase-Specific Skills
+
+### Core Skills (7) — Always Invoke
+
+Selalu auto-invoke untuk semua phase:
+
+| Skill | Fungsi |
+|-------|--------|
+| `/git` | Version control |
+| `/docker` | Containerization |
+| `/ci-cd` | Pipeline automation |
+| `/code-quality` | Code review & standards |
+| `/deployment` | Deployment strategies |
+| `/logging` | Structured logging |
+| `/config` | Configuration management |
+
+### Phase-Specific Skills
+
+Invoke skills berdasarkan **pekerjaan** yang akan dilakukan:
+
+#### Phase 2: Core POS (Cart + Checkout + Frontend)
+```
+Skills: /api-design, /frontend, /testing
+Work: Shopping cart, checkout flow, React UI
+```
+
+#### Phase 3: Inventory Module
+```
+Skills: /database, /observability, /api-design
+Work: Stock management, reporting
+```
+
+#### Phase 4: Dashboard & Reporting
+```
+Skills: /frontend, /performance, /database
+Work: Dashboard UI, charts, data aggregation
+```
+
+#### Phase 5: Hardware Integration
+```
+Skills: /api-design, /deployment, /observability
+Work: Printer integration, EDC, scanner
+```
+
+#### Phase 6: Polish & Launch
+```
+Skills: /performance, /observability, /deployment, /security
+Work: Optimize, monitoring, security audit, deploy
+```
+
+---
+
+## 💬 Prompt Templates
+
+Gunakan prompt ini di chat baru:
+
+```
+"lanjutkan phase 2"              → Phase 2 work
+"lanjutkan phase 3"              → Phase 3 work
+"lanjutkan phase [N]"           → Phase N work
+```
 
 ---
 
@@ -79,7 +143,7 @@ Setiap phase harus melewati:
 - Solo developer project
 - Priority: Maintainability > Scalability > Security
 - Backend Phase 1 DONE, frontend belum ada
-- Next: Phase 2 - Core POS (Cart, Checkout)
+- Next: Phase 2 - Core POS (Cart, Checkout + React UI)
 
 ---
 

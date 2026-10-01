@@ -1,7 +1,7 @@
 // Repository Interfaces - Domain Layer
 // These define contracts, implementations are in Infrastructure
 
-import type { Tenant, User, Category, Product, Table, Order, Transaction, StockLog, AuditLog } from '../entities/index.js';
+import type { Tenant, User, Category, Product, Table, Order, Transaction, StockLog, AuditLog, ModifierGroup, Modifier } from '../entities/index.js';
 
 export interface ITenantRepository {
   create(tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Tenant>;
@@ -50,6 +50,24 @@ export interface ITableRepository {
   findAll(tenantId: string): Promise<Table[]>;
   update(tenantId: string, id: string, data: Partial<Table>): Promise<Table>;
   updateStatus(tenantId: string, id: string, status: Table['status']): Promise<Table>;
+  delete(tenantId: string, id: string): Promise<void>;
+}
+
+// ============== MODIFIER GROUP ==============
+export interface IModifierGroupRepository {
+  create(tenantId: string, data: Omit<ModifierGroup, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<ModifierGroup>;
+  findById(tenantId: string, id: string): Promise<ModifierGroup | null>;
+  findAll(tenantId: string): Promise<ModifierGroup[]>;
+  update(tenantId: string, id: string, data: Partial<ModifierGroup>): Promise<ModifierGroup>;
+  delete(tenantId: string, id: string): Promise<void>;
+}
+
+// ============== MODIFIER ==============
+export interface IModifierRepository {
+  create(tenantId: string, groupId: string, data: Omit<Modifier, 'id' | 'groupId' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<Modifier>;
+  findById(tenantId: string, id: string): Promise<Modifier | null>;
+  findByGroup(tenantId: string, groupId: string): Promise<Modifier[]>;
+  update(tenantId: string, id: string, data: Partial<Modifier>): Promise<Modifier>;
   delete(tenantId: string, id: string): Promise<void>;
 }
 
@@ -111,4 +129,32 @@ export interface AuditLogFilters {
   action?: string;
   fromDate?: Date;
   toDate?: Date;
+}
+
+// ============== IDEMPOTENCY KEY ==============
+export interface IdempotencyKey {
+  id: string;
+  tenantId: string;
+  keyHash: string;
+  orderId?: string;
+  response?: unknown;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+export interface IIdempotencyKeyRepository {
+  /**
+   * Check if an idempotency key exists and is valid (not expired).
+   * Returns the cached response if exists, null otherwise.
+   */
+  checkAndLock(tenantId: string, keyHash: string): Promise<IdempotencyKey | null>;
+  /**
+   * Store the response for an idempotency key.
+   * Called after successful checkout.
+   */
+  storeResponse(tenantId: string, keyHash: string, orderId: string, response: unknown): Promise<void>;
+  /**
+   * Clean up expired keys.
+   */
+  cleanupExpired(): Promise<void>;
 }

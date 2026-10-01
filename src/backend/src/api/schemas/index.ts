@@ -213,6 +213,55 @@ export const voidOrderSchema = z.object({
   }),
 });
 
+// ============== MODIFIER SCHEMAS ==============
+export const createModifierGroupSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).max(255),
+    type: z.enum(['size', 'extras', 'topping', 'custom']),
+    isRequired: z.boolean().optional(),
+    minSelections: z.number().int().min(0).optional(),
+    maxSelections: z.number().int().min(1).optional(),
+  }),
+});
+
+export const updateModifierGroupSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+  body: z.object({
+    name: z.string().min(1).max(255).optional(),
+    type: z.enum(['size', 'extras', 'topping', 'custom']).optional(),
+    isRequired: z.boolean().optional(),
+    minSelections: z.number().int().min(0).optional(),
+    maxSelections: z.number().int().min(1).optional(),
+  }),
+});
+
+export const modifierGroupIdParamsSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+});
+
+export const createModifierSchema = z.object({
+  params: z.object({ groupId: z.string().uuid() }),
+  body: z.object({
+    name: z.string().min(1).max(255),
+    priceAdjustment: z.number().optional(),
+    sortOrder: z.number().int().optional(),
+  }),
+});
+
+export const updateModifierSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+  body: z.object({
+    name: z.string().min(1).max(255).optional(),
+    priceAdjustment: z.number().optional(),
+    isActive: z.boolean().optional(),
+    sortOrder: z.number().int().optional(),
+  }),
+});
+
+export const modifierIdParamsSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+});
+
 // ============== COMMON SCHEMAS ==============
 export const paginationQuerySchema = z.object({
   query: z.object({

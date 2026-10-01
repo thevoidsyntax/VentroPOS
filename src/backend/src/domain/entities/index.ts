@@ -76,6 +76,8 @@ export interface Modifier {
   priceAdjustment: number;
   isActive: boolean;
   sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============== PRODUCT ==============
@@ -201,4 +203,15 @@ export interface AuditLog {
   ipAddress?: string;
   userAgent?: string;
   createdAt: Date;
+}
+
+// ============== IDEMPOTENCY ==============
+export interface IdempotencyKey {
+  id: string;
+  tenantId: string;
+  keyHash: string;
+  orderId?: string;
+  response?: unknown;
+  createdAt: Date;
+  expiresAt: Date;
 }

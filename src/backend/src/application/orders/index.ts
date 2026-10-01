@@ -7,7 +7,8 @@ import type {
   IProductRepository,
   ITransactionRepository,
   ITableRepository,
-  IStockLogRepository
+  IStockLogRepository,
+  IIdempotencyKeyRepository,
 } from '../../domain/repositories/index.js';
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
 
@@ -162,7 +163,8 @@ export class CheckoutUseCase {
     private orderRepo: IOrderRepository,
     private transactionRepo: ITransactionRepository,
     private productRepo: IProductRepository,
-    private stockLogRepo: IStockLogRepository
+    private stockLogRepo: IStockLogRepository,
+    private idempotencyRepo?: IIdempotencyKeyRepository
   ) {}
 
   async execute(
@@ -170,6 +172,17 @@ export class CheckoutUseCase {
     userId: string,
     input: CheckoutInput
   ): Promise<CheckoutResult> {
+    // Check idempotency key first
+    if (input.idempotencyKey && this.idempotencyRepo) {
+      const keyHash = await this.hashKey(input.idempotencyKey);
+      const existing = await this.idempotencyRepo.checkAndLock(tenantId, keyHash);
+
+      if (existing && existing.response) {
+        // Return cached response for duplicate request
+        return existing.response as CheckoutResult;
+      }
+    }
+
     // Get order
     const order = await this.orderRepo.findById(tenantId, input.orderId);
 
@@ -224,6 +237,13 @@ export class CheckoutUseCase {
       },
       referenceNumber: input.referenceNumber,
       userId,
+      splits: input.splitPayments?.map(s => ({
+        id: crypto.randomUUID(),
+        transactionId: '',
+        paymentMethod: s.method,
+        amount: s.amount,
+        referenceNumber: undefined,
+      })),
     });
 
     // Deduct stock for each item
@@ -252,11 +272,31 @@ export class CheckoutUseCase {
     // Update order status to paid
     const updatedOrder = await this.orderRepo.updateStatus(tenantId, order.id, 'paid');
 
-    return {
+    const result: CheckoutResult = {
       transaction,
       order: updatedOrder,
       changeAmount: changeAmount > 0 ? changeAmount : undefined,
     };
+
+    // Store response in idempotency key
+    if (input.idempotencyKey && this.idempotencyRepo) {
+      const keyHash = await this.hashKey(input.idempotencyKey);
+      await this.idempotencyRepo.storeResponse(tenantId, keyHash, order.id, result);
+    }
+
+    return result;
+  }
+
+  /**
+   * Creates a SHA-256 hash of the idempotency key.
+   * In production, use crypto.subtle.digest for better security.
+   */
+  private async hashKey(key: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(key);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 }
 

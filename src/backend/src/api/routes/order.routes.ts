@@ -15,6 +15,7 @@ import {
   PostgresTransactionRepository,
   PostgresTableRepository,
   PostgresStockLogRepository,
+  PostgresIdempotencyKeyRepository,
 } from '../../infrastructure/database/repositories/index.js';
 import {
   createOrderSchema,
@@ -34,12 +35,13 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
   const transactionRepo = new PostgresTransactionRepository();
   const tableRepo = new PostgresTableRepository();
   const stockLogRepo = new PostgresStockLogRepository();
+  const idempotencyRepo = new PostgresIdempotencyKeyRepository();
 
   const createOrderUseCase = new CreateOrderUseCase(
     orderRepo, productRepo, tableRepo, stockLogRepo
   );
   const checkoutUseCase = new CheckoutUseCase(
-    orderRepo, transactionRepo, productRepo, stockLogRepo
+    orderRepo, transactionRepo, productRepo, stockLogRepo, idempotencyRepo
   );
   const updateOrderStatusUseCase = new UpdateOrderStatusUseCase(orderRepo);
   const voidOrderUseCase = new VoidOrderUseCase(
