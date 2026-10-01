@@ -14,6 +14,13 @@ Ketika memulai chat baru, baca terlebih dahulu:
 
 ---
 
+## ⚠️ User Preferences
+
+- **DO NOT** add `Co-Authored-By` in git commits
+- **DO NOT** add "Generated with Claude Code" footer in PRs
+
+---
+
 ## 🎯 Current Status
 
 ```
