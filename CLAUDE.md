@@ -135,10 +135,29 @@ Types: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
 
 ### Phase Gate
 Setiap phase harus melewati:
+- [ ] Full Audit (security, dependencies, type check)
+- [ ] Fix all critical/high issues
 - [ ] All tests passing
 - [ ] No TypeScript errors
-- [ ] No critical security issues
 - [ ] Documentation updated
+
+### Phase Completion Workflow
+```
+Phase Complete
+    ↓
+Full Audit
+    ├── npm audit (security vulnerabilities)
+    ├── npm test (all tests)
+    └── tsc --noEmit (type check)
+    ↓
+Fix Issues (if any critical/high found)
+    ↓
+Update Documentation
+    ├── README.md (progress tracker)
+    └── docs/roadmap/phase-N.md
+    ↓
+Git commit + push
+```
 
 ### Multi-Tenancy
 - Semua query HARUS filter by `tenant_id`
