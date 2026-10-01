@@ -546,9 +546,4 @@ Each phase must pass these gates before moving to next:
 
 ## Next Steps
 
-➡️ **[Go to Phase 1: Foundation](./phase-1-foundation.md)**
-
----
-
-*Maintained by: thevoidsyntax*  
-*Last updated: 2024*
+➡️ **[Phase 1 Details](./phase-1-foundation.md)**
