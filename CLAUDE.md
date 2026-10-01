@@ -8,9 +8,15 @@
 
 ## 📖 First Read
 
-Ketika memulai chat baru, baca terlebih dahulu:
+**WAJIB** baca di setiap chat baru:
 
-1. **`README.md`** — Progress tracker, overview, recent changes
+1. **`README.md`** — Single source of truth untuk:
+   - Progress tracker (Phase 1-6)
+   - Phase specifications (requirements, deliverables, user stories)
+   - API reference
+   - Database schema
+   - Tech stack & dependencies
+   - Development guidelines
 
 ---
 
@@ -24,9 +30,10 @@ Ketika memulai chat baru, baca terlebih dahulu:
 ## 🎯 Current Status
 
 ```
-Phase 1: ✅ DONE (~95%)
-Phase 2: ✅ DONE (95% - Core POS)
+Phase 1: ✅ DONE
+Phase 2: ✅ DONE
 Phase 3: ⬜ NEXT (Inventory)
+Phase 4-6: ⬜ TODO
 ```
 
 **Last work:** Phase 2 completion - Core POS with cart, checkout, modifiers (59 tests passing)
@@ -44,78 +51,58 @@ src/backend/           # Fastify API server
 └── src/shared/        # Config, errors, utils
 ```
 
+**Reference:**
+- `README.md` — Requirements, specs, progress
+- `docs/prd/README.md` — Full business requirements (PRD)
+
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Node.js 20+, Fastify, TypeScript
-- **Database:** PostgreSQL 15+ (RLS)
-- **Auth:** JWT + Refresh Tokens
-- **Validation:** Zod
-- **Frontend:** React 18 (future - Phase 2+)
+| Layer | Technology |
+|-------|------------|
+| Backend | Node.js 20+, Fastify 5.x, TypeScript 5.x |
+| Database | PostgreSQL 15+ (RLS) |
+| Auth | JWT (@fastify/jwt 10.x) |
+| Validation | Zod 3.x |
+| Password | bcrypt 6.x |
+| ORM/Query | Knex 3.x + pg 8.x |
+| Logging | Pino 9.x |
+| Testing | Vitest 2.x |
 
 ---
 
-## 📌 Phase-Specific Skills
+## 📌 Phase Work
 
-### Core Skills (7) — Always Invoke
+### Current: Phase 3 - Inventory
 
-Selalu auto-invoke untuk semua phase:
+**Requirements:** Lihat `README.md` Section "Phase 3: Inventory"
 
-| Skill | Fungsi |
-|-------|--------|
-| `/git` | Version control |
-| `/docker` | Containerization |
-| `/ci-cd` | Pipeline automation |
-| `/code-quality` | Code review & standards |
-| `/deployment` | Deployment strategies |
-| `/logging` | Structured logging |
-| `/config` | Configuration management |
+**Skills to invoke:**
+- `/database` - Stock management
+- `/api-design` - Stock APIs
 
-### Phase-Specific Skills
+**Deliverables:**
+- Stock overview API
+- Low stock alerts
+- Manual adjustment
+- Stock history
 
-Invoke skills berdasarkan **pekerjaan** yang akan dilakukan:
+### Future Phases
 
-#### Phase 2: Core POS (Cart + Checkout + Backend) - DONE ✅
-```
-Skills: /api-design, /testing
-Work: Shopping cart, checkout flow, modifiers, idempotency
-```
-
-#### Phase 3: Inventory Module - NEXT
-```
-Skills: /database, /observability, /api-design
-Work: Stock management, reporting
-```
-
-#### Phase 4: Dashboard & Reporting
-```
-Skills: /frontend, /performance, /database
-Work: Dashboard UI, charts, data aggregation
-```
-
-#### Phase 5: Hardware Integration
-```
-Skills: /api-design, /deployment, /observability
-Work: Printer integration, EDC, scanner
-```
-
-#### Phase 6: Polish & Launch
-```
-Skills: /performance, /observability, /deployment, /security
-Work: Optimize, monitoring, security audit, deploy
-```
+| Phase | Focus | Skills |
+|-------|-------|--------|
+| 4 | Reporting | `/frontend`, `/database` |
+| 5 | Hardware | `/api-design`, `/deployment` |
+| 6 | Launch | `/security`, `/performance` |
 
 ---
 
 ## 💬 Prompt Templates
 
-Gunakan prompt ini di chat baru:
-
 ```
-"lanjutkan phase 2"              → Phase 2 work
-"lanjutkan phase 3"              → Phase 3 work
-"lanjutkan phase [N]"           → Phase N work
+"lanjutkan phase 3"    → Phase 3 work (Inventory)
+"lanjutkan phase N"    → Phase N work
 ```
 
 ---
@@ -123,40 +110,34 @@ Gunakan prompt ini di chat baru:
 ## ⚙️ Development Rules
 
 ### Coding Standards
-- TypeScript strict mode
-- No `any` types
+- TypeScript strict mode, no `any` types
 - Explicit return types
-- Use repository pattern (DDD-lite)
-
-### Git Commits
-Format: `<type>(<scope>): <description>`
-
-Types: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- Repository pattern (DDD-lite)
+- Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `chore:`
 
 ### Phase Gate
-Setiap phase harus melewati:
-- [ ] Full Audit (security, dependencies, type check)
+Setiap phase HARUS melewati:
+- [ ] Full Audit (npm audit, npm test, tsc --noEmit)
 - [ ] Fix all critical/high issues
 - [ ] All tests passing
 - [ ] No TypeScript errors
-- [ ] Documentation updated
+- [ ] Documentation updated (README.md)
 
 ### Phase Completion Workflow
 ```
-Phase Complete
-    ↓
-Full Audit
-    ├── npm audit (security vulnerabilities)
-    ├── npm test (all tests)
-    └── tsc --noEmit (type check)
-    ↓
-Fix Issues (if any critical/high found)
-    ↓
-Update Documentation
-    ├── README.md (progress tracker)
-    └── docs/roadmap/phase-N.md
-    ↓
-Git commit + push
+1. Full Audit
+   ├── npm audit (0 vulnerabilities)
+   ├── npm test (all passing)
+   └── tsc --noEmit (no errors)
+
+2. Fix Issues
+   └── Fix critical/high issues found
+
+3. Update Documentation
+   └── README.md (progress, specs, recent changes)
+
+4. Git
+   └── commit + push
 ```
 
 ### Multi-Tenancy
@@ -165,19 +146,11 @@ Git commit + push
 
 ---
 
-## 📝 Important Notes
-
-- Solo developer project
-- Priority: Maintainability > Scalability > Security
-- Backend Phase 1 & 2 DONE, frontend belum ada
-- Next: Phase 3 - Inventory (Stock Management)
-
----
-
 ## 🔗 Links
 
 - **GitHub:** https://github.com/thevoidsyntax/VentroPOS
 - **Backend:** `src/backend/`
+- **PRD:** `docs/prd/README.md`
 
 ---
 
