@@ -12,6 +12,10 @@ import type {
 } from '../../domain/repositories/index.js';
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
 
+// ============== CONSTANTS ==============
+/** Indonesia PPN tax rate (11%) */
+const TAX_RATE = 0.11;
+
 // ============== CART DTOs ==============
 
 export interface CartItemInput {
@@ -109,7 +113,7 @@ export class CreateOrderUseCase {
 
     // Calculate tax (assume 11% PPN for Indonesia)
     const taxableAmount = subtotal - discountAmount;
-    const taxAmount = Math.round(taxableAmount * 0.11 * 100) / 100;
+    const taxAmount = Math.round(taxableAmount * TAX_RATE * 100) / 100;
     const totalAmount = Math.round((taxableAmount + taxAmount) * 100) / 100;
 
     // Generate order number

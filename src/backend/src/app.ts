@@ -82,17 +82,18 @@ export async function buildApp() {
 
   // ============== ERROR HANDLER ==============
 
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error: Error | unknown, _request, reply) => {
     app.log.error(error);
 
-    // Zod validation errors
-    if (error.validation) {
+    // Zod validation errors (FastifyError has validation property)
+    if (typeof error === 'object' && error !== null && 'validation' in error) {
+      const validationError = error as { validation: unknown };
       return reply.status(400).send({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
-          details: error.validation,
+          details: validationError.validation,
         },
       });
     }
@@ -114,7 +115,7 @@ export async function buildApp() {
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: config.isDevelopment ? error.message : 'Internal server error',
+        message: config.isDevelopment && error instanceof Error ? error.message : 'Internal server error',
       },
     });
   });

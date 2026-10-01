@@ -32,6 +32,7 @@ import type {
   ModifierGroup,
   Modifier,
 } from '../../../domain/entities/index.js';
+import type { StockLogFilters } from '../../../domain/repositories/index.js';
 import { DatabaseError, DuplicateError } from '../../../shared/errors/index.js';
 
 // ============== BASE REPOSITORY ==============
@@ -350,7 +351,7 @@ export class PostgresCategoryRepository extends BaseRepository implements ICateg
 export class PostgresTableRepository extends BaseRepository implements ITableRepository {
   async create(tenantId: string, data: Omit<Table, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<Table> {
     const rows = await this.query<Table>(
-      `INSERT INTO tables (tenant_id, table_number, capacity, position_x, position_y, status)
+      `INSERT INTO restaurant_tables (tenant_id, table_number, capacity, position_x, position_y, status)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [tenantId, data.tableNumber, data.capacity, data.positionX, data.positionY, data.status]
     );
@@ -358,12 +359,12 @@ export class PostgresTableRepository extends BaseRepository implements ITableRep
   }
 
   async findById(tenantId: string, id: string): Promise<Table | null> {
-    const rows = await this.query<Table>('SELECT * FROM tables WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
+    const rows = await this.query<Table>('SELECT * FROM restaurant_tables WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
     return rows[0] ?? null;
   }
 
   async findAll(tenantId: string): Promise<Table[]> {
-    return this.query<Table>('SELECT * FROM tables WHERE tenant_id = $1 ORDER BY table_number ASC', [tenantId]);
+    return this.query<Table>('SELECT * FROM restaurant_tables WHERE tenant_id = $1 ORDER BY table_number ASC', [tenantId]);
   }
 
   async update(tenantId: string, id: string, data: Partial<Table>): Promise<Table> {
@@ -381,7 +382,7 @@ export class PostgresTableRepository extends BaseRepository implements ITableRep
     values.push(id, tenantId);
 
     const rows = await this.query<Table>(
-      `UPDATE tables SET ${updates.join(', ')} WHERE id = $${paramIndex} AND tenant_id = $${paramIndex + 1} RETURNING *`,
+      `UPDATE restaurant_tables SET ${updates.join(', ')} WHERE id = $${paramIndex} AND tenant_id = $${paramIndex + 1} RETURNING *`,
       values
     );
 
@@ -390,14 +391,14 @@ export class PostgresTableRepository extends BaseRepository implements ITableRep
 
   async updateStatus(tenantId: string, id: string, status: Table['status']): Promise<Table> {
     const rows = await this.query<Table>(
-      `UPDATE tables SET status = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 RETURNING *`,
+      `UPDATE restaurant_tables SET status = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 RETURNING *`,
       [status, id, tenantId]
     );
     return rows[0];
   }
 
   async delete(tenantId: string, id: string): Promise<void> {
-    await this.query('DELETE FROM tables WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
+    await this.query('DELETE FROM restaurant_tables WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
   }
 }
 
@@ -923,8 +924,30 @@ export class PostgresStockLogRepository extends BaseRepository implements IStock
     );
   }
 
-  async findAll(tenantId: string): Promise<StockLog[]> {
-    return this.query<StockLog>('SELECT * FROM stock_logs WHERE tenant_id = $1 ORDER BY created_at DESC', [tenantId]);
+  async findAll(tenantId: string, filters?: StockLogFilters): Promise<StockLog[]> {
+    let query = 'SELECT * FROM stock_logs WHERE tenant_id = $1';
+    const params: unknown[] = [tenantId];
+    let paramIndex = 2;
+
+    if (filters?.productId) {
+      query += ` AND product_id = $${paramIndex++}`;
+      params.push(filters.productId);
+    }
+    if (filters?.type) {
+      query += ` AND type = $${paramIndex++}`;
+      params.push(filters.type);
+    }
+    if (filters?.fromDate) {
+      query += ` AND created_at >= $${paramIndex++}`;
+      params.push(filters.fromDate);
+    }
+    if (filters?.toDate) {
+      query += ` AND created_at <= $${paramIndex++}`;
+      params.push(filters.toDate);
+    }
+
+    query += ' ORDER BY created_at DESC';
+    return this.query<StockLog>(query, params);
   }
 }
 
