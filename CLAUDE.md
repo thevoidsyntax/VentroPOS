@@ -18,10 +18,11 @@ Ketika memulai chat baru, baca terlebih dahulu:
 
 ```
 Phase 1: ✅ DONE (~95%)
-Phase 2: ⬜ NEXT (Cart, Checkout, Orders)
+Phase 2: ✅ DONE (95% - Core POS)
+Phase 3: ⬜ NEXT (Inventory)
 ```
 
-**Last work:** Audit fix (security, bug, quality) - 34 tests passing
+**Last work:** Phase 2 completion - Core POS with cart, checkout, modifiers (59 tests passing)
 
 ---
 
@@ -68,13 +69,13 @@ Selalu auto-invoke untuk semua phase:
 
 Invoke skills berdasarkan **pekerjaan** yang akan dilakukan:
 
-#### Phase 2: Core POS (Cart + Checkout + Frontend)
+#### Phase 2: Core POS (Cart + Checkout + Backend) - DONE ✅
 ```
-Skills: /api-design, /frontend, /testing
-Work: Shopping cart, checkout flow, React UI
+Skills: /api-design, /testing
+Work: Shopping cart, checkout flow, modifiers, idempotency
 ```
 
-#### Phase 3: Inventory Module
+#### Phase 3: Inventory Module - NEXT
 ```
 Skills: /database, /observability, /api-design
 Work: Stock management, reporting
@@ -142,8 +143,8 @@ Setiap phase harus melewati:
 
 - Solo developer project
 - Priority: Maintainability > Scalability > Security
-- Backend Phase 1 DONE, frontend belum ada
-- Next: Phase 2 - Core POS (Cart, Checkout + React UI)
+- Backend Phase 1 & 2 DONE, frontend belum ada
+- Next: Phase 3 - Inventory (Stock Management)
 
 ---
 
