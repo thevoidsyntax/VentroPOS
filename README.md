@@ -12,101 +12,97 @@ VentroPos adalah sistem Point of Sale (POS) berbasis cloud untuk cafe dan restor
 
 ## ✨ Features
 
-### Core Features
 - 🛒 **Shopping Cart** - Proses order cepat
 - 💳 **Multi-Payment** - Cash, QRIS, Debit/Credit, Split Bill
 - 📦 **Inventory Management** - Stock tracking real-time
 - 📊 **Reporting Dashboard** - Sales, produk, staff performance
 - 🖨️ **Hardware Integration** - Receipt printer, barcode scanner, cash drawer
-
-### Technical Features
 - 📱 **PWA** - Berjalan di Tablet, Mobile, Desktop
-- 🔒 **Offline-Capable** - Tetap berfungsi tanpa internet
-- 🔐 **Multi-Tenant Security** - PostgreSQL Row-Level Security
-- 🚀 **Scalable Architecture** - Dari 1 cafe hingga 100+ outlets
 
-## 📊 Development Progress
+## 📊 Progress Tracker
 
 ```
-PHASE 1 ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░  ✅ ~95%
-Foundation (Backend + DB + Auth)
-
-PHASE 2 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ⬜ 0%
-Core POS (Cart + Checkout)
-
-PHASE 3 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ⬜ 0%
-Inventory Module
-
-PHASE 4 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ⬜ 0%
-Reporting & Dashboard
-
-PHASE 5 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ⬜ 0%
-Hardware Integration
-
-PHASE 6 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ⬜ 0%
-Polish & Launch
+✅ Phase 1: Foundation     ~95%   (Backend, DB, Auth - DONE)
+⬜ Phase 2: Core POS     0%     (Cart, Checkout, Orders - NEXT)
+⬜ Phase 3: Inventory     0%     (Stock Management)
+⬜ Phase 4: Reporting     0%     (Dashboard & Reports)
+⬜ Phase 5: Hardware     0%     (Printer, Scanner, EDC)
+⬜ Phase 6: Launch        0%     (Polish & Deploy)
 ```
 
-**Lihat detail progress:** [docs/roadmap/PROGRESS.md](./docs/roadmap/PROGRESS.md)
+### Phase 1 Status: ✅ DONE
+- PostgreSQL database dengan RLS
+- JWT authentication dengan refresh tokens
+- CRUD API untuk Users, Products, Categories, Tables
+- Unit tests (34 passing)
+- Security audit passed
+
+### Next: Phase 2 - Core POS
+- Shopping cart functionality
+- Checkout flow
+- Multiple payment methods
+- Order management
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 18, TypeScript, TailwindCSS, PWA |
 | Backend | Node.js 20+, Fastify, TypeScript |
 | Database | PostgreSQL 15+ (RLS) |
 | Auth | JWT + Refresh Tokens |
-| Deployment | Docker, VPS |
+| Frontend | React 18 (future) |
 
 ## 🚀 Quick Start
 
 ```bash
-# Clone & install backend
-cd src/backend && npm install
-
-# Setup .env
+# Backend
+cd src/backend
+npm install
 cp .env.example .env
-
-# Start
 npm run dev
+
+# API: http://localhost:3000
+# Docs: http://localhost:3000/docs
 ```
 
-**Backend API:** http://localhost:3000  
-**API Docs:** http://localhost:3000/docs (Swagger)
-
-## 📁 Project Structure
+## 📁 Structure
 
 ```
 VentroPos/
-├── src/
-│   └── backend/          # Fastify API server
-├── docs/
-│   ├── prd/             # Product Requirements
-│   └── roadmap/          # Phase roadmaps
-├── CHANGELOG.md          # Version history
-├── README.md             # This file
-└── CLAUDE.md            # Developer guide
+├── src/backend/         # Fastify API
+├── docs/               # Documentation
+├── README.md           # Project info
+└── CLAUDE.md          # Developer instructions
 ```
 
-## 📚 Documentation
+## 📝 Recent Changes
 
-| Document | Description |
-|----------|-------------|
-| [PROGRESS.md](./docs/roadmap/PROGRESS.md) | Development progress tracker |
-| [CHANGELOG.md](./CHANGELOG.md) | Version history |
-| [CLAUDE.md](./CLAUDE.md) | Developer instructions |
+### [Security] - Latest
+- Fix SQL injection in tenant context
+- CORS wildcard rejection in production
+- JWT secret weak pattern validation
+- Stock validation at order creation
+
+### [Fixed]
+- Missing requireManager import
+- Missing table input types
+- TypeScript compilation errors
+- ESLint peer dependency conflicts
+
+### [Tests]
+- 34 unit tests passing
+- Type coverage >80%
 
 ## 🔒 Security
 
-- **Multi-Tenant Isolation:** PostgreSQL Row-Level Security (RLS)
-- **Authentication:** JWT with refresh token rotation
-- **Password:** bcrypt hashing (cost factor 12)
-- **Input Validation:** Zod schemas on all endpoints
+- PostgreSQL Row-Level Security (RLS)
+- JWT with refresh token rotation
+- bcrypt password hashing (cost 12)
+- Zod input validation
 
 ## 📄 License
 
-MIT License - lihat [LICENSE](LICENSE)
+MIT License
 
 ---
 
