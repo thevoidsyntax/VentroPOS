@@ -81,7 +81,7 @@ export async function buildApp() {
 
   // ============== ERROR HANDLER ==============
 
-  app.setErrorHandler((error, request, reply) => {
+  app.setErrorHandler((error, _request, reply) => {
     app.log.error(error);
 
     // Zod validation errors
@@ -122,7 +122,7 @@ export async function buildApp() {
 
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
-  app.get('/ready', async (request, reply) => {
+  app.get('/ready', async (_request, reply) => {
     // Check database connection
     try {
       const db = PostgresConnection.getInstance();

@@ -1,6 +1,7 @@
 // Repository Implementations - PostgreSQL
 // Infrastructure Layer: Implements Domain Repository Interfaces
 
+import pg from 'pg';
 import type {
   ITenantRepository,
   IUserRepository,
@@ -31,13 +32,13 @@ import { DatabaseError, DuplicateError } from '../../../shared/errors/index.js';
 abstract class BaseRepository {
   protected db = () => import('../../../infrastructure/database/postgres/index.js').then(m => m.getDb());
 
-  protected async query<T = unknown>(text: string, params?: unknown[]): Promise<T[]> {
+  protected async query<T extends pg.QueryResultRow = pg.QueryResultRow>(text: string, params?: unknown[]): Promise<T[]> {
     const pool = await this.db();
     const result = await pool.query<T>(text, params);
     return result.rows;
   }
 
-  protected async queryOne<T = unknown>(text: string, params?: unknown[]): Promise<T | null> {
+  protected async queryOne<T extends pg.QueryResultRow = pg.QueryResultRow>(text: string, params?: unknown[]): Promise<T | null> {
     const rows = await this.query<T>(text, params);
     return rows[0] ?? null;
   }

@@ -16,10 +16,7 @@ export interface StockAlert {
 }
 
 export class GetStockAlertsUseCase {
-  constructor(
-    private productRepo: IProductRepository,
-    private stockLogRepo: IStockLogRepository
-  ) {}
+  constructor(private productRepo: IProductRepository) {}
 
   async execute(tenantId: string): Promise<StockAlert[]> {
     const products = await this.productRepo.findAll(tenantId, { isActive: true, lowStock: true });
@@ -77,6 +74,7 @@ export class ReceiveStockUseCase {
 
     // Create stock log
     const stockLog = await this.stockLogRepo.create(tenantId, {
+      tenantId,
       productId: input.productId,
       type: 'restock',
       quantity: input.quantity,
@@ -133,6 +131,7 @@ export class AdjustStockUseCase {
 
     // Create stock log
     const stockLog = await this.stockLogRepo.create(tenantId, {
+      tenantId,
       productId: input.productId,
       type: 'adjustment',
       quantity: adjustment,

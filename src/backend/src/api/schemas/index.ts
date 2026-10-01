@@ -164,7 +164,7 @@ export const createOrderSchema = z.object({
     notes: z.string().optional(),
     applyDiscount: z.object({
       type: z.enum(['percentage', 'fixed']),
-      value: z.number().positive(),
+      value: z.number().positive().max(100).optional(),
     }).optional(),
   }),
 });
@@ -202,6 +202,7 @@ export const checkoutSchema = z.object({
       method: z.enum(['cash', 'qris', 'debit', 'credit']),
       amount: z.number().positive(),
     })).optional(),
+    idempotencyKey: z.string().min(32).max(128).optional(),
   }),
 });
 

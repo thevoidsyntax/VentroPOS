@@ -49,7 +49,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   );
 
   const refreshTokenUseCase = new RefreshTokenUseCase(
-    (token: string) => {
+    async (token: string) => {
       return fastify.jwt.verify<{
         sub: string;
         tenantId: string;

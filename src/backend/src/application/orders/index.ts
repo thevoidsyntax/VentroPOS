@@ -1,7 +1,7 @@
 // Orders & Checkout Application Service
 // Simplified DDD: Order Aggregate with Checkout Flow
 
-import type { Order, OrderItem, Product, Transaction, Table, StockLog } from '../../domain/entities/index.js';
+import type { Order, OrderItem, Transaction } from '../../domain/entities/index.js';
 import type {
   IOrderRepository,
   IProductRepository,
@@ -35,8 +35,10 @@ export class CreateOrderUseCase {
     private orderRepo: IOrderRepository,
     private productRepo: IProductRepository,
     private tableRepo: ITableRepository,
-    private stockLogRepo: IStockLogRepository
-  ) {}
+    _stockLogRepo: IStockLogRepository
+  ) {
+    void _stockLogRepo; // Reserved for future stock tracking at order creation
+  }
 
   async execute(tenantId: string, userId: string, input: CreateOrderInput): Promise<Order> {
     // Validate table if provided
@@ -62,6 +64,13 @@ export class CreateOrderUseCase {
         throw new BusinessRuleError(`Product '${product.name}' is not available`);
       }
 
+      // Validate stock availability
+      if (product.stockQuantity < itemInput.quantity) {
+        throw new BusinessRuleError(
+          `Insufficient stock for '${product.name}': requested ${itemInput.quantity}, available ${product.stockQuantity}`
+        );
+      }
+
       // Calculate modifiers price
       const modifiersTotal = itemInput.modifiers?.reduce((sum, m) => sum + m.priceAdjustment, 0) ?? 0;
       const unitPrice = product.price + modifiersTotal;
@@ -75,7 +84,12 @@ export class CreateOrderUseCase {
         quantity: itemInput.quantity,
         unitPrice,
         totalPrice,
-        modifiers: itemInput.modifiers ?? [],
+        modifiers: (itemInput.modifiers ?? []).map(m => ({
+          id: crypto.randomUUID(),
+          modifierId: m.modifierId,
+          modifierName: m.name,
+          priceAdjustment: m.priceAdjustment,
+        })),
         notes: itemInput.notes,
       });
 
@@ -102,6 +116,7 @@ export class CreateOrderUseCase {
 
     // Create order
     const order = await this.orderRepo.create(tenantId, {
+      tenantId,
       tableId: input.tableId,
       userId,
       orderNumber,
@@ -132,6 +147,8 @@ export interface CheckoutInput {
   cashReceived?: number; // For cash payment
   referenceNumber?: string;
   splitPayments?: { method: 'cash' | 'qris' | 'debit' | 'credit'; amount: number }[];
+  /** Idempotency key to prevent duplicate checkout on retry */
+  idempotencyKey?: string;
 }
 
 export interface CheckoutResult {
@@ -196,6 +213,7 @@ export class CheckoutUseCase {
 
     // Create transaction
     const transaction = await this.transactionRepo.create(tenantId, {
+      tenantId,
       orderId: order.id,
       amount: totalAmount,
       changeAmount,
@@ -219,6 +237,7 @@ export class CheckoutUseCase {
 
         // Create stock log
         await this.stockLogRepo.create(tenantId, {
+          tenantId,
           productId: product.id,
           type: 'sale',
           quantity: -item.quantity,
@@ -261,7 +280,7 @@ export class UpdateOrderStatusUseCase {
     tenantId: string,
     orderId: string,
     newStatus: Order['status'],
-    userId: string
+    _userId: string
   ): Promise<Order> {
     const order = await this.orderRepo.findById(tenantId, orderId);
 
@@ -319,6 +338,7 @@ export class VoidOrderUseCase {
         await this.productRepo.updateStock(tenantId, item.productId, newQuantity);
 
         await this.stockLogRepo.create(tenantId, {
+          tenantId,
           productId: product.id,
           type: 'void',
           quantity: item.quantity,

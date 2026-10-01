@@ -11,6 +11,22 @@ import type { Table } from '../../domain/entities/index.js';
 import type { ITableRepository } from '../../domain/repositories/index.js';
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
 
+// Input types for table operations
+export interface CreateTableInput {
+  tableNumber: string;
+  capacity?: number;
+  positionX?: number;
+  positionY?: number;
+}
+
+export interface UpdateTableInput {
+  tableNumber?: string;
+  capacity?: number;
+  positionX?: number;
+  positionY?: number;
+  status?: Table['status'];
+}
+
 /**
  * Create a new restaurant table
  * @param input - Table creation parameters

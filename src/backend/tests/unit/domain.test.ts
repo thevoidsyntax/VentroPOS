@@ -1,5 +1,6 @@
 // Unit Tests for Domain Entities
 import { describe, it, expect } from 'vitest';
+import { validatePasswordStrength } from '../../src/shared/utils/password.js';
 
 // Mock types for testing without external dependencies
 type UserRole = 'owner' | 'manager' | 'kasir' | 'kitchen';
@@ -166,8 +167,8 @@ describe('Price Calculations', () => {
     const result = calculateOrderTotal(items);
 
     expect(result.discountAmount).toBe(0);
-    expect(result.taxAmount).toBe(5500); // 50000 * 0.11
-    expect(result.total).toBe(55000);
+    expect(result.taxAmount).toBe(5500); // 50000 * 0.11 = 5500
+    expect(result.total).toBe(55500); // 50000 + 5500 = 55500
   });
 });
 
@@ -186,14 +187,15 @@ describe('Order Number Generation', () => {
   });
 
   it('should pad sequence to 4 digits', () => {
-    const date = new Date();
-    expect(generateOrderNumber(date, 42)).toMatch(/00042$/);
+    // Use UTC date to match toISOString() behavior
+    const date = new Date(Date.UTC(2024, 0, 15));
+    expect(generateOrderNumber(date, 42)).toMatch(/0042$/);
     expect(generateOrderNumber(date, 999)).toMatch(/0999$/);
     expect(generateOrderNumber(date, 1234)).toMatch(/1234$/);
   });
 
   it('should include date in order number', () => {
-    const date = new Date('2024-03-20T12:00:00Z');
+    const date = new Date(Date.UTC(2024, 2, 20));
     const orderNumber = generateOrderNumber(date, 1);
 
     expect(orderNumber).toContain('20240320');
@@ -279,54 +281,32 @@ describe('Email Validation', () => {
 });
 
 describe('Password Validation', () => {
-  function validatePassword(password: string): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (password.length < 8) {
-      errors.push('Password must be at least 8 characters');
-    }
-    if (password.length > 128) {
-      errors.push('Password must be less than 128 characters');
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-    if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-
-    return { valid: errors.length === 0, errors };
-  }
-
   it('should accept strong password', () => {
-    const result = validatePassword('SecurePass123');
+    const result = validatePasswordStrength('SecurePass123!');
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
   it('should reject short password', () => {
-    const result = validatePassword('Pass1');
+    const result = validatePasswordStrength('Pass1');
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('Password must be at least 8 characters');
   });
 
   it('should reject password without uppercase', () => {
-    const result = validatePassword('password123');
+    const result = validatePasswordStrength('password123');
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('Password must contain at least one uppercase letter');
   });
 
   it('should reject password without number', () => {
-    const result = validatePassword('PasswordOnly');
+    const result = validatePasswordStrength('PasswordOnly');
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('Password must contain at least one number');
   });
 
   it('should return multiple errors', () => {
-    const result = validatePassword('short');
+    const result = validatePasswordStrength('short');
     expect(result.errors.length).toBeGreaterThan(1);
   });
 });

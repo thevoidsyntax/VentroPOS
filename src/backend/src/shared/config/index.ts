@@ -23,7 +23,11 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().optional(),
 
   // JWT
-  JWT_SECRET: z.string().min(32),
+  JWT_SECRET: z.string().min(32).refine(val => {
+    // Reject common weak secrets
+    const weakPatterns = ['secret', 'password', 'jwt', 'token', 'changeme'];
+    return !weakPatterns.some(p => val.toLowerCase().includes(p));
+  }, { message: 'JWT secret contains a weak pattern' }),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
@@ -45,6 +49,13 @@ const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {
   console.error('❌ Invalid environment variables:');
   console.error(JSON.stringify(parsed.error.format(), null, 2));
+  process.exit(1);
+}
+
+// Validate CORS origin after parsing
+const env = parsed.data;
+if (env.NODE_ENV === 'production' && env.CORS_ORIGIN === '*') {
+  console.error('❌ CORS origin cannot be "*" in production. Set CORS_ORIGIN to specific domain(s).');
   process.exit(1);
 }
 

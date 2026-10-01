@@ -12,7 +12,7 @@ import { validatePasswordStrength, isCommonPassword } from '../../shared/utils/p
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn: string; // JWT time string format (e.g., "15m", "7d")
 }
 
 export interface JwtPayload {

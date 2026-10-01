@@ -2,10 +2,10 @@
 /**
  * Handles refresh token storage and validation
  * Implements sliding window expiration and rotation
+ * NOTE: For production, use Redis for token storage to support horizontal scaling
  */
 
 import { randomBytes } from 'crypto';
-import { config } from '../../shared/config/index.js';
 
 export interface RefreshToken {
   id: string;

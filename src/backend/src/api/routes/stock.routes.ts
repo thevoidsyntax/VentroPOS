@@ -59,7 +59,7 @@ export async function stockRoutes(fastify: FastifyInstance): Promise<void> {
   const productRepo = new PostgresProductRepository();
   const stockLogRepo = new PostgresStockLogRepository();
 
-  const getStockAlertsUseCase = new GetStockAlertsUseCase(productRepo, stockLogRepo);
+  const getStockAlertsUseCase = new GetStockAlertsUseCase(productRepo);
   const receiveStockUseCase = new ReceiveStockUseCase(productRepo, stockLogRepo);
   const adjustStockUseCase = new AdjustStockUseCase(productRepo, stockLogRepo);
   const getStockHistoryUseCase = new GetStockHistoryUseCase(productRepo, stockLogRepo);

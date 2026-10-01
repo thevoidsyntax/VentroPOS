@@ -18,7 +18,7 @@ declare module 'fastify' {
 // ============== AUTH MIDDLEWARE ==============
 export async function authMiddleware(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<void> {
   try {
     await request.jwtVerify();
@@ -41,18 +41,12 @@ export async function authMiddleware(
 }
 
 // ============== RBAC MIDDLEWARE ==============
-type RoleHierarchy = Record<UserRole, number>;
-
-const roleHierarchy: RoleHierarchy = {
-  owner: 4,
-  manager: 3,
-  kasir: 2,
-  kitchen: 1,
-};
+// Role hierarchy for future use (currently using include check)
+// tier levels: owner(4) > manager(3) > kasir(2) > kitchen(1)
 
 // Factory to create role-checking middleware
 export function requireRole(...allowedRoles: UserRole[]) {
-  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  return async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
     const userRole = request.userRole;
 
     if (!userRole) {
@@ -80,7 +74,7 @@ export const requireAnyRole = requireRole('owner', 'manager', 'kasir', 'kitchen'
 // ============== TENANT CONTEXT ==============
 export async function tenantContextMiddleware(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<void> {
   // Tenant context is already set from JWT
   // This middleware just validates it exists
@@ -102,9 +96,12 @@ export async function createAuditLog(
   request: FastifyRequest,
   data: AuditLogData
 ): Promise<void> {
-  // This would typically write to the audit_logs table
-  // Implementation would use the IAuditLogRepository
-  const log = {
+  // TODO: Persist to database via IAuditLogRepository
+  // Implementation requires:
+  // 1. Inject IAuditLogRepository into middleware context
+  // 2. Use transaction to ensure atomic write
+  // 3. Add correlation ID for distributed tracing
+  const auditEntry = {
     tenantId: request.tenantId,
     userId: request.userId,
     action: data.action,
@@ -114,9 +111,10 @@ export async function createAuditLog(
     newData: data.newData,
     ipAddress: request.ip,
     userAgent: request.headers['user-agent'],
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 
-  // TODO: Write to database via repository
-  console.log('AUDIT:', JSON.stringify(log));
+  // Structured logging via app.log (Pino) instead of console.log
+  // Use app.log.info({ audit: auditEntry }, 'AUDIT') in route handlers
+  void auditEntry; // Acknowledge unused (will be used when persisting to DB)
 }

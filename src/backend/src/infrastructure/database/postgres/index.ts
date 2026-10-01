@@ -2,7 +2,7 @@
 // Handles connection pool, RLS context, and migrations
 
 import pg from 'pg';
-import { config } from '../../shared/config/index.js';
+import { config } from '../../../shared/config/index.js';
 
 const { Pool } = pg;
 
@@ -19,7 +19,9 @@ export class PostgresConnection {
     });
 
     this.pool.on('error', (err) => {
-      console.error('Unexpected database error:', err);
+      // Use structured logging - pool errors should go to app.log
+      // This is a fallback for connection-level errors
+      process.stderr.write(`[DB POOL ERROR] ${err.message}\n`);
     });
   }
 
@@ -37,10 +39,10 @@ export class PostgresConnection {
   // Set tenant context for RLS
   async setTenantContext(tenantId: string): Promise<void> {
     const client = this.pool.connect();
-    await (await client).query(`SET LOCAL app.tenant_id = '${tenantId}'`);
+    await (await client).query('SET LOCAL app.tenant_id = $1', [tenantId]);
   }
 
-  async query<T = unknown>(text: string, params?: unknown[]): Promise<pg.QueryResult<T>> {
+  async query<T extends pg.QueryResultRow = pg.QueryResultRow>(text: string, params?: unknown[]): Promise<pg.QueryResult<T>> {
     return this.pool.query<T>(text, params);
   }
 

@@ -25,7 +25,7 @@ import {
   voidOrderSchema,
 } from '../schemas/index.js';
 import { AppError } from '../../shared/errors/index.js';
-import { authMiddleware, requireKasir } from '../middleware/index.js';
+import { authMiddleware, requireKasir, requireManager } from '../middleware/index.js';
 import type { Order } from '../../domain/entities/index.js';
 
 export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
@@ -173,6 +173,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
       cashReceived?: number;
       referenceNumber?: string;
       splitPayments?: Array<{ method: 'cash' | 'qris' | 'debit' | 'credit'; amount: number }>;
+      idempotencyKey?: string;
     };
 
     try {
@@ -182,6 +183,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
         cashReceived: body.cashReceived,
         referenceNumber: body.referenceNumber,
         splitPayments: body.splitPayments,
+        idempotencyKey: body.idempotencyKey,
       });
       return reply.send({ success: true, data: result });
     } catch (error) {
