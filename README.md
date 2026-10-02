@@ -46,7 +46,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 | 1 | ✅ Done | Foundation, Database, Auth |
 | 2 | ✅ Done | Core POS, Cart, Checkout |
 | 3 | ✅ Done | Inventory, Stock Management |
-| 4 | ⬜ Todo | Reporting, Dashboard |
+| 4 | ✅ Done | Reporting, Dashboard |
 | 5 | ⬜ Todo | Hardware Integration |
 | 6 | ⬜ Todo | Launch, Polish |
 
@@ -133,14 +133,39 @@ POST /api/v1/stock/opnames/:id/cancel          - Cancel opname ✅
 
 ---
 
-### Phase 4: Reporting (Todo)
+### Phase 4: Reporting ✅ Done
 
 **Objectives:**
-- Sales report (daily, weekly, monthly)
-- Product performance report
-- Staff performance report
-- Category breakdown
-- Export to PDF/Excel
+- [x] Sales summary (daily, weekly, monthly)
+- [x] Product performance report
+- [x] Staff performance report
+- [x] Category breakdown
+- [x] Export to CSV
+
+**Deliverables:**
+```
+Report APIs:
+GET  /api/v1/reports/sales        - Sales summary ✅
+GET  /api/v1/reports/products     - Product performance ✅
+GET  /api/v1/reports/staff       - Staff performance ✅
+GET  /api/v1/reports/categories  - Category breakdown ✅
+GET  /api/v1/reports/export      - CSV export ✅
+```
+
+**Date Presets:**
+- `today` - Hari Ini
+- `yesterday` - Kemarin
+- `this_week` - Minggu Ini
+- `last_week` - Minggu Lalu
+- `this_month` - Bulan Ini
+- `last_month` - Bulan Lalu
+
+**Phase Gate:**
+- [x] All tests passing (120 total)
+- [x] tsc --noEmit: no errors
+- [x] Documentation updated
+
+**Test Coverage:** 25 unit tests for reports (reports.test.ts)
 
 ---
 
@@ -193,6 +218,7 @@ http://localhost:3000/api/v1
 | Modifiers | CRUD `/modifiers/*` |
 | Stock | CRUD `/stock/*` |
 | Stock Opname | CRUD `/stock/opnames/*` |
+| Reports | GET `/reports/*` |
 
 ### Response Format
 
@@ -259,11 +285,12 @@ src/backend/           # Fastify API server
 │   ├── users/       # User use cases (split into 7 files)
 │   ├── tables/      # Table use cases (split into 8 files)
 │   ├── categories/  # Category use cases (split into 4 files)
-│   └── modifiers/   # Modifier use cases
+│   ├── modifiers/   # Modifier use cases
+│   └── reports/     # Report use cases (6 files + utils)
 ├── src/domain/       # Entities, repositories interfaces (Domain Layer)
 ├── src/infrastructure/ # DB, auth implementations (Infrastructure Layer)
 │   └── database/
-│       └── repositories/  # Split into 14 individual files
+│       └── repositories/  # Split into 15 individual files
 └── src/shared/       # Config, errors, utils (Shared Kernel)
 ```
 
@@ -292,7 +319,7 @@ src/backend/           # Fastify API server
 |-------|--------|-------|
 | ESLint | ✅ Configured | TypeScript + Prettier support |
 | TypeScript | ✅ Strict | No `any` types |
-| Tests | ✅ 95 passing | Vitest unit tests |
+| Tests | ✅ 120 passing | Vitest unit tests |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 | Max File Size | ✅ <250 ln | Fat class split complete |
 
@@ -361,7 +388,7 @@ npm run dev
 npm run dev          # Development server
 npm run build        # TypeScript build
 npm start            # Production server
-npm test             # Run tests (83 passing)
+npm test             # Run tests (120 passing)
 npm run lint         # ESLint check
 npm run test:coverage # Test coverage report
 ```
@@ -383,6 +410,45 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### Phase 4: Reporting
+
+**New Features:**
+- Sales summary API with metrics, payment method breakdown, hourly sales, and period comparison
+- Product performance report with rankings and percentages
+- Staff performance report with transaction counts and AOV
+- Category breakdown report with order counts
+- CSV export for all report types
+
+**Date Presets (Indonesian):**
+- `today` - Hari Ini
+- `yesterday` - Kemarin
+- `this_week` - Minggu Ini
+- `last_week` - Minggu Lalu
+- `this_month` - Bulan Ini
+- `last_month` - Bulan Lalu
+
+**New Files:**
+```
+Domain:
+- src/domain/entities/report.ts (Report entities)
+- src/domain/repositories/report.ts (Report repository interface)
+
+Infrastructure:
+- src/infrastructure/database/repositories/report.ts (PostgreSQL implementation)
+
+Application:
+- src/application/reports/ (6 files: sales-summary, product-performance, staff-performance, category-breakdown, export-report, index)
+- src/application/reports/utils/date-utils.ts
+
+API:
+- src/api/routes/report.routes.ts
+
+Tests:
+- tests/unit/reports.test.ts (25 unit tests)
+```
+
+**Test Coverage:** 120 total unit tests passing
 
 ### Audit Fixes - Code Quality Refactoring
 
@@ -437,7 +503,6 @@ Infrastructure Layer:
   - Submit and apply adjustments
   - Cancel stock opname
 - **36 unit tests** for stock use cases (stock.test.ts)
-- 95 total unit tests passing
 
 ### Audit Fixes Applied
 - ESLint configuration with TypeScript support
