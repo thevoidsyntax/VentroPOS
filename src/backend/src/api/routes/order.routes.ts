@@ -31,7 +31,7 @@ import type { Order } from '../../domain/entities/index.js';
 
 export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
   const createOrderUseCase = new CreateOrderUseCase(
-    orderRepository, productRepository, tableRepository, stockLogRepository
+    orderRepository, productRepository, tableRepository
   );
   const checkoutUseCase = new CheckoutUseCase(
     orderRepository, transactionRepository, productRepository, stockLogRepository, idempotencyKeyRepository
