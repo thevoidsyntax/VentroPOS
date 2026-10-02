@@ -8,9 +8,13 @@ import {
   GetStockOverviewUseCase,
   CreateStockOpnameUseCase,
   RecordStockCountUseCase,
+  BatchRecordStockCountUseCase,
   SubmitStockOpnameUseCase,
   CancelStockOpnameUseCase,
   GetStockOpnameUseCase,
+  ListStockOpnamesUseCase,
+  UpdateStockOpnameUseCase,
+  CompleteStockOpnameUseCase,
 } from '../../src/application/stock/index.js';
 import type { IProductRepository, IStockLogRepository, IStockOpnameRepository } from '../../src/domain/repositories/index.js';
 import type { Product, StockLog, StockOpname, StockOpnameItem } from '../../src/domain/entities/index.js';
@@ -755,5 +759,279 @@ describe('GetStockOpnameUseCase', () => {
     await expect(
       useCase.execute('tenant-1', 'non-existent')
     ).rejects.toThrow(NotFoundError);
+  });
+});
+
+// ============== GetStockHistoryUseCase Tests ==============
+describe('GetStockHistoryUseCase', () => {
+  let mockProductRepo: IProductRepository;
+  let mockStockLogRepo: IStockLogRepository;
+  let useCase: GetStockHistoryUseCase;
+
+  const mockProduct: Product = {
+    id: 'prod-1',
+    tenantId: 'tenant-1',
+    name: 'Coffee',
+    price: 25000,
+    cost: 15000,
+    stockQuantity: 10,
+    lowStockThreshold: 5,
+    isActive: true,
+    isSerialized: false,
+    modifierGroupIds: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockLogs: StockLog[] = [
+    { id: 'log-1', tenantId: 'tenant-1', productId: 'prod-1', type: 'sale', quantity: -2, balanceAfter: 8, referenceType: 'order', referenceId: 'order-1', createdAt: new Date() },
+    { id: 'log-2', tenantId: 'tenant-1', productId: 'prod-1', type: 'restock', quantity: 10, balanceAfter: 10, referenceType: 'manual', referenceId: null, createdAt: new Date() },
+  ];
+
+  beforeEach(() => {
+    mockProductRepo = {
+      create: vi.fn(),
+      findById: vi.fn(),
+      findBySku: vi.fn(),
+      findAll: vi.fn(),
+      update: vi.fn(),
+      updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    mockStockLogRepo = {
+      create: vi.fn(),
+      findByProduct: vi.fn(),
+      findAll: vi.fn(),
+    };
+
+    useCase = new GetStockHistoryUseCase(mockProductRepo, mockStockLogRepo);
+  });
+
+  it('should return all stock logs for tenant', async () => {
+    vi.mocked(mockStockLogRepo.findAll).mockResolvedValue(mockLogs);
+
+    const result = await useCase.execute('tenant-1', {});
+
+    expect(result.logs).toHaveLength(2);
+    expect(result.meta.productName).toBeUndefined();
+  });
+
+  it('should filter by productId and include product name', async () => {
+    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProduct);
+    vi.mocked(mockStockLogRepo.findAll).mockResolvedValue(mockLogs);
+
+    const result = await useCase.execute('tenant-1', { productId: 'prod-1' });
+
+    expect(result.logs).toHaveLength(2);
+    expect(result.meta.productName).toBe('Coffee');
+  });
+
+  it('should filter by type', async () => {
+    vi.mocked(mockStockLogRepo.findAll).mockResolvedValue([mockLogs[1]]);
+
+    const result = await useCase.execute('tenant-1', { type: 'restock' });
+
+    expect(result.logs).toHaveLength(1);
+    expect(result.logs[0].type).toBe('restock');
+  });
+
+  it('should throw NotFoundError for invalid productId', async () => {
+    vi.mocked(mockProductRepo.findById).mockResolvedValue(null);
+
+    await expect(
+      useCase.execute('tenant-1', { productId: 'invalid' })
+    ).rejects.toThrow(NotFoundError);
+  });
+});
+
+// ============== ListStockOpnamesUseCase Tests ==============
+describe('ListStockOpnamesUseCase', () => {
+  let mockStockOpnameRepo: IStockOpnameRepository;
+  let useCase: ListStockOpnamesUseCase;
+
+  const mockOpnames: StockOpname[] = [
+    { id: 'opname-1', tenantId: 'tenant-1', userId: 'user-1', status: 'in_progress', items: [], createdAt: new Date() },
+    { id: 'opname-2', tenantId: 'tenant-1', userId: 'user-1', status: 'completed', items: [], createdAt: new Date() },
+  ];
+
+  beforeEach(() => {
+    mockStockOpnameRepo = {
+      create: vi.fn(),
+      createItem: vi.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      update: vi.fn(),
+      updateItem: vi.fn(),
+      getItems: vi.fn(),
+      updateItemBatch: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    useCase = new ListStockOpnamesUseCase(mockStockOpnameRepo);
+  });
+
+  it('should return all opnames for tenant', async () => {
+    vi.mocked(mockStockOpnameRepo.findAll).mockResolvedValue(mockOpnames);
+
+    const result = await useCase.execute('tenant-1');
+
+    expect(result.opnames).toHaveLength(2);
+  });
+
+  it('should filter by status', async () => {
+    vi.mocked(mockStockOpnameRepo.findAll).mockResolvedValue([mockOpnames[0]]);
+
+    const result = await useCase.execute('tenant-1', { status: 'in_progress' });
+
+    expect(result.opnames).toHaveLength(1);
+    expect(result.opnames[0].status).toBe('in_progress');
+  });
+});
+
+// ============== CompleteStockOpnameUseCase Tests ==============
+describe('CompleteStockOpnameUseCase', () => {
+  let mockStockOpnameRepo: IStockOpnameRepository;
+  let useCase: CompleteStockOpnameUseCase;
+
+  const mockOpname: StockOpname = {
+    id: 'opname-1',
+    tenantId: 'tenant-1',
+    userId: 'user-1',
+    status: 'in_progress',
+    items: [],
+    createdAt: new Date(),
+  };
+
+  beforeEach(() => {
+    mockStockOpnameRepo = {
+      create: vi.fn(),
+      createItem: vi.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      update: vi.fn(),
+      updateItem: vi.fn(),
+      getItems: vi.fn(),
+      updateItemBatch: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    useCase = new CompleteStockOpnameUseCase(mockStockOpnameRepo);
+  });
+
+  it('should complete in_progress opname', async () => {
+    vi.mocked(mockStockOpnameRepo.findById).mockResolvedValue(mockOpname);
+    vi.mocked(mockStockOpnameRepo.update).mockResolvedValue({
+      ...mockOpname,
+      status: 'completed',
+      completedAt: new Date(),
+    });
+
+    const result = await useCase.execute('tenant-1', 'opname-1', { applyAdjustments: true });
+
+    expect(result.status).toBe('completed');
+    expect(result.completedAt).toBeDefined();
+  });
+
+  it('should throw error for completed opname', async () => {
+    vi.mocked(mockStockOpnameRepo.findById).mockResolvedValue({ ...mockOpname, status: 'completed' });
+
+    await expect(
+      useCase.execute('tenant-1', 'opname-1', { applyAdjustments: true })
+    ).rejects.toThrow(BusinessRuleError);
+  });
+
+  it('should throw NotFoundError for non-existent opname', async () => {
+    vi.mocked(mockStockOpnameRepo.findById).mockResolvedValue(null);
+
+    await expect(
+      useCase.execute('tenant-1', 'invalid', { applyAdjustments: true })
+    ).rejects.toThrow(NotFoundError);
+  });
+});
+
+// ============== UpdateStockOpnameUseCase Tests ==============
+describe('UpdateStockOpnameUseCase', () => {
+  let mockStockOpnameRepo: IStockOpnameRepository;
+  let useCase: UpdateStockOpnameUseCase;
+
+  const mockUpdatedItems: StockOpnameItem[] = [
+    { id: 'item-1', opnameId: 'opname-1', productId: 'prod-1', systemQuantity: 10, actualQuantity: 9, variance: -1 },
+  ];
+
+  beforeEach(() => {
+    mockStockOpnameRepo = {
+      create: vi.fn(),
+      createItem: vi.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      update: vi.fn(),
+      updateItem: vi.fn(),
+      getItems: vi.fn(),
+      updateItemBatch: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    useCase = new UpdateStockOpnameUseCase(mockStockOpnameRepo);
+  });
+
+  it('should batch update item quantities', async () => {
+    vi.mocked(mockStockOpnameRepo.updateItemBatch).mockResolvedValue(mockUpdatedItems);
+
+    const result = await useCase.execute('tenant-1', 'opname-1', {
+      items: [{ productId: 'prod-1', actualQuantity: 9 }],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].actualQuantity).toBe(9);
+    expect(result[0].variance).toBe(-1);
+  });
+
+  it('should handle empty items array', async () => {
+    vi.mocked(mockStockOpnameRepo.updateItemBatch).mockResolvedValue([]);
+
+    const result = await useCase.execute('tenant-1', 'opname-1', { items: [] });
+
+    expect(result).toHaveLength(0);
+  });
+});
+
+// ============== BatchRecordStockCountUseCase Tests ==============
+describe('BatchRecordStockCountUseCase', () => {
+  let mockStockOpnameRepo: IStockOpnameRepository;
+  let useCase: BatchRecordStockCountUseCase;
+
+  const mockItems: StockOpnameItem[] = [
+    { id: 'item-1', opnameId: 'opname-1', productId: 'prod-1', systemQuantity: 10, actualQuantity: 9, variance: -1 },
+    { id: 'item-2', opnameId: 'opname-1', productId: 'prod-2', systemQuantity: 5, actualQuantity: 7, variance: 2 },
+  ];
+
+  beforeEach(() => {
+    mockStockOpnameRepo = {
+      create: vi.fn(),
+      createItem: vi.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      update: vi.fn(),
+      updateItem: vi.fn(),
+      getItems: vi.fn(),
+      updateItemBatch: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    useCase = new BatchRecordStockCountUseCase(mockStockOpnameRepo);
+  });
+
+  it('should batch record multiple counts', async () => {
+    vi.mocked(mockStockOpnameRepo.updateItemBatch).mockResolvedValue(mockItems);
+
+    const result = await useCase.execute('tenant-1', 'opname-1', [
+      { productId: 'prod-1', actualQuantity: 9 },
+      { productId: 'prod-2', actualQuantity: 7 },
+    ]);
+
+    expect(result).toHaveLength(2);
+    expect(mockStockOpnameRepo.updateItemBatch).toHaveBeenCalledWith('tenant-1', 'opname-1', expect.any(Array));
   });
 });

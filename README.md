@@ -129,6 +129,8 @@ POST /api/v1/stock/opnames/:id/cancel          - Cancel opname ✅
 - [x] tsc --noEmit: no errors
 - [x] Documentation updated
 
+**Test Coverage:** 36 unit tests for stock use cases (stock.test.ts)
+
 ---
 
 ### Phase 4: Reporting (Todo)
@@ -290,7 +292,7 @@ src/backend/           # Fastify API server
 |-------|--------|-------|
 | ESLint | ✅ Configured | TypeScript + Prettier support |
 | TypeScript | ✅ Strict | No `any` types |
-| Tests | ✅ 83 passing | Vitest unit tests |
+| Tests | ✅ 95 passing | Vitest unit tests |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 | Max File Size | ✅ <250 ln | Fat class split complete |
 
@@ -331,7 +333,7 @@ src/backend/           # Fastify API server
 ```
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
-Tests: 83 passing ✅
+Tests: 95 passing ✅
 ESLint: Configured ✅
 Architecture: Split complete ✅
 ```
@@ -434,8 +436,8 @@ Infrastructure Layer:
   - Batch record counts
   - Submit and apply adjustments
   - Cancel stock opname
-- 24 new unit tests for stock use cases
-- 83 total unit tests passing
+- **36 unit tests** for stock use cases (stock.test.ts)
+- 95 total unit tests passing
 
 ### Audit Fixes Applied
 - ESLint configuration with TypeScript support
