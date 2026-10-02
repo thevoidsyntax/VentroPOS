@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VentroPOS - Flowchart Documentation</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --bg-card-hover: #475569;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-green: #22c55e;
+      --accent-orange: #f97316;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-cyan: #06b6d4;
+      --accent-yellow: #eab308;
+      --border: #475569;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .nav a {
+      padding: 0.5rem 1rem;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .nav a:hover {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title .icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .mermaid {
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title .badge {
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    .badge-success { background: var(--accent-green); color: #000; }
+    .badge-warning { background: var(--accent-orange); color: #000; }
+    .badge-info { background: var(--accent-blue); color: #fff; }
+    .badge-error { background: var(--accent-red); color: #fff; }
+
+    .status-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .status-box {
+      padding: 0.5rem 1rem;
+      background: var(--bg-primary);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-arrow {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-primary);
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .highlight {
+      background: var(--accent-blue);
+      color: white;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 0.25rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 1.75rem; }
+      .section { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>VentroPOS Flowchart</h1>
+      <p class="subtitle">Visual documentation for Point of Sale system flows</p>
+      <nav class="nav">
+        <a href="#architecture">Architecture</a>
+        <a href="#order">Order Flow</a>
+        <a href="#stock">Stock</a>
+        <a href="#payment">Payment</a>
+        <a href="#auth">Auth</a>
+        <a href="#database">Database</a>
+      </nav>
+    </header>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="section">
+      <h2 class="section-title">
+        <span class="icon">🏗️</span>
+        System Architecture
+      </h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">System Overview</h3>
+          <div class="mermaid">
+flowchart LR
+    subgraph Client["<b>Client Layer</b>"]
+        PWA["<b>PWA</b><br/>React App"]
+    end
+
+    subgraph API["<b>API Layer</b>"]
+        Routes["<b>Routes</b><br/>/orders, /stock..."]
+        Middleware["<b>Middleware</b><br/>Auth, RateLimit, CORS"]
+        Schemas["<b>Schemas</b><br/>Zod Validation"]
+    end
+
+    subgraph App["<b>Application Layer</b>"]
+        UC["<b>Use Cases</b><br/>Business Logic"]
+    end
+
+    subgraph Domain["<b>Domain Layer</b>"]
+        Entities["<b>Entities</b><br/>Order, Product, User"]
+        Interfaces["<b>Interfaces</b><br/>Repository Contracts"]
+    end
+
+    subgraph Infra["<b>Infrastructure</b>"]
+        DB["<b>PostgreSQL</b><br/>RLS Enabled"]
+        Redis["<b>Redis</b><br/>Cache"]
+    end
+
+    PWA --> Routes
+    Routes --> Middleware
+    Middleware --> Schemas
+    Schemas --> UC
+    UC --> Entities
+    UC --> Interfaces
+    Interfaces --> DB
+    Interfaces --> Redis
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Multi-Tenancy</h3>
+          <div class="mermaid">
+flowchart TB
+    subgraph DB["<b>PostgreSQL Database</b>"]
+        subgraph T1["<b>Tenant A</b><br/>Cafe Jakarta"]
+            U1["users (5)"]
+            P1["products (50)"]
+            O1["orders (1234)"]
+        end
+        subgraph T2["<b>Tenant B</b><br/>Cafe Bandung"]
+            U2["users (3)"]
+            P2["products (35)"]
+            O2["orders (567)"]
+        end
+    end
+
+    T1 -.->|<b>RLS Policy</b><br/>tenant_id = current_setting|T2
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: var(--accent-blue)"></div>
+          <span>Client Request</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: var(--accent-green)"></div>
+          <span>Success Response</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: var(--accent-red)"></div>
+          <span>Error/Validation</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: var(--accent-purple)"></div>
+          <span>Business Logic</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Flow Section -->
+    <section id="order" class="section">
+      <h2 class="section-title">
+        <span class="icon">📝</span>
+        Order Lifecycle
+      </h2>
+
+      <div class="card">
+        <h3 class="card-title">Order Status Flow</h3>
+        <div class="status-flow">
+          <span class="status-box" style="background: var(--accent-blue)">pending</span>
+          <span class="status-arrow">→</span>
+          <span class="status-box" style="background: var(--accent-cyan)">confirmed</span>
+          <span class="status-arrow">→</span>
+          <span class="status-box" style="background: var(--accent-yellow)">preparing</span>
+          <span class="status-arrow">→</span>
+          <span class="status-box" style="background: var(--accent-orange)">ready</span>
+          <span class="status-arrow">→</span>
+          <span class="status-box" style="background: var(--accent-purple)">served</span>
+          <span class="status-arrow">→</span>
+          <span class="status-box" style="background: var(--accent-green)">paid</span>
+          <span style="margin-left: 1rem; color: var(--text-muted)">or</span>
+          <span class="status-box" style="background: var(--accent-red)">voided</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem;">
+        <h3 class="card-title">Order Process Flow</h3>
+        <div class="mermaid">
+flowchart TB
+    A["<b>Create Order</b><br/>POST /orders"] --> B{Validate<br/>Products & Stock}
+    B -->|Valid| C["Create Order<br/>Status: pending"]
+    B -->|Invalid| E["Throw Error<br/>400 Bad Request"]
+    C --> D["Cart Ready<br/>Items with Modifiers"]
+    D --> F["<b>Checkout</b><br/>POST /orders/:id/checkout"]
+    F --> G{Payment<br/>Method}
+    G -->|Cash| H["Calculate Change"]
+    G -->|QRIS| I["Generate QR Code"]
+    G -->|Card| J["Process EDC"]
+    H --> K["<b>Payment Success</b><br/>Status: paid"]
+    I --> K
+    J --> K
+    K --> L["<b>Deduct Stock</b><br/>Batch Update"]
+    L --> M["Create Transaction<br/>Log Payment"]
+    M --> N["✓ Order Complete"]
+        </div>
+      </div>
+    </section>
+
+    <!-- Stock Flow Section -->
+    <section id="stock" class="section">
+      <h2 class="section-title">
+        <span class="icon">📦</span>
+        Stock Management
+      </h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Stock Operations</h3>
+          <div class="mermaid">
+flowchart LR
+    subgraph Sources["<b>Stock In</b>"]
+        R["<b>Restock</b><br/>Receive Stock"]
+        A["<b>Adjustment</b><br/>Manual Correction"]
+        O["<b>Opname</b><br/>Physical Count"]
+    end
+
+    Sources --> Stock["<b>Stock Level</b>"]
+
+    Stock --> Check{"Check<br/>Threshold"}
+    Check -->|<b>Low</b>| Alert["<b>Alert</b><br/>Warning/Critical"]
+    Check -->|<b>Out</b>| Alert2["<b>Alert</b><br/>Out of Stock"]
+    Check -->|<b>OK</b>| Normal["<b>In Stock</b>"]
+
+    Stock --> Sale["<b>Sale</b><br/>Order Checkout"]
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Stock Opname Process</h3>
+          <div class="mermaid">
+flowchart TB
+    A["<b>Start Opname</b><br/>Select Products"] --> B["<b>Create Session</b><br/>Status: in_progress"]
+    B --> C["<b>Physical Count</b><br/>Record Actual Qty"]
+    C --> D{"Variance?"}
+    D -->|<b>No</b>| E["No Change<br/>variance = 0"]
+    D -->|<b>Yes</b>| F["Calculate<br/>variance"]
+    F --> G{"Apply<br/>Adjustments?"}
+    G -->|<b>Yes</b>| H["<b>Update Stock</b><br/>Apply New Qty"]
+    G -->|<b>No</b>| I["Skip Update<br/>Keep System Qty"]
+    H --> J
+    I --> J["<b>Complete</b><br/>Status: completed"]
+    E --> J
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Stock Type</th>
+            <th>Trigger</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="highlight">Restock</span></td>
+            <td>Supplier delivery</td>
+            <td>+ quantity to stock</td>
+          </tr>
+          <tr>
+            <td><span class="highlight">Sale</span></td>
+            <td>Order checkout</td>
+            <td>- quantity from stock</td>
+          </tr>
+          <tr>
+            <td><span class="highlight">Adjustment</span></td>
+            <td>Manual correction</td>
+            <td>Set exact quantity</td>
+          </tr>
+          <tr>
+            <td><span class="highlight">Void</span></td>
+            <td>Refund/void order</td>
+            <td>+ quantity back to stock</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Payment Flow Section -->
+    <section id="payment" class="section">
+      <h2 class="section-title">
+        <span class="icon">💳</span>
+        Payment Flow
+      </h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Payment Methods</h3>
+          <div class="mermaid">
+flowchart LR
+    subgraph Methods["<b>Supported Methods</b>"]
+        C["<b>Cash</b><br/>Instant<br/>Includes Change"]
+        Q["<b>QRIS</b><br/>e-Wallet<br/>Scan QR"]
+        D["<b>Debit</b><br/>Bank Card"]
+        CR["<b>Credit</b><br/>Bank Card"]
+        S["<b>Split</b><br/>Multiple<br/>Methods"]
+    end
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Checkout Flow</h3>
+          <div class="mermaid">
+flowchart TB
+    A["<b>Start Checkout</b>"] --> B{Idempotency<br/>Key Present?}
+    B -->|Yes| C["Check Cache<br/>Return if exists"]
+    B -->|No| D["Validate Order<br/>Status check"]
+    D --> E["Calculate Total<br/>Tax & Discount"]
+    E --> F["Process Payment<br/>By Method"]
+    F --> G{Payment<br/>Success?}
+    G -->|Yes| H["<b>Update Stock</b><br/>Batch Deduct"]
+    H --> I["<b>Create Transaction</b>"]
+    I --> J["<b>Update Order</b><br/>Status: paid"]
+    J --> K["✓ Complete"]
+    G -->|No| L["Throw Error<br/>Payment Failed"]
+    C --> K
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.5rem;">
+        <h3 class="card-title">Idempotency Protection</h3>
+        <div class="mermaid">
+flowchart LR
+    A["<b>Request</b><br/>X-Idempotency-Key"] --> B{Key<br/>Exists?}
+    B -->|<b>New</b>| C["Process<br/>Payment"]
+    B -->|<b>Exists</b>| D{Cached<br/>Response?}
+    C --> E["<b>Store</b><br/>Response + TTL 24h"]
+    D -->|<b>Yes</b>| F["<b>Return Cached</b><br/>No Reprocess"]
+    D -->|<b>No</b>| C
+    E --> G["<b>Response</b>"]
+    F --> G
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth Flow Section -->
+    <section id="auth" class="section">
+      <h2 class="section-title">
+        <span class="icon">🔐</span>
+        Authentication Flow
+      </h2>
+
+      <div class="card">
+        <h3 class="card-title">JWT Authentication</h3>
+        <div class="mermaid">
+flowchart TB
+    A["<b>Login</b><br/>POST /auth/login"] --> B{Validate<br/>Email & Password}
+    B -->|Invalid| E["401 Unauthorized"]
+    B -->|Valid| C["Generate JWT<br/>Access Token"]
+    C --> D["Generate JWT<br/>Refresh Token"]
+    D --> F["<b>Set Tokens</b><br/>HTTP Only Cookie"]
+    F --> G["<b>User Dashboard</b>"]
+    G --> H["<b>API Request</b><br/>Authorization: Bearer"]
+    H --> I{JWT<br/>Valid?}
+    I -->|Yes| J["<b>Execute</b><br/>Business Logic"]
+    I -->|No| K["401 Unauthorized"]
+    J --> L["<b>Response</b>"]
+    G --> M["<b>Refresh Token</b><br/>POST /auth/refresh"]
+    M --> N{Token<br/>Valid?}
+    N -->|Yes| C
+    N -->|No| O["Re-login Required"]
+        </div>
+      </div>
+
+      <table style="margin-top: 1.5rem;">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Permissions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-success">Owner</span></td>
+            <td>Full access, create managers, view all data</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-info">Manager</span></td>
+            <td>Manage staff, products, view reports, process voids</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-warning">Kasir</span></td>
+            <td>Create orders, process checkout, view own orders</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-error">Warehouse</span></td>
+            <td>Stock management, opname, receive inventory</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Database Section -->
+    <section id="database" class="section">
+      <h2 class="section-title">
+        <span class="icon">🗄️</span>
+        Database Schema
+      </h2>
+
+      <div class="card">
+        <h3 class="card-title">Entity Relationships</h3>
+        <div class="mermaid">
+erDiagram
+    TENANT {
+        uuid id PK
+        string name
+        string domain
+        json settings
+        string plan
+        boolean is_active
+    }
+
+    USER {
+        uuid id PK
+        uuid tenant_id FK
+        string email
+        string password_hash
+        string name
+        string role
+        boolean is_active
+    }
+
+    PRODUCT {
+        uuid id PK
+        uuid tenant_id FK
+        uuid category_id FK
+        string name
+        string sku
+        decimal price
+        decimal cost
+        int stock_quantity
+        int low_stock_threshold
+        boolean is_active
+    }
+
+    ORDER {
+        uuid id PK
+        uuid tenant_id FK
+        uuid table_id FK
+        uuid user_id FK
+        string order_number
+        string status
+        decimal total_amount
+    }
+
+    ORDER_ITEM {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        int quantity
+        decimal unit_price
+    }
+
+    TRANSACTION {
+        uuid id PK
+        uuid tenant_id FK
+        uuid order_id FK
+        decimal amount
+        string payment_method
+        string status
+    }
+
+    STOCK_LOG {
+        uuid id PK
+        uuid tenant_id FK
+        uuid product_id FK
+        string type
+        int quantity
+        int balance_after
+    }
+
+    TENANT ||--o{ USER : "has"
+    TENANT ||--o{ PRODUCT : "has"
+    TENANT ||--o{ ORDER : "has"
+    TENANT ||--o{ TRANSACTION : "has"
+    TENANT ||--o{ STOCK_LOG : "has"
+    USER ||--o{ ORDER : "creates"
+    PRODUCT ||--o{ ORDER_ITEM : "sold in"
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    ORDER ||--o{ TRANSACTION : "has"
+    PRODUCT ||--o{ STOCK_LOG : "logged"
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>VentroPOS v1.0.0 &bull; Generated 2024</p>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      er: {
+        useMaxWidth: true
+      }
+    });
+  </script>
+</body>
+</html>
