@@ -3,7 +3,7 @@
 > **Version:** 1.0.0
 > **Status:** Development
 > **License:** MIT
-> **Last Updated:** 2024-10-02
+> **Last Updated:** 2026-10-02
 
 ---
 
@@ -307,7 +307,25 @@ src/backend/           # Fastify API server
 | Module | Files | Max Lines |
 |--------|-------|-----------|
 | Application (use cases) | 40+ | ~90 ln |
-| Infrastructure (repos) | 14 | ~207 ln |
+| Infrastructure (repos) | 15 | ~207 ln |
+
+### Audit Logging
+
+Audit logging for compliance and forensic tracking:
+
+```
+Audit Log Table: audit_logs
+- tenant_id, user_id, action, entity_type, entity_id
+- old_data, new_data (JSONB)
+- ip_address, user_agent
+- created_at
+```
+
+**Features:**
+- ✅ DB persistence with PostgreSQL
+- ✅ Structured logging to Pino
+- ✅ Non-blocking (logs errors but doesn't fail requests)
+- ✅ Multi-tenant isolation via RLS
 
 ---
 
@@ -360,9 +378,11 @@ src/backend/           # Fastify API server
 ```
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
-Tests: 95 passing ✅
+Tests: 120 passing ✅
 ESLint: Configured ✅
 Architecture: Split complete ✅
+Fastify: 5.x compatible ✅
+Audit Logging: Implemented ✅
 ```
 
 ---
@@ -391,6 +411,8 @@ npm start            # Production server
 npm test             # Run tests (120 passing)
 npm run lint         # ESLint check
 npm run test:coverage # Test coverage report
+npm run db:migrate  # Run database migrations
+npm run db:seed     # Seed demo data
 ```
 
 ### Environment Variables
@@ -532,6 +554,30 @@ Infrastructure Layer:
 - bcrypt 6.0.0 (vulnerability fix)
 - fastify 5.12.5 (DoS fix)
 - uuid 11.1.1 (buffer fix)
+
+### Code Audit Fixes (2026-10-02)
+
+**Performance Fixes:**
+- N+1 query fix in `CreateStockOpnameUseCase`: Use `findByIds()` batch query instead of sequential `findById()` calls
+- N+1 query fix in `GetStockOpnameUseCase`: Batch fetch products then map locally
+
+**New Feature: Audit Logging**
+- New table: `audit_logs` for compliance and forensic tracking
+- New repository: `PostgresAuditLogRepository` with create/findByTenant methods
+- Middleware integration: `createAuditLog()` persists to DB
+- Migration: `004_audit_logs.sql`
+
+**Bug Fixes:**
+- UserRepository `mapRow()`: Fixed snake_case to camelCase conversion
+- Fastify 5.x compatibility: Updated `@fastify/cors` to v10, `@fastify/swagger-ui` to v5
+
+**New Scripts:**
+- `npm run db:migrate` - Run all migrations
+- `npm run db:seed` - Seed demo data (owner@demo.com / owner123)
+
+**Test Updates:**
+- Added `findByIds` and `batchUpdateStock` mocks to stock tests
+- All 120 tests passing
 
 ---
 
