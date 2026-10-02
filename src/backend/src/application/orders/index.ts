@@ -102,13 +102,20 @@ export class CreateOrderUseCase {
       subtotal += totalPrice;
     }
 
-    // Calculate discount
+    // Calculate discount with validation
     let discountAmount = 0;
     if (input.applyDiscount) {
       if (input.applyDiscount.type === 'percentage') {
-        discountAmount = (subtotal * input.applyDiscount.value) / 100;
+        const percentage = input.applyDiscount.value;
+        if (percentage < 0 || percentage > 100) {
+          throw new BusinessRuleError('Discount percentage must be between 0 and 100');
+        }
+        discountAmount = (subtotal * percentage) / 100;
       } else {
         discountAmount = input.applyDiscount.value;
+        if (discountAmount < 0 || discountAmount > subtotal) {
+          throw new BusinessRuleError('Fixed discount cannot exceed subtotal');
+        }
       }
     }
 

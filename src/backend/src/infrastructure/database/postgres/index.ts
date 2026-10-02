@@ -36,10 +36,11 @@ export class PostgresConnection {
     return this.pool;
   }
 
-  // Set tenant context for RLS
-  async setTenantContext(tenantId: string): Promise<void> {
-    const client = this.pool.connect();
-    await (await client).query('SET LOCAL app.tenant_id = $1', [tenantId]);
+  // Set tenant context for RLS (returns client - caller must release)
+  async setTenantContext(tenantId: string): Promise<pg.PoolClient> {
+    const client = await this.pool.connect();
+    await client.query('SET LOCAL app.tenant_id = $1', [tenantId]);
+    return client; // Caller is responsible for releasing
   }
 
   async query<T extends pg.QueryResultRow = pg.QueryResultRow>(text: string, params?: unknown[]): Promise<pg.QueryResult<T>> {

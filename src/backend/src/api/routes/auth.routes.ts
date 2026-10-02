@@ -160,6 +160,9 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   // ============== REFRESH TOKEN ==============
   fastify.post('/refresh', {
     schema: refreshTokenSchema,
+    config: {
+      rateLimit: { max: 10, timeWindow: '1 minute' },
+    },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { refreshToken } = request.body as { refreshToken: string };
 

@@ -5,7 +5,7 @@
  * NOTE: For production, use Redis for token storage to support horizontal scaling
  */
 
-import { randomBytes } from 'crypto';
+import { randomBytes, createHash } from 'crypto';
 
 export interface RefreshToken {
   id: string;
@@ -20,6 +20,30 @@ export interface RefreshToken {
 
 // In-memory store for refresh tokens (use Redis in production)
 const tokenStore = new Map<string, RefreshToken>();
+
+// Cleanup interval handle
+let cleanupInterval: NodeJS.Timeout | null = null;
+
+/**
+ * Start automatic token cleanup (call once at app startup)
+ */
+export function startTokenCleanup(): void {
+  if (cleanupInterval) return;
+  cleanupInterval = setInterval(() => {
+    cleanupExpiredTokens();
+  }, 60 * 60 * 1000); // Every hour
+  cleanupExpiredTokens(); // Initial cleanup
+}
+
+/**
+ * Stop automatic token cleanup
+ */
+export function stopTokenCleanup(): void {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+}
 
 /**
  * Generate a new refresh token
@@ -56,6 +80,8 @@ export function generateRefreshToken(userId: string, tenantId: string): {
  */
 export function consumeRefreshToken(token: string): RefreshToken | null {
   const tokenHash = hashToken(token);
+
+  // Thread-safe read
   const refreshToken = tokenStore.get(tokenHash);
 
   if (!refreshToken) {
@@ -94,8 +120,17 @@ export function revokeRefreshToken(token: string): void {
  * @param userId - User ID
  */
 export function revokeAllUserTokens(userId: string): void {
-  for (const token of tokenStore.values()) {
+  // Collect keys first to avoid concurrent modification
+  const keysToRevoke: string[] = [];
+  for (const [hash, token] of tokenStore.entries()) {
     if (token.userId === userId && !token.revokedAt) {
+      keysToRevoke.push(hash);
+    }
+  }
+  // Then revoke
+  for (const hash of keysToRevoke) {
+    const token = tokenStore.get(hash);
+    if (token) {
       token.revokedAt = new Date();
     }
   }
@@ -103,6 +138,7 @@ export function revokeAllUserTokens(userId: string): void {
 
 /**
  * Clean up expired tokens (call periodically)
+ * @returns Number of tokens cleaned
  */
 export function cleanupExpiredTokens(): number {
   const now = new Date();
@@ -124,6 +160,12 @@ export function cleanupExpiredTokens(): number {
  * @returns SHA256 hash
  */
 function hashToken(token: string): string {
-  const { createHash } = require('crypto');
   return createHash('sha256').update(token).digest('hex');
+}
+
+/**
+ * Get token store size (for monitoring)
+ */
+export function getTokenStoreSize(): number {
+  return tokenStore.size;
 }

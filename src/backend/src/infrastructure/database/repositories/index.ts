@@ -431,6 +431,7 @@ export class PostgresTableRepository extends BaseRepository implements ITableRep
       `UPDATE restaurant_tables SET status = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 RETURNING *`,
       [status, id, tenantId]
     );
+    if (!rows[0]) throw new DatabaseError('Table not found');
     return rows[0];
   }
 
@@ -851,6 +852,7 @@ export class PostgresOrderRepository extends BaseRepository implements IOrderRep
       values
     );
 
+    if (!rows[0]) throw new DatabaseError('Order not found');
     return rows[0];
   }
 
@@ -859,6 +861,7 @@ export class PostgresOrderRepository extends BaseRepository implements IOrderRep
       `UPDATE orders SET status = $1, updated_at = NOW(), paid_at = CASE WHEN $1 = 'paid' THEN NOW() ELSE paid_at END WHERE id = $2 AND tenant_id = $3 RETURNING *`,
       [status, id, tenantId]
     );
+    if (!rows[0]) throw new DatabaseError('Order not found');
     return rows[0];
   }
 
@@ -1347,6 +1350,16 @@ export class PostgresStockOpnameRepository extends BaseRepository implements ISt
     const results: StockOpnameItem[] = [];
 
     for (const item of items) {
+      // First get the system quantity to calculate variance
+      const existing = await this.query<{
+        system_quantity: number;
+      }>(
+        `SELECT system_quantity FROM stock_opname_items WHERE opname_id = $1 AND product_id = $2`,
+        [opnameId, item.productId]
+      );
+      const systemQuantity = existing[0]?.system_quantity ?? 0;
+      const variance = item.actualQuantity - systemQuantity;
+
       const rows = await this.query<{
         id: string;
         opname_id: string;
@@ -1360,7 +1373,7 @@ export class PostgresStockOpnameRepository extends BaseRepository implements ISt
          SET actual_quantity = $1, variance = $2, notes = $3
          WHERE opname_id = $4 AND product_id = $5
          RETURNING *`,
-        [item.actualQuantity, item.actualQuantity, item.notes, opnameId, item.productId]
+        [item.actualQuantity, variance, item.notes, opnameId, item.productId]
       );
 
       if (rows[0]) {
