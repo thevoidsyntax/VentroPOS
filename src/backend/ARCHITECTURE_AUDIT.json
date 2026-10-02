@@ -1,0 +1,252 @@
+{
+  "solidViolations": [
+    {
+      "type": "SRP",
+      "file": "src/api/routes/order.routes.ts",
+      "context": "Route file mixes routing (lines 46-274), date parsing validation (lines 72-85), error handling (lines 121-128), AND use case instantiation (lines 33-43). Has ~275 lines handling multiple responsibilities."
+    },
+    {
+      "type": "SRP",
+      "file": "src/api/routes/stock.routes.ts",
+      "context": "Route file (~493 lines) mixes: inline schema definitions (lines 24-135), 12 use case instantiations (lines 138-149), routing, validation, and error handling. Violates SRP by combining schema definition with routing logic."
+    },
+    {
+      "type": "SRP",
+      "file": "src/api/routes/product.routes.ts",
+      "context": "Combines product AND category routes in one file. Instantiates 9 use cases (lines 30-39). Handles both entities in 235 lines with no clear separation."
+    },
+    {
+      "type": "SRP",
+      "file": "src/application/reports/sales-summary.ts",
+      "context": "Function directly accepts FastifyRequest/FastifyReply types from API layer. Mixes HTTP concerns (request parsing) with business logic (report aggregation). Should be a use case class receiving DTOs."
+    },
+    {
+      "type": "OCP",
+      "file": "src/application/orders/update-status.ts",
+      "context": "Order status transitions are hardcoded in private map (lines 9-18). Adding new status requires modifying this class. Should use configuration or strategy pattern."
+    },
+    {
+      "type": "DIP",
+      "file": "src/application/reports/sales-summary.ts",
+      "context": "Line 5: imports reportRepository directly from infrastructure container, bypassing repository interfaces. Depends on concrete implementation instead of abstraction."
+    },
+    {
+      "type": "ISP",
+      "file": "src/domain/repositories/index.ts",
+      "context": "Interface IProductRepository has 10 methods, including batchUpdateStock which is only needed by checkout/void use cases. Clients don't need all methods."
+    }
+  ],
+  "godClasses": [
+    {
+      "file": "src/api/routes/stock.routes.ts",
+      "responsibilities": [
+        "Inline JSON schema definitions for 8+ endpoints",
+        "12 use case instantiations",
+        "Date parsing/validation logic",
+        "Error handling patterns",
+        "Route registration for 13+ endpoints"
+      ],
+      "suggestion": "Split into: schema file, use case factory, and separate route modules per resource (overview, alerts, history, opname)"
+    },
+    {
+      "file": "src/api/routes/order.routes.ts",
+      "responsibilities": [
+        "6 use case instantiations",
+        "Date range parsing",
+        "Query parameter transformation",
+        "HTTP response formatting",
+        "Error handling boilerplate"
+      ],
+      "suggestion": "Extract date parsing to middleware, use case factory pattern, response helper"
+    },
+    {
+      "file": "src/app.ts",
+      "responsibilities": [
+        "Fastify instance creation",
+        "Plugin registration (CORS, JWT, rate-limit, swagger)",
+        "Error handler definition",
+        "Health check endpoints",
+        "Route registration",
+        "Graceful shutdown logic"
+      ],
+      "suggestion": "Extract plugins to separate modules, health checks to dedicated file, use factory functions"
+    },
+    {
+      "file": "src/application/orders/checkout.ts",
+      "responsibilities": [
+        "Idempotency key handling",
+        "Order validation",
+        "Payment calculation",
+        "Stock deduction logic",
+        "Stock log creation",
+        "Order status update",
+        "Response caching"
+      ],
+      "suggestion": "Extract stock management to domain service, payment calculation to value object"
+    }
+  ],
+  "shotgunSurgery": [
+    {
+      "pattern": "Adding new OrderStatus",
+      "files": [
+        "src/domain/entities/index.ts (line 5: OrderStatus type)",
+        "src/application/orders/update-status.ts (lines 9-18: transitions map)",
+        "src/application/orders/create.ts (likely validation)",
+        "src/api/routes/order.routes.ts (status enum in schema)",
+        "Test files"
+      ]
+    },
+    {
+      "pattern": "Adding new StockOpnameStatus",
+      "files": [
+        "src/domain/entities/index.ts (line 9: StockOpnameStatus type)",
+        "src/application/stock/submit-opname.ts (lines 29-35: status checks)",
+        "src/application/stock/complete-opname.ts (line 24: status check)",
+        "src/application/stock/cancel-opname.ts (status check)",
+        "src/api/routes/stock.routes.ts (line 131: enum in schema)"
+      ]
+    },
+    {
+      "pattern": "Multi-tenancy changes",
+      "files": [
+        "All repository files (tenantId parameter in every method)",
+        "src/infrastructure/database/repositories/container.ts",
+        "src/api/middleware/index.ts (tenant context)",
+        "All use cases (tenantId parameter)"
+      ]
+    },
+    {
+      "pattern": "Stock deduction/restore logic",
+      "files": [
+        "src/application/orders/checkout.ts (lines 72-100)",
+        "src/application/orders/void.ts (lines 22-50)",
+        "src/application/stock/receive.ts",
+        "src/application/stock/submit-opname.ts (lines 40-63)",
+        "src/infrastructure/database/repositories/product.ts (batchUpdateStock)"
+      ]
+    }
+  ],
+  "layerViolations": [
+    {
+      "file": "src/application/reports/sales-summary.ts",
+      "violation": "Application layer imports infrastructure directly: imports reportRepository from '../../infrastructure/database/repositories/container.js'. Should depend only on domain interfaces."
+    },
+    {
+      "file": "src/api/middleware/index.ts",
+      "violation": "API layer imports infrastructure: 'import { auditLogRepository } from \"../../infrastructure/database/repositories/container.js\"' at line 87. Middleware should not know about infrastructure details."
+    },
+    {
+      "file": "src/application/orders/checkout.ts",
+      "violation": "Application layer contains business logic about stock management. Stock operations (batchUpdateStock, stockLog creation) should be in domain service or infrastructure layer with domain events."
+    },
+    {
+      "file": "src/domain/entities/index.ts",
+      "violation": "Entities are plain TypeScript interfaces with no behavior. This is anemic domain model - business logic scattered in use cases. Consider rich domain objects for complex entities like Order."
+    },
+    {
+      "file": "src/infrastructure/database/repositories/base.ts",
+      "violation": "BaseRepository uses dynamic import 'protected db = () => import(...).then(m => m.getDb())'. This lazy loading pattern leaks infrastructure concerns and makes testing difficult."
+    },
+    {
+      "file": "src/application/orders/create.ts",
+      "violation": "Application layer accesses config directly: 'import { config } from \"../../shared/config/index.js\"' at line 9. TAX_RATE should be injected or come from domain."
+    },
+    {
+      "file": "src/api/routes/*.ts",
+      "violation": "All route files directly instantiate use cases: 'new CreateOrderUseCase(...)' at line 33 of order.routes.ts. This violates DI principle - use cases should be provided via constructor or factory."
+    }
+  ],
+  "additionalObservations": {
+    "featureEnvy": [
+      {
+        "location": "src/api/routes/*.ts",
+        "description": "Routes access request.tenantId!, request.userId! directly. Should use TenantContext abstraction."
+      },
+      {
+        "location": "src/application/orders/checkout.ts",
+        "description": "CheckoutUseCase manually builds stockUpdates array and calls batchUpdateStock. This logic (productId + quantity calculation) could be extracted to domain."
+      }
+    ],
+    "duplicatedLogic": [
+      {
+        "pattern": "Date parsing validation",
+        "files": [
+          "src/api/routes/order.routes.ts (lines 72-85)",
+          "src/api/routes/stock.routes.ts (lines 242-259, 296-313)"
+        ],
+        "description": "Same date validation logic repeated in multiple route files"
+      },
+      {
+        "pattern": "Stock update loop pattern",
+        "files": [
+          "src/application/orders/checkout.ts (lines 77-86)",
+          "src/application/orders/void.ts (lines 27-35)"
+        ],
+        "description": "Identical stock update loop in checkout and void operations"
+      },
+      {
+        "pattern": "Error handling boilerplate",
+        "files": ["All route files"],
+        "description": "Every route handler repeats 'if (error instanceof AppError) return reply.status(...).send(...)' pattern"
+      }
+    ],
+    "missingAbstractions": [
+      {
+        "issue": "No TenantContext abstraction",
+        "files": ["All use cases and routes"],
+        "description": "tenantId/userId passed as raw strings through every layer"
+      },
+      {
+        "issue": "No StockManagement domain service",
+        "files": ["checkout.ts", "void.ts", "submit-opname.ts"],
+        "description": "Stock operations duplicated across multiple use cases"
+      },
+      {
+        "issue": "No Transaction domain service",
+        "files": ["checkout.ts"],
+        "description": "Transaction creation logic embedded in checkout use case"
+      }
+    ],
+    "testabilityConcerns": [
+      {
+        "file": "src/api/routes/*.ts",
+        "issue": "Routes instantiate use cases inline, cannot mock dependencies for testing"
+      },
+      {
+        "file": "src/application/reports/*.ts",
+        "issue": "Functions accept Fastify types, requires mocking entire Fastify request"
+      },
+      {
+        "file": "src/infrastructure/database/repositories/base.ts",
+        "issue": "Dynamic import makes synchronous mocking impossible"
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "recommendation": "Extract inline schemas from stock.routes.ts into dedicated schema files",
+      "reason": "stock.routes.ts at 493 lines is unmaintainable"
+    },
+    {
+      "priority": "HIGH",
+      "recommendation": "Create TenantContext abstraction injected into use cases",
+      "reason": "tenantId passed manually through every method signature"
+    },
+    {
+      "priority": "MEDIUM",
+      "recommendation": "Extract stock management to StockService domain service",
+      "reason": "Stock update logic duplicated in checkout, void, and opname"
+    },
+    {
+      "priority": "MEDIUM",
+      "recommendation": "Create use case factory or DI container",
+      "reason": "Routes manually instantiate use cases with repository dependencies"
+    },
+    {
+      "priority": "LOW",
+      "recommendation": "Consider rich domain objects for Order entity",
+      "reason": "Order business logic scattered across 4+ use case files"
+    }
+  ]
+}

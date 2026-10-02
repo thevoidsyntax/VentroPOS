@@ -1,0 +1,20 @@
+{
+  "orphanedFiles": [
+    "infrastructure/auth/refreshToken.ts"
+  ],
+  "deepNesting": [],
+  "largeFiles": [
+    {"path": "api/routes/stock.routes.ts", "lines": 492},
+    {"path": "api/schemas/index.ts", "lines": 293},
+    {"path": "api/routes/order.routes.ts", "lines": 275},
+    {"path": "infrastructure/database/repositories/report.ts", "lines": 270},
+    {"path": "domain/entities/index.ts", "lines": 241},
+    {"path": "api/routes/modifier.routes.ts", "lines": 239}
+  ],
+  "namingIssues": [
+    "infrastructure/auth/refreshToken.ts uses camelCase while most files use kebab-case",
+    "application/reports has mix of naming patterns: category-breakdown, product-performance, sales-summary, staff-performance (inconsistent compound naming)",
+    "application/stock uses plural 'opnames' in list-opnames but singular 'opname' in get-opname (inconsistent pluralization)",
+    "application/stock has 'idempotency-key' as kebab but repository in same directory is 'idempotency-key.ts' - compound naming inconsistency with other repos"
+  ]
+}

@@ -12,6 +12,7 @@ import { config } from './shared/config/index.js';
 import { AppError } from './shared/errors/index.js';
 
 import { authRoutes } from './api/routes/auth.routes.js';
+import { categoryRoutes } from './api/routes/category.routes.js';
 import { productRoutes } from './api/routes/product.routes.js';
 import { orderRoutes } from './api/routes/order.routes.js';
 import { userRoutes } from './api/routes/user.routes.js';
@@ -88,6 +89,17 @@ export async function buildApp() {
   app.setErrorHandler((error: Error | unknown, _request, reply) => {
     app.log.error(error);
 
+    // JSON Parse errors
+    if (error instanceof SyntaxError && 'body' in error) {
+      return reply.status(400).send({
+        success: false,
+        error: {
+          code: 'INVALID_JSON',
+          message: 'Malformed JSON in request body',
+        },
+      });
+    }
+
     // Zod validation errors (FastifyError has validation property)
     if (typeof error === 'object' && error !== null && 'validation' in error) {
       const validationError = error as { validation: unknown };
@@ -153,6 +165,7 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: '/api/v1/auth' });
 
   // Protected routes (require auth)
+  await app.register(categoryRoutes, { prefix: '/api/v1/categories' });
   await app.register(userRoutes, { prefix: '/api/v1/users' });
   await app.register(productRoutes, { prefix: '/api/v1/products' });
   await app.register(orderRoutes, { prefix: '/api/v1/orders' });
