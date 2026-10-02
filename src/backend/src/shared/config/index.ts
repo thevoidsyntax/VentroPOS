@@ -3,17 +3,14 @@
 
 import { z } from 'zod';
 import { config as dotenv } from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-// Get the directory of this config file
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { resolve } from 'path';
 
 // Load environment-specific .env file
 const envName = process.env.NODE_ENV || 'development';
-const envFile = envName === 'test' ? '.env.test' : envName === 'production' ? '.env' : '.env';
-dotenv({ path: join(__dirname, '..', '..', '..', '..', envFile) });
+const envFile = envName === 'test' ? '.env.test' : '.env';
+
+// Resolve path relative to project root (backend folder)
+dotenv({ path: resolve(__dirname, '..', '..', envFile) });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -51,16 +48,17 @@ const envSchema = z.object({
 
 // Simple startup logger (runs before app logger is available)
 const isTest = process.env.NODE_ENV === 'test';
+const isCI = process.env.CI === 'true';
 const startupLogger = {
   error: (msg: string, ...args: unknown[]) => {
     const timestamp = new Date().toISOString();
     console.error(`[${timestamp}] ERROR: ${msg}`, ...args);
-    if (!isTest) process.exit(1);
+    if (!isTest && !isCI) process.exit(1);
   },
   fatal: (msg: string, ...args: unknown[]) => {
     const timestamp = new Date().toISOString();
     console.error(`[${timestamp}] FATAL: ${msg}`, ...args);
-    if (!isTest) process.exit(1);
+    if (!isTest && !isCI) process.exit(1);
   },
 };
 

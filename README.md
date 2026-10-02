@@ -45,7 +45,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 |-------|--------|-------------|
 | 1 | ✅ Done | Foundation, Database, Auth |
 | 2 | ✅ Done | Core POS, Cart, Checkout |
-| 3 | ⬜ Next | Inventory, Stock Management |
+| 3 | ✅ Done | Inventory, Stock Management |
 | 4 | ⬜ Todo | Reporting, Dashboard |
 | 5 | ⬜ Todo | Hardware Integration |
 | 6 | ⬜ Todo | Launch, Polish |
@@ -93,7 +93,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 
 ---
 
-### Phase 3: Inventory (In Progress)
+### Phase 3: Inventory ✅ Done
 
 **Objectives:**
 - [x] Stock level tracking per product
@@ -101,8 +101,8 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 - [x] Stock adjustment (manual correction)
 - [x] Stock history/log
 - [x] Stock overview API
-- [ ] Restock management
-- [ ] Stock opname support
+- [x] Restock management
+- [x] Stock opname support
 
 **Deliverables:**
 ```
@@ -110,8 +110,17 @@ Stock APIs:
 GET  /api/v1/stock/overview      - Stock overview ✅
 GET  /api/v1/stock/alerts        - Low stock alerts ✅
 POST /api/v1/stock/adjust        - Manual adjustment ✅
-POST /api/v1/stock/receive        - Receive/restock ✅
+POST /api/v1/stock/receive       - Receive/restock ✅
 GET  /api/v1/stock/history       - Stock history ✅
+
+Stock Opname APIs:
+GET  /api/v1/stock/opnames       - List stock opnames ✅
+POST /api/v1/stock/opnames       - Create stock opname ✅
+GET  /api/v1/stock/opnames/:id   - Get opname details ✅
+POST /api/v1/stock/opnames/:id/counts         - Record count ✅
+POST /api/v1/stock/opnames/:id/counts/batch   - Batch record ✅
+POST /api/v1/stock/opnames/:id/submit          - Submit & apply ✅
+POST /api/v1/stock/opnames/:id/cancel          - Cancel opname ✅
 ```
 
 **Phase Gate:**
@@ -180,7 +189,8 @@ http://localhost:3000/api/v1
 | Tables | CRUD `/tables` |
 | Orders | CRUD `/orders` + `/orders/checkout` |
 | Modifiers | CRUD `/modifiers/*` |
-| Stock | CRUD `/stock/*` (Phase 3) |
+| Stock | CRUD `/stock/*` |
+| Stock Opname | CRUD `/stock/opnames/*` |
 
 ### Response Format
 
@@ -263,7 +273,7 @@ src/backend/           # Fastify API server
 |-------|--------|-------|
 | ESLint | ✅ Configured | TypeScript + Prettier support |
 | TypeScript | ✅ Strict | No `any` types |
-| Tests | ✅ 59 passing | Vitest unit tests |
+| Tests | ✅ 83 passing | Vitest unit tests |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 
 ### Performance Optimizations
@@ -295,7 +305,7 @@ src/backend/           # Fastify API server
 ```
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
-Tests: 59 passing ✅
+Tests: 83 passing ✅
 ESLint: Configured ✅
 ```
 
@@ -344,6 +354,21 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### Phase 3: Inventory
+- Stock overview API (`GET /stock/overview`)
+- Low stock alerts API (`GET /stock/alerts`)
+- Manual stock adjustment API (`POST /stock/adjust`)
+- Restock/receive API (`POST /stock/receive`)
+- Stock history API (`GET /stock/history`)
+- Stock opname (stocktake) feature:
+  - Create stock opname session
+  - Record physical counts per item
+  - Batch record counts
+  - Submit and apply adjustments
+  - Cancel stock opname
+- 24 new unit tests for stock use cases
+- 83 total unit tests passing
 
 ### Audit Fixes Applied
 - ESLint configuration with TypeScript support

@@ -18,4 +18,7 @@ export default defineConfig({
     },
     include: ['tests/**/*.test.ts'],
   },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('test'),
+  },
 });

@@ -1,7 +1,7 @@
 // Repository Interfaces - Domain Layer
 // These define contracts, implementations are in Infrastructure
 
-import type { Tenant, User, Category, Product, Table, Order, Transaction, StockLog, AuditLog, ModifierGroup, Modifier } from '../entities/index.js';
+import type { Tenant, User, Category, Product, Table, Order, Transaction, StockLog, AuditLog, ModifierGroup, Modifier, StockOpname, StockOpnameItem, StockOpnameStatus } from '../entities/index.js';
 
 export interface ITenantRepository {
   create(tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Tenant>;
@@ -115,6 +115,25 @@ export interface StockLogFilters {
   type?: StockLog['type'];
   fromDate?: Date;
   toDate?: Date;
+}
+
+// ============== STOCK OPNAME REPOSITORY ==============
+export interface StockOpnameFilters {
+  status?: StockOpnameStatus;
+  fromDate?: Date;
+  toDate?: Date;
+}
+
+export interface IStockOpnameRepository {
+  create(tenantId: string, data: Omit<StockOpname, 'id' | 'createdAt'>): Promise<StockOpname>;
+  createItem(tenantId: string, data: Omit<StockOpnameItem, 'id'>): Promise<StockOpnameItem>;
+  findById(tenantId: string, id: string): Promise<StockOpname | null>;
+  findAll(tenantId: string, filters?: StockOpnameFilters): Promise<StockOpname[]>;
+  update(tenantId: string, id: string, data: Partial<StockOpname>): Promise<StockOpname>;
+  updateItem(tenantId: string, id: string, data: Partial<StockOpnameItem>): Promise<StockOpnameItem>;
+  getItems(tenantId: string, opnameId: string): Promise<StockOpnameItem[]>;
+  updateItemBatch(tenantId: string, opnameId: string, items: Array<{productId: string; actualQuantity: number; notes?: string}>): Promise<StockOpnameItem[]>;
+  delete(tenantId: string, id: string): Promise<void>;
 }
 
 export interface IAuditLogRepository {

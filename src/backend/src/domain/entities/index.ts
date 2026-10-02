@@ -6,6 +6,7 @@ export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'ser
 export type PaymentMethod = 'cash' | 'qris' | 'debit' | 'credit';
 export type TableStatus = 'available' | 'occupied' | 'reserved' | 'maintenance';
 export type StockOperationType = 'sale' | 'restock' | 'adjustment' | 'return' | 'void';
+export type StockOpnameStatus = 'draft' | 'in_progress' | 'completed' | 'cancelled';
 
 // ============== TENANT ==============
 export interface Tenant {
@@ -188,6 +189,29 @@ export interface StockLog {
   notes?: string;
   userId?: string;
   createdAt: Date;
+}
+
+// ============== STOCK OPNAME ==============
+export interface StockOpnameItem {
+  id: string;
+  opnameId: string;
+  productId: string;
+  productName?: string;
+  systemQuantity: number;
+  actualQuantity: number;
+  variance: number;
+  notes?: string;
+}
+
+export interface StockOpname {
+  id: string;
+  tenantId: string;
+  userId: string;
+  status: StockOpnameStatus;
+  items: StockOpnameItem[];
+  notes?: string;
+  createdAt: Date;
+  completedAt?: Date;
 }
 
 // ============== AUDIT ==============
