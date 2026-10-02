@@ -433,8 +433,8 @@ export class GetOrdersUseCase {
     orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     // Pagination
-    const page = input.page ?? 1;
-    const limit = input.limit ?? 50;
+    const page = Math.max(1, input.page ?? 1);
+    const limit = Math.max(1, input.limit ?? 50);
     const start = (page - 1) * limit;
     const paginatedOrders = orders.slice(start, start + limit);
 

@@ -44,6 +44,8 @@ export async function buildApp() {
   // JWT
   await app.register(jwt, {
     secret: config.jwt.secret,
+    sign: { algorithm: 'HS256' },
+    verify: { algorithms: ['HS256'] },
   });
 
   // Rate Limiting

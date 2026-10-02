@@ -373,6 +373,7 @@ export class PostgresCategoryRepository extends BaseRepository implements ICateg
       values
     );
 
+    if (!rows[0]) throw new DatabaseError('Category not found');
     return rows[0];
   }
 

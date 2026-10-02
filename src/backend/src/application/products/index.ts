@@ -80,9 +80,9 @@ export class GetProductsUseCase {
       search: input.search,
     });
 
-    // Simple pagination
-    const page = input.page ?? 1;
-    const limit = input.limit ?? 50;
+    // Safe pagination
+    const page = Math.max(1, input.page ?? 1);
+    const limit = Math.max(1, input.limit ?? 50);
     const start = (page - 1) * limit;
     const paginatedProducts = products.slice(start, start + limit);
 
@@ -166,7 +166,7 @@ export class DeleteProductUseCase {
   }
 }
 
-// ============== CATEGORY USE CASES ==============
+// ============== CATEGORY USE CASES =============
 
 export interface CreateCategoryInput {
   name: string;
