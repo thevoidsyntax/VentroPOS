@@ -355,6 +355,17 @@ LOG_LEVEL=info         # Pino log level
 
 ## Changelog
 
+### Security & Correctness Fixes
+- JWT secret fail-fast in production (no fallback)
+- Rate limit on refresh token endpoint (10/min)
+- Discount percentage validation (0-100% range)
+- Pagination safe guards (Math.max(1, ...) for page/limit)
+- Null checks added to all repository update methods
+- Variance calculation fix in stock opname
+- JWT algorithm explicitly set to HS256
+- Token store race condition fixes
+- Auto token cleanup interval for memory management
+
 ### Phase 3: Inventory
 - Stock overview API (`GET /stock/overview`)
 - Low stock alerts API (`GET /stock/alerts`)
