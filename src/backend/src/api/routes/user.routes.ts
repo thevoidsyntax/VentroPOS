@@ -1,13 +1,11 @@
 // Users Routes - API Endpoints
-// Simplified DDD: Routes delegate to Application Services
-
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   CreateUserUseCase,
   GetUsersUseCase,
   GetUserUseCase,
   UpdateUserUseCase,
-  UpdatePasswordUseCase,
+  ChangePasswordUseCase,
   DeactivateUserUseCase,
   AdminResetPasswordUseCase,
 } from '../../application/users/index.js';
@@ -21,7 +19,7 @@ export async function userRoutes(fastify: FastifyInstance): Promise<void> {
   const getUsersUseCase = new GetUsersUseCase(userRepository);
   const getUserUseCase = new GetUserUseCase(userRepository);
   const updateUserUseCase = new UpdateUserUseCase(userRepository);
-  const updatePasswordUseCase = new UpdatePasswordUseCase(userRepository);
+  const changePasswordUseCase = new ChangePasswordUseCase(userRepository);
   const deactivateUserUseCase = new DeactivateUserUseCase(userRepository);
   const adminResetPasswordUseCase = new AdminResetPasswordUseCase(userRepository);
 
@@ -100,8 +98,8 @@ export async function userRoutes(fastify: FastifyInstance): Promise<void> {
     try {
       const user = await updateUserUseCase.execute(
         request.tenantId!,
-        request.userRole!,
         id,
+        request.userRole!,
         body
       );
       return reply.send({ success: true, data: user });
@@ -147,7 +145,7 @@ export async function userRoutes(fastify: FastifyInstance): Promise<void> {
     };
 
     try {
-      await updatePasswordUseCase.execute(
+      await changePasswordUseCase.execute(
         request.tenantId!,
         request.userId!,
         body

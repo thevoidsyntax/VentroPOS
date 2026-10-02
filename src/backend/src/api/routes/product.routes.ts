@@ -1,6 +1,4 @@
 // Products Routes - API Endpoints
-// Simplified DDD: Routes delegate to Application Services
-
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   CreateProductUseCase,
@@ -8,11 +6,13 @@ import {
   GetProductUseCase,
   UpdateProductUseCase,
   DeleteProductUseCase,
+} from '../../application/products/index.js';
+import {
   CreateCategoryUseCase,
   GetCategoriesUseCase,
   UpdateCategoryUseCase,
   DeleteCategoryUseCase,
-} from '../../application/products/index.js';
+} from '../../application/categories/index.js';
 import { productRepository, categoryRepository } from '../../infrastructure/database/repositories/container.js';
 import {
   createProductSchema,
@@ -30,7 +30,7 @@ export async function productRoutes(fastify: FastifyInstance): Promise<void> {
   const createProductUseCase = new CreateProductUseCase(productRepository, categoryRepository);
   const getProductsUseCase = new GetProductsUseCase(productRepository);
   const getProductUseCase = new GetProductUseCase(productRepository);
-  const updateProductUseCase = new UpdateProductUseCase(productRepository);
+  const updateProductUseCase = new UpdateProductUseCase(productRepository, categoryRepository);
   const deleteProductUseCase = new DeleteProductUseCase(productRepository);
 
   const createCategoryUseCase = new CreateCategoryUseCase(categoryRepository);
