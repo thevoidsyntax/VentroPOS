@@ -20,7 +20,7 @@ export class CreateStockOpnameUseCase {
     input: CreateStockOpnameInput = {}
   ): Promise<{ opname: StockOpname; items: StockOpnameItem[] }> {
     const products = input.productIds?.length
-      ? await Promise.all(input.productIds.map(id => this.productRepo.findById(tenantId, id)))
+      ? await this.productRepo.findByIds(tenantId, input.productIds)
       : await this.productRepo.findAll(tenantId, { isActive: true });
 
     const validProducts = products.filter((p): p is Product => p !== null);

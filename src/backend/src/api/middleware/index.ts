@@ -84,6 +84,8 @@ export async function tenantContextMiddleware(
 }
 
 // ============== AUDIT LOGGING ==============
+import { auditLogRepository } from '../../infrastructure/database/repositories/container.js';
+
 export interface AuditLogData {
   action: string;
   entityType: string;
@@ -96,13 +98,8 @@ export async function createAuditLog(
   request: FastifyRequest,
   data: AuditLogData
 ): Promise<void> {
-  // TODO: Persist to database via IAuditLogRepository
-  // Implementation requires:
-  // 1. Inject IAuditLogRepository into middleware context
-  // 2. Use transaction to ensure atomic write
-  // 3. Add correlation ID for distributed tracing
   const auditEntry = {
-    tenantId: request.tenantId,
+    tenantId: request.tenantId!,
     userId: request.userId,
     action: data.action,
     entityType: data.entityType,
@@ -111,10 +108,16 @@ export async function createAuditLog(
     newData: data.newData,
     ipAddress: request.ip,
     userAgent: request.headers['user-agent'],
-    createdAt: new Date().toISOString(),
   };
 
-  // Structured logging via app.log (Pino) instead of console.log
-  // Use app.log.info({ audit: auditEntry }, 'AUDIT') in route handlers
-  void auditEntry; // Acknowledge unused (will be used when persisting to DB)
+  try {
+    // Persist audit log to database
+    await auditLogRepository.create(auditEntry);
+  } catch (error) {
+    // Log but don't fail the request if audit persistence fails
+    request.log.error({ err: error, audit: auditEntry }, 'Failed to persist audit log');
+  }
+
+  // Also log to structured logger for real-time monitoring
+  request.log.info({ audit: auditEntry }, `AUDIT: ${data.action} on ${data.entityType}`);
 }

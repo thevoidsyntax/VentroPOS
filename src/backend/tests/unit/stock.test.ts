@@ -73,10 +73,12 @@ describe('GetStockAlertsUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
     useCase = new GetStockAlertsUseCase(mockProductRepo);
@@ -131,10 +133,12 @@ describe('ReceiveStockUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -235,10 +239,12 @@ describe('AdjustStockUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -305,10 +311,12 @@ describe('GetStockOverviewUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
     useCase = new GetStockOverviewUseCase(mockProductRepo);
@@ -357,10 +365,12 @@ describe('CreateStockOpnameUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -408,7 +418,7 @@ describe('CreateStockOpnameUseCase', () => {
   });
 
   it('should create stock opname with selected products only', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProducts[0]);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([mockProducts[0]]);
     vi.mocked(mockStockOpnameRepo.create).mockResolvedValue({
       id: 'opname-1',
       tenantId: 'tenant-1',
@@ -436,10 +446,10 @@ describe('CreateStockOpnameUseCase', () => {
 
   it('should throw BusinessRuleError when no products found', async () => {
     vi.mocked(mockProductRepo.findAll).mockResolvedValue([]);
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(null);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([]);
 
     await expect(
-      useCase.execute('tenant-1', 'user-1', {})
+      useCase.execute('tenant-1', 'user-1', { productIds: ['non-existent'] })
     ).rejects.toThrow(BusinessRuleError);
   });
 });
@@ -527,10 +537,12 @@ describe('SubmitStockOpnameUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -698,10 +710,12 @@ describe('GetStockOpnameUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -732,7 +746,7 @@ describe('GetStockOpnameUseCase', () => {
     vi.mocked(mockStockOpnameRepo.getItems).mockResolvedValue([
       { id: 'item-1', opnameId: 'opname-1', productId: 'prod-1', systemQuantity: 10, actualQuantity: 8, variance: -2 },
     ]);
-    vi.mocked(mockProductRepo.findById).mockResolvedValue({
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([{
       id: 'prod-1',
       tenantId: 'tenant-1',
       name: 'Coffee',
@@ -745,7 +759,7 @@ describe('GetStockOpnameUseCase', () => {
       modifierGroupIds: [],
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    }]);
 
     const result = await useCase.execute('tenant-1', 'opname-1');
 

@@ -21,15 +21,15 @@ export class GetStockOpnameUseCase {
 
     const items = await this.stockOpnameRepo.getItems(tenantId, opnameId);
 
-    const enrichedItems = await Promise.all(
-      items.map(async item => {
-        const product = await this.productRepo.findById(tenantId, item.productId);
-        return {
-          ...item,
-          productName: product?.name || item.productName,
-        };
-      })
-    );
+    // Batch fetch all products in single query, then map locally
+    const productIds = items.map(i => i.productId);
+    const products = await this.productRepo.findByIds(tenantId, productIds);
+    const productMap = new Map(products.map(p => [p.id, p]));
+
+    const enrichedItems = items.map(item => ({
+      ...item,
+      productName: productMap.get(item.productId)?.name || item.productName,
+    }));
 
     return { opname, items: enrichedItems };
   }

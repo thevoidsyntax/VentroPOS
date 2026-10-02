@@ -8,7 +8,7 @@ import { DatabaseError, DuplicateError } from '../../../shared/errors/index.js';
 export class PostgresUserRepository extends BaseRepository implements IUserRepository {
   async create(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     try {
-      const rows = await this.query<User>(
+      const rows = await this.query<Record<string, unknown>>(
         `INSERT INTO users (tenant_id, email, password_hash, name, role, is_active, last_login_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
@@ -24,7 +24,7 @@ export class PostgresUserRepository extends BaseRepository implements IUserRepos
   }
 
   async findById(tenantId: string, id: string): Promise<User | null> {
-    const rows = await this.query<User>(
+    const rows = await this.query<Record<string, unknown>>(
       'SELECT * FROM users WHERE id = $1 AND tenant_id = $2',
       [id, tenantId]
     );
@@ -37,12 +37,12 @@ export class PostgresUserRepository extends BaseRepository implements IUserRepos
       : 'SELECT * FROM users WHERE email = $1 AND tenant_id = $2 LIMIT 1';
 
     const params = tenantId === 'system' ? [email] : [email, tenantId];
-    const rows = await this.query<User>(query, params);
+    const rows = await this.query<Record<string, unknown>>(query, params);
     return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
   async findAll(tenantId: string): Promise<User[]> {
-    const rows = await this.query<User>(
+    const rows = await this.query<Record<string, unknown>>(
       'SELECT * FROM users WHERE tenant_id = $1 ORDER BY created_at DESC',
       [tenantId]
     );
@@ -64,7 +64,7 @@ export class PostgresUserRepository extends BaseRepository implements IUserRepos
     updates.push(`updated_at = NOW()`);
     values.push(id, tenantId);
 
-    const rows = await this.query<User>(
+    const rows = await this.query<Record<string, unknown>>(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} AND tenant_id = $${paramIndex + 1} RETURNING *`,
       values
     );
@@ -77,18 +77,18 @@ export class PostgresUserRepository extends BaseRepository implements IUserRepos
     await this.query('UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1 AND tenant_id = $2', [id, tenantId]);
   }
 
-  private mapRow(row: User): User {
+  private mapRow(row: Record<string, unknown>): User {
     return {
-      id: row.id,
-      tenantId: row.tenantId,
-      email: row.email,
-      passwordHash: row.passwordHash,
-      name: row.name,
-      role: row.role,
-      isActive: row.isActive ?? true,
-      lastLoginAt: row.lastLoginAt,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      id: String(row.id),
+      tenantId: String(row.tenant_id),
+      email: String(row.email),
+      passwordHash: String(row.password_hash),
+      name: String(row.name),
+      role: String(row.role) as User['role'],
+      isActive: Boolean(row.is_active) ?? true,
+      lastLoginAt: row.last_login_at ? new Date(String(row.last_login_at)) : undefined,
+      createdAt: new Date(String(row.created_at)),
+      updatedAt: new Date(String(row.updated_at)),
     };
   }
 }

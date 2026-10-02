@@ -15,3 +15,4 @@ export { PostgresStockLogRepository } from './stock-log.js';
 export { PostgresIdempotencyKeyRepository } from './idempotency-key.js';
 export { PostgresStockOpnameRepository } from './stock-opname.js';
 export { PostgresReportRepository } from './report.js';
+export { PostgresAuditLogRepository } from './audit-log.js';

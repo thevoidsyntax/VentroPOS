@@ -15,6 +15,7 @@ import {
   PostgresIdempotencyKeyRepository,
   PostgresStockOpnameRepository,
   PostgresReportRepository,
+  PostgresAuditLogRepository,
 } from './index.js';
 
 // Singleton instances - created once, reused across all requests
@@ -31,3 +32,4 @@ export const stockLogRepository = new PostgresStockLogRepository();
 export const idempotencyKeyRepository = new PostgresIdempotencyKeyRepository();
 export const stockOpnameRepository = new PostgresStockOpnameRepository();
 export const reportRepository = new PostgresReportRepository();
+export const auditLogRepository = new PostgresAuditLogRepository();
