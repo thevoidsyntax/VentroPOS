@@ -1,5 +1,4 @@
-// Orders & Checkout Application Service
-// Simplified DDD: Order Aggregate with Checkout Flow
+// Orders Application Service - Use Cases
 
 import type { Order, OrderItem, Transaction } from '../../domain/entities/index.js';
 import type {
@@ -13,311 +12,226 @@ import type {
 import { NotFoundError, BusinessRuleError } from '../../shared/errors/index.js';
 import { config } from '../../shared/config/index.js';
 
-// ============== CONSTANTS ==============
-/** Default Indonesia PPN tax rate (11%) - configurable via TAX_RATE env var */
 const TAX_RATE = config.tax.rate;
 
-// ============== CART DTOs ==============
-
-export interface CartItemInput {
-  productId: string;
-  quantity: number;
-  modifiers?: { modifierId: string; name: string; priceAdjustment: number }[];
-  notes?: string;
-}
-
+// Create Order
 export interface CreateOrderInput {
   tableId?: string;
-  items: CartItemInput[];
+  items: Array<{
+    productId: string;
+    quantity: number;
+    modifiers?: Array<{ modifierId: string; name: string; priceAdjustment: number }>;
+    notes?: string;
+  }>;
   customerName?: string;
   notes?: string;
   applyDiscount?: { type: 'percentage' | 'fixed'; value: number };
 }
-
-// ============== CREATE ORDER USE CASE ==============
 
 export class CreateOrderUseCase {
   constructor(
     private orderRepo: IOrderRepository,
     private productRepo: IProductRepository,
     private tableRepo: ITableRepository,
-    _stockLogRepo: IStockLogRepository
+    _logRepo: IStockLogRepository
   ) {
-    void _stockLogRepo; // Reserved for future stock tracking at order creation
+    void _logRepo;
   }
 
   async execute(tenantId: string, userId: string, input: CreateOrderInput): Promise<Order> {
-    // Validate table if provided
     if (input.tableId) {
       const table = await this.tableRepo.findById(tenantId, input.tableId);
-      if (!table) {
-        throw new NotFoundError(`Table with id '${input.tableId}'`);
-      }
+      if (!table) throw new NotFoundError(`Table '${input.tableId}'`);
     }
 
-    // Build order items with product details
+    // Batch fetch all products at once
+    const ids = input.items.map(i => i.productId);
+    const products = await this.productRepo.findByIds(tenantId, ids);
+    const prodMap = new Map(products.map(p => [p.id, p]));
+
     const orderItems: OrderItem[] = [];
     let subtotal = 0;
-
-    for (const itemInput of input.items) {
-      const product = await this.productRepo.findById(tenantId, itemInput.productId);
-
-      if (!product) {
-        throw new NotFoundError(`Product with id '${itemInput.productId}'`);
+    for (const item of input.items) {
+      const p = prodMap.get(item.productId);
+      if (!p) throw new NotFoundError(`Product '${item.productId}'`);
+      if (!p.isActive) throw new BusinessRuleError(`Product '${p.name}' is inactive`);
+      if (p.stockQuantity < item.quantity) {
+        throw new BusinessRuleError(`Insufficient stock for '${p.name}'`);
       }
-
-      if (!product.isActive) {
-        throw new BusinessRuleError(`Product '${product.name}' is not available`);
-      }
-
-      // Validate stock availability
-      if (product.stockQuantity < itemInput.quantity) {
-        throw new BusinessRuleError(
-          `Insufficient stock for '${product.name}': requested ${itemInput.quantity}, available ${product.stockQuantity}`
-        );
-      }
-
-      // Calculate modifiers price
-      const modifiersTotal = itemInput.modifiers?.reduce((sum, m) => sum + m.priceAdjustment, 0) ?? 0;
-      const unitPrice = product.price + modifiersTotal;
-      const totalPrice = unitPrice * itemInput.quantity;
-
+      const modTotal = item.modifiers?.reduce((s, m) => s + m.priceAdjustment, 0) ?? 0;
+      const unitPrice = p.price + modTotal;
+      const totalPrice = unitPrice * item.quantity;
       orderItems.push({
         id: crypto.randomUUID(),
-        orderId: '', // Will be set after order creation
-        productId: product.id,
-        productName: product.name,
-        quantity: itemInput.quantity,
+        orderId: '',
+        productId: p.id,
+        productName: p.name,
+        quantity: item.quantity,
         unitPrice,
         totalPrice,
-        modifiers: (itemInput.modifiers ?? []).map(m => ({
+        modifiers: (item.modifiers ?? []).map(m => ({
           id: crypto.randomUUID(),
           modifierId: m.modifierId,
           modifierName: m.name,
           priceAdjustment: m.priceAdjustment,
         })),
-        notes: itemInput.notes,
+        notes: item.notes,
       });
-
       subtotal += totalPrice;
     }
 
-    // Calculate discount with validation
     let discountAmount = 0;
     if (input.applyDiscount) {
       if (input.applyDiscount.type === 'percentage') {
-        const percentage = input.applyDiscount.value;
-        if (percentage < 0 || percentage > 100) {
-          throw new BusinessRuleError('Discount percentage must be between 0 and 100');
-        }
-        discountAmount = (subtotal * percentage) / 100;
+        const pct = input.applyDiscount.value;
+        if (pct < 0 || pct > 100) throw new BusinessRuleError('Discount pct 0-100');
+        discountAmount = (subtotal * pct) / 100;
       } else {
         discountAmount = input.applyDiscount.value;
         if (discountAmount < 0 || discountAmount > subtotal) {
-          throw new BusinessRuleError('Fixed discount cannot exceed subtotal');
+          throw new BusinessRuleError('Fixed discount exceeds subtotal');
         }
       }
     }
 
-    // Calculate tax (assume 11% PPN for Indonesia)
-    const taxableAmount = subtotal - discountAmount;
-    const taxAmount = Math.round(taxableAmount * TAX_RATE * 100) / 100;
-    const totalAmount = Math.round((taxableAmount + taxAmount) * 100) / 100;
-
-    // Generate order number
-    const orderNumber = await this.orderRepo.generateOrderNumber(tenantId);
-
-    // Create order
+    const taxable = subtotal - discountAmount;
+    const taxAmount = Math.round(taxable * TAX_RATE * 100) / 100;
+    const total = Math.round((taxable + taxAmount) * 100) / 100;
     const order = await this.orderRepo.create(tenantId, {
       tenantId,
       tableId: input.tableId,
       userId,
-      orderNumber,
+      orderNumber: await this.orderRepo.generateOrderNumber(tenantId),
       status: 'pending',
       items: orderItems,
       subtotal,
       taxAmount,
       discountAmount,
-      totalAmount,
+      totalAmount: total,
       customerName: input.customerName,
       notes: input.notes,
     });
 
-    // Update table status if assigned
-    if (input.tableId) {
-      await this.tableRepo.updateStatus(tenantId, input.tableId, 'occupied');
-    }
-
+    if (input.tableId) await this.tableRepo.updateStatus(tenantId, input.tableId, 'occupied');
     return order;
   }
 }
 
-// ============== CHECKOUT USE CASE ==============
-
+// Checkout
 export interface CheckoutInput {
   orderId: string;
   paymentMethod: 'cash' | 'qris' | 'debit' | 'credit';
-  cashReceived?: number; // For cash payment
+  cashReceived?: number;
   referenceNumber?: string;
-  splitPayments?: { method: 'cash' | 'qris' | 'debit' | 'credit'; amount: number }[];
-  /** Idempotency key to prevent duplicate checkout on retry */
+  splitPayments?: Array<{ method: 'cash' | 'qris' | 'debit' | 'credit'; amount: number }>;
   idempotencyKey?: string;
 }
 
-export interface CheckoutResult {
-  transaction: Transaction;
-  order: Order;
-  changeAmount?: number;
-}
+export interface CheckoutResult { transaction: Transaction; order: Order; changeAmount?: number }
 
 export class CheckoutUseCase {
   constructor(
     private orderRepo: IOrderRepository,
-    private transactionRepo: ITransactionRepository,
+    private txRepo: ITransactionRepository,
     private productRepo: IProductRepository,
-    private stockLogRepo: IStockLogRepository,
-    private idempotencyRepo?: IIdempotencyKeyRepository
+    private logRepo: IStockLogRepository,
+    private idemRepo?: IIdempotencyKeyRepository
   ) {}
 
-  async execute(
-    tenantId: string,
-    userId: string,
-    input: CheckoutInput
-  ): Promise<CheckoutResult> {
-    // Check idempotency key first
-    if (input.idempotencyKey && this.idempotencyRepo) {
-      const keyHash = await this.hashKey(input.idempotencyKey);
-      const existing = await this.idempotencyRepo.checkAndLock(tenantId, keyHash);
-
-      if (existing && existing.response) {
-        // Return cached response for duplicate request
-        return existing.response as CheckoutResult;
-      }
+  async execute(tenantId: string, userId: string, input: CheckoutInput): Promise<CheckoutResult> {
+    if (input.idempotencyKey && this.idemRepo) {
+      const h = await this.hash(input.idempotencyKey);
+      const cached = await this.idemRepo.checkAndLock(tenantId, h);
+      if (cached?.response) return cached.response as CheckoutResult;
     }
 
-    // Get order
     const order = await this.orderRepo.findById(tenantId, input.orderId);
-
-    if (!order) {
-      throw new NotFoundError(`Order with id '${input.orderId}'`);
-    }
-
+    if (!order) throw new NotFoundError(`Order '${input.orderId}'`);
     if (order.status !== 'pending' && order.status !== 'confirmed') {
-      throw new BusinessRuleError(`Order cannot be checked out. Current status: ${order.status}`);
+      throw new BusinessRuleError(`Order status: ${order.status}`);
     }
 
-    // Calculate total amount
-    const totalAmount = order.totalAmount;
     let changeAmount = 0;
-    let cashReceived = input.cashReceived;
-
-    // Handle split payments
+    const total = order.totalAmount;
     if (input.splitPayments) {
-      const splitTotal = input.splitPayments.reduce((sum, s) => sum + s.amount, 0);
-      if (splitTotal < totalAmount) {
-        throw new BusinessRuleError('Split payment total is less than order amount');
-      }
+      const splitTotal = input.splitPayments.reduce((s, p) => s + p.amount, 0);
+      if (splitTotal < total) throw new BusinessRuleError('Split total < order amount');
     }
-
-    // Validate cash payment
     if (input.paymentMethod === 'cash' || input.splitPayments) {
-      const effectiveCash = input.splitPayments
-        ?.filter(s => s.method === 'cash')
-        .reduce((sum, s) => sum + s.amount, 0) ?? cashReceived ?? 0;
-
-      if (effectiveCash < totalAmount) {
-        throw new BusinessRuleError('Cash received is less than order amount');
-      }
-
-      if (input.splitPayments) {
-        cashReceived = effectiveCash;
-      }
-
-      changeAmount = Math.round(((cashReceived ?? 0) - totalAmount) * 100) / 100;
+      const cashTotal = input.splitPayments?.filter(p => p.method === 'cash').reduce((s, p) => s + p.amount, 0) ?? input.cashReceived ?? 0;
+      if (cashTotal < total) throw new BusinessRuleError('Cash < total');
+      changeAmount = Math.round((cashTotal - total) * 100) / 100;
     }
 
-    // Create transaction
-    const transaction = await this.transactionRepo.create(tenantId, {
+    const tx = await this.txRepo.create(tenantId, {
       tenantId,
       orderId: order.id,
-      amount: totalAmount,
+      amount: total,
       changeAmount,
       paymentMethod: input.paymentMethod,
       paymentDetails: {
-        ...(input.referenceNumber && { referenceNumber: input.referenceNumber }),
-        ...(input.splitPayments && { splits: input.splitPayments }),
+        ...(input.referenceNumber ? { referenceNumber: input.referenceNumber } : {}),
+        ...(input.splitPayments ? { splits: input.splitPayments } : {}),
       },
       referenceNumber: input.referenceNumber,
       userId,
-      splits: input.splitPayments?.map(s => ({
-        id: crypto.randomUUID(),
-        transactionId: '',
-        paymentMethod: s.method,
-        amount: s.amount,
-        referenceNumber: undefined,
-      })),
     });
 
-    // Deduct stock for each item
+    // Batch deduct stock - single DB round-trip
+    const prodIds = order.items.map(i => i.productId);
+    const prods = await this.productRepo.findByIds(tenantId, prodIds);
+    const pMap = new Map(prods.map(p => [p.id, p]));
+
+    // Prepare batch updates
+    const stockUpdates: Array<{id: string; quantity: number}> = [];
+    const stockLogs: Array<{productId: string; newQty: number; quantity: number}> = [];
+
     for (const item of order.items) {
-      const product = await this.productRepo.findById(tenantId, item.productId);
-
-      if (product) {
-        // Update product stock
-        const newQuantity = product.stockQuantity - item.quantity;
-        await this.productRepo.updateStock(tenantId, item.productId, newQuantity);
-
-        // Create stock log
-        await this.stockLogRepo.create(tenantId, {
-          tenantId,
-          productId: product.id,
-          type: 'sale',
-          quantity: -item.quantity,
-          balanceAfter: newQuantity,
-          referenceType: 'order',
-          referenceId: order.id,
-          userId,
-        });
-      }
+      const p = pMap.get(item.productId);
+      if (!p) continue;
+      const newQty = p.stockQuantity - item.quantity;
+      stockUpdates.push({ id: p.id, quantity: newQty });
+      stockLogs.push({ productId: p.id, newQty, quantity: item.quantity });
     }
 
-    // Update order status to paid
-    const updatedOrder = await this.orderRepo.updateStatus(tenantId, order.id, 'paid');
+    // Batch update all stock in single transaction
+    await this.productRepo.batchUpdateStock(tenantId, stockUpdates);
 
-    const result: CheckoutResult = {
-      transaction,
-      order: updatedOrder,
-      changeAmount: changeAmount > 0 ? changeAmount : undefined,
-    };
-
-    // Store response in idempotency key
-    if (input.idempotencyKey && this.idempotencyRepo) {
-      const keyHash = await this.hashKey(input.idempotencyKey);
-      await this.idempotencyRepo.storeResponse(tenantId, keyHash, order.id, result);
+    // Create stock logs
+    for (const log of stockLogs) {
+      await this.logRepo.create(tenantId, {
+        tenantId,
+        productId: log.productId,
+        type: 'sale',
+        quantity: -log.quantity,
+        balanceAfter: log.newQty,
+        referenceType: 'order',
+        referenceId: order.id,
+      });
     }
 
+    const updated = await this.orderRepo.updateStatus(tenantId, order.id, 'paid');
+    const result: CheckoutResult = { transaction: tx, order: updated, changeAmount: changeAmount > 0 ? changeAmount : undefined };
+
+    if (input.idempotencyKey && this.idemRepo) {
+      const h = await this.hash(input.idempotencyKey);
+      await this.idemRepo.storeResponse(tenantId, h, order.id, result);
+    }
     return result;
   }
 
-  /**
-   * Creates a SHA-256 hash of the idempotency key.
-   * In production, use crypto.subtle.digest for better security.
-   */
-  private async hashKey(key: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(key);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  private async hash(key: string): Promise<string> {
+    const buf = new TextEncoder().encode(key);
+    const h = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 }
 
-// ============== UPDATE ORDER STATUS USE CASE ==============
-
+// Update Order Status
 export class UpdateOrderStatusUseCase {
   constructor(private orderRepo: IOrderRepository) {}
 
-  private validTransitions: Record<string, string[]> = {
+  private readonly transitions: Record<string, string[]> = {
     pending: ['confirmed', 'voided', 'held'],
     confirmed: ['preparing', 'voided', 'held'],
     preparing: ['ready', 'voided'],
@@ -328,87 +242,66 @@ export class UpdateOrderStatusUseCase {
     held: ['pending', 'confirmed', 'voided'],
   };
 
-  async execute(
-    tenantId: string,
-    orderId: string,
-    newStatus: Order['status'],
-    _userId: string
-  ): Promise<Order> {
+  async execute(tenantId: string, orderId: string, newStatus: Order['status']): Promise<Order> {
     const order = await this.orderRepo.findById(tenantId, orderId);
-
-    if (!order) {
-      throw new NotFoundError(`Order with id '${orderId}'`);
-    }
-
-    const allowed = this.validTransitions[order.status] ?? [];
-    if (!allowed.includes(newStatus)) {
-      throw new BusinessRuleError(
-        `Invalid status transition from '${order.status}' to '${newStatus}'`
-      );
-    }
-
+    if (!order) throw new NotFoundError(`Order '${orderId}'`);
+    const allowed = this.transitions[order.status] ?? [];
+    if (!allowed.includes(newStatus)) throw new BusinessRuleError(`Cannot ${order.status} → ${newStatus}`);
     return this.orderRepo.updateStatus(tenantId, orderId, newStatus);
   }
 }
 
-// ============== VOID ORDER USE CASE ==============
-
-export interface VoidOrderInput {
-  reason?: string;
-}
-
+// Void Order
 export class VoidOrderUseCase {
   constructor(
     private orderRepo: IOrderRepository,
     private productRepo: IProductRepository,
-    private stockLogRepo: IStockLogRepository
+    private logRepo: IStockLogRepository
   ) {}
 
-  async execute(
-    tenantId: string,
-    orderId: string,
-    userId: string,
-    input: VoidOrderInput
-  ): Promise<Order> {
+  async execute(tenantId: string, orderId: string, _input?: string): Promise<Order> {
     const order = await this.orderRepo.findById(tenantId, orderId);
+    if (!order) throw new NotFoundError(`Order '${orderId}'`);
+    if (order.status !== 'paid') throw new BusinessRuleError('Only paid orders can be voided');
 
-    if (!order) {
-      throw new NotFoundError(`Order with id '${orderId}'`);
-    }
+    // Batch restore stock - single DB round-trip
+    const prodIds = order.items.map(i => i.productId);
+    const prods = await this.productRepo.findByIds(tenantId, prodIds);
+    const pMap = new Map(prods.map(p => [p.id, p]));
 
-    // Can only void if already paid
-    if (order.status !== 'paid') {
-      throw new BusinessRuleError('Can only void paid orders');
-    }
+    // Prepare batch updates
+    const stockUpdates: Array<{id: string; quantity: number}> = [];
+    const stockLogs: Array<{productId: string; newQty: number; quantity: number}> = [];
 
-    // Restore stock for each item
     for (const item of order.items) {
-      const product = await this.productRepo.findById(tenantId, item.productId);
+      const p = pMap.get(item.productId);
+      if (!p) continue;
+      const newQty = p.stockQuantity + item.quantity;
+      stockUpdates.push({ id: p.id, quantity: newQty });
+      stockLogs.push({ productId: p.id, newQty, quantity: item.quantity });
+    }
 
-      if (product) {
-        const newQuantity = product.stockQuantity + item.quantity;
-        await this.productRepo.updateStock(tenantId, item.productId, newQuantity);
+    // Batch restore all stock in single transaction
+    await this.productRepo.batchUpdateStock(tenantId, stockUpdates);
 
-        await this.stockLogRepo.create(tenantId, {
-          tenantId,
-          productId: product.id,
-          type: 'void',
-          quantity: item.quantity,
-          balanceAfter: newQuantity,
-          referenceType: 'order',
-          referenceId: order.id,
-          notes: input.reason,
-          userId,
-        });
-      }
+    // Create stock logs
+    for (const log of stockLogs) {
+      await this.logRepo.create(tenantId, {
+        tenantId,
+        productId: log.productId,
+        type: 'void',
+        quantity: log.quantity,
+        balanceAfter: log.newQty,
+        referenceType: 'order',
+        referenceId: order.id,
+      });
     }
 
     return this.orderRepo.updateStatus(tenantId, orderId, 'voided');
   }
 }
 
-// ============== GET ORDERS USE CASE ==============
-
+// Get Orders
 export interface GetOrdersInput {
   status?: Order['status'][];
   tableId?: string;
@@ -428,24 +321,9 @@ export class GetOrdersUseCase {
       fromDate: input.fromDate,
       toDate: input.toDate,
     });
-
-    // Sort by createdAt desc
-    orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-    // Pagination
     const page = Math.max(1, input.page ?? 1);
     const limit = Math.max(1, input.limit ?? 50);
     const start = (page - 1) * limit;
-    const paginatedOrders = orders.slice(start, start + limit);
-
-    return {
-      data: paginatedOrders,
-      meta: {
-        page,
-        limit,
-        total: orders.length,
-        totalPages: Math.ceil(orders.length / limit),
-      },
-    };
+    return { data: orders.slice(start, start + limit), meta: { page, limit, total: orders.length } };
   }
 }

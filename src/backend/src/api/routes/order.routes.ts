@@ -155,7 +155,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
 
     try {
       const order = await updateOrderStatusUseCase.execute(
-        request.tenantId!, id, status, request.userId!
+        request.tenantId!, id, status
       );
       return reply.send({ success: true, data: order });
     } catch (error) {
@@ -210,11 +210,10 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
     schema: voidOrderSchema,
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
-    const { reason } = request.body as { reason?: string };
 
     try {
       const order = await voidOrderUseCase.execute(
-        request.tenantId!, id, request.userId!, { reason }
+        request.tenantId!, id
       );
       return reply.send({ success: true, data: order });
     } catch (error) {
@@ -237,7 +236,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
 
     try {
       const order = await updateOrderStatusUseCase.execute(
-        request.tenantId!, id, 'held', request.userId!
+        request.tenantId!, id, 'held'
       );
       return reply.send({ success: true, data: order });
     } catch (error) {
@@ -260,7 +259,7 @@ export async function orderRoutes(fastify: FastifyInstance): Promise<void> {
 
     try {
       const order = await updateOrderStatusUseCase.execute(
-        request.tenantId!, id, 'pending', request.userId!
+        request.tenantId!, id, 'pending'
       );
       return reply.send({ success: true, data: order });
     } catch (error) {

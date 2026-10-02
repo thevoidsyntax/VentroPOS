@@ -30,10 +30,12 @@ export interface ICategoryRepository {
 export interface IProductRepository {
   create(tenantId: string, product: Omit<Product, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<Product>;
   findById(tenantId: string, id: string): Promise<Product | null>;
+  findByIds(tenantId: string, ids: string[]): Promise<Product[]>;
   findBySku(tenantId: string, sku: string): Promise<Product | null>;
   findAll(tenantId: string, filters?: ProductFilters): Promise<Product[]>;
   update(tenantId: string, id: string, data: Partial<Product>): Promise<Product>;
   updateStock(tenantId: string, id: string, quantity: number): Promise<Product>;
+  batchUpdateStock(tenantId: string, updates: Array<{id: string; quantity: number}>): Promise<void>;
   delete(tenantId: string, id: string): Promise<void>;
 }
 

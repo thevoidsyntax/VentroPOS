@@ -54,10 +54,12 @@ describe('CreateOrderUseCase', () => {
     mockProductRepo = {
       create: vi.fn(),
       findById: vi.fn(),
+      findByIds: vi.fn(),
       findBySku: vi.fn(),
       findAll: vi.fn(),
       update: vi.fn(),
       updateStock: vi.fn(),
+      batchUpdateStock: vi.fn(),
       delete: vi.fn(),
     };
 
@@ -85,7 +87,7 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should create order with valid items', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProduct);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([mockProduct]);
     vi.mocked(mockOrderRepo.generateOrderNumber).mockResolvedValue('ORD-20240101-0001');
     vi.mocked(mockOrderRepo.create).mockResolvedValue({
       id: 'order-1',
@@ -123,7 +125,7 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should throw NotFoundError for non-existent product', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(null);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([]);
 
     await expect(
       useCase.execute('tenant-1', 'user-1', {
@@ -133,10 +135,10 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should throw BusinessRuleError for inactive product', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue({
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([{
       ...mockProduct,
       isActive: false,
-    });
+    }]);
 
     await expect(
       useCase.execute('tenant-1', 'user-1', {
@@ -146,10 +148,10 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should throw BusinessRuleError for insufficient stock', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue({
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([{
       ...mockProduct,
       stockQuantity: 5,
-    });
+    }]);
 
     await expect(
       useCase.execute('tenant-1', 'user-1', {
@@ -159,7 +161,7 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should calculate correct total with modifiers', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProduct);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([mockProduct]);
     vi.mocked(mockOrderRepo.generateOrderNumber).mockResolvedValue('ORD-20240101-0001');
     vi.mocked(mockOrderRepo.create).mockImplementation(async (_, data) => ({
       id: 'order-1',
@@ -195,7 +197,7 @@ describe('CreateOrderUseCase', () => {
   });
 
   it('should apply percentage discount correctly', async () => {
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProduct);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([mockProduct]);
     vi.mocked(mockOrderRepo.generateOrderNumber).mockResolvedValue('ORD-20240101-0001');
     vi.mocked(mockOrderRepo.create).mockImplementation(async (_, data) => ({
       id: 'order-1',
@@ -227,7 +229,7 @@ describe('CreateOrderUseCase', () => {
 
   it('should update table status when order has tableId', async () => {
     vi.mocked(mockTableRepo.findById).mockResolvedValue(mockTable);
-    vi.mocked(mockProductRepo.findById).mockResolvedValue(mockProduct);
+    vi.mocked(mockProductRepo.findByIds).mockResolvedValue([mockProduct]);
     vi.mocked(mockOrderRepo.generateOrderNumber).mockResolvedValue('ORD-20240101-0001');
     vi.mocked(mockOrderRepo.create).mockResolvedValue({
       id: 'order-1',
