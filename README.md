@@ -1,6 +1,6 @@
 # VentroPos - Cloud POS for Small & Medium Business
 
-> **Version:** 1.0.0
+> **Version:** 1.0.1
 > **Status:** Development
 > **License:** MIT
 > **Last Updated:** 2026-10-02
@@ -89,11 +89,9 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 - `POST /api/v1/orders/:id/void` - Void order
 - `GET/POST/PUT/DELETE /api/v1/modifiers/*` - Modifier management
 
-**Test Coverage:** 83 unit tests passing
+**Test Coverage:** 142 unit tests passing
 
 ---
-
-### Phase 3: Inventory ✅ Done
 
 **Objectives:**
 - [x] Stock level tracking per product
@@ -129,11 +127,11 @@ POST /api/v1/stock/opnames/:id/cancel          - Cancel opname ✅
 - [x] tsc --noEmit: no errors
 - [x] Documentation updated
 
-**Test Coverage:** 36 unit tests for stock use cases (stock.test.ts)
+**Test Coverage:** 142 unit tests total
 
 ---
 
-### Phase 4: Reporting ✅ Done
+### Phase 3: Inventory ✅ Done
 
 **Objectives:**
 - [x] Sales summary (daily, weekly, monthly)
@@ -161,7 +159,7 @@ GET  /api/v1/reports/export      - CSV export ✅
 - `last_month` - Bulan Lalu
 
 **Phase Gate:**
-- [x] All tests passing (120 total)
+- [x] All tests passing (142 total)
 - [x] tsc --noEmit: no errors
 - [x] Documentation updated
 
@@ -337,7 +335,7 @@ Audit Log Table: audit_logs
 |-------|--------|-------|
 | ESLint | ✅ Configured | TypeScript + Prettier support |
 | TypeScript | ✅ Strict | No `any` types |
-| Tests | ✅ 120 passing | Vitest unit tests |
+| Tests | ✅ 142 passing | Vitest unit tests |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 | Max File Size | ✅ <250 ln | Fat class split complete |
 
@@ -378,7 +376,7 @@ Audit Log Table: audit_logs
 ```
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
-Tests: 120 passing ✅
+Tests: 142 passing ✅
 ESLint: Configured ✅
 Architecture: Split complete ✅
 Fastify: 5.x compatible ✅
@@ -408,7 +406,7 @@ npm run dev
 npm run dev          # Development server
 npm run build        # TypeScript build
 npm start            # Production server
-npm test             # Run tests (120 passing)
+npm test             # Run tests (142 passing)
 npm run lint         # ESLint check
 npm run test:coverage # Test coverage report
 npm run db:migrate  # Run database migrations
@@ -432,6 +430,31 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### v1.0.1 - Audit Fixes (2026-01-18)
+
+**Critical Fixes:**
+- ✅ Categories API now at `/api/v1/categories` (dedicated route)
+- ✅ JSON parse error handling in global error handler
+- ✅ `refreshToken.ts` dead code removed
+
+**New Test Coverage:**
+- ✅ `tests/unit/auth.test.ts` - 13 test cases for Login, Register, Refresh, GetCurrentUser
+- ✅ `tests/unit/checkout.test.ts` - 11 test cases for payment flows
+
+**Database Performance:**
+- ✅ `migrations/005_performance_indexes.sql` - 16 new indexes for:
+  - Orders: status+date, tenant+user, table+status
+  - Products: category, active products, SKU, low stock
+  - Stock logs: product+date, type filtering
+  - Users: email lookup, tenant+active
+  - Categories: tenant+sort, parent hierarchy
+
+**Documentation:**
+- ✅ `.env.example` created with all required variables
+- ✅ `package-lock.json` generated
+
+**Test Results:** 142 unit tests passing ✅
 
 ### Phase 4: Reporting
 
@@ -470,7 +493,7 @@ Tests:
 - tests/unit/reports.test.ts (25 unit tests)
 ```
 
-**Test Coverage:** 120 total unit tests passing
+**Test Coverage:** 142 total unit tests passing
 
 ### Audit Fixes - Code Quality Refactoring
 
