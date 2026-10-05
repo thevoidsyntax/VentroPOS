@@ -286,6 +286,42 @@ CREATE TABLE hardware_logs (
 
 ## API Reference
 
+### API Documentation (Swagger UI)
+
+Interactive API documentation is available at:
+```
+http://localhost:3000/docs
+```
+
+**Features:**
+- Interactive API explorer with "Try it out" functionality
+- JWT authentication support (click "Authorize" to enter token)
+- OpenAPI 3.0 specification
+- All endpoints documented with request/response schemas
+
+**Authentication:**
+1. Register or login via `/api/v1/auth/*` endpoints
+2. Copy the access token from the response
+3. Click "Authorize" button in Swagger UI
+4. Enter: `Bearer <your-access-token>`
+5. Click "Authorize" to apply to all requests
+
+### Health Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /health` | Liveness probe - returns server status |
+| `GET /ready` | Readiness probe - checks DB and Redis connectivity |
+
+**Response Example:**
+```json
+// /health
+{ "status": "ok", "timestamp": "...", "uptime": 12345 }
+
+// /ready
+{ "status": "ready", "checks": { "database": true, "redis": true }, "timestamp": "..." }
+```
+
 ### Base URL
 ```
 http://localhost:3000/api/v1
@@ -314,6 +350,31 @@ http://localhost:3000/api/v1
 | Stock Opname | CRUD `/stock/opnames/*` |
 | Reports | GET `/reports/*` |
 | Hardware | CRUD `/hardware/devices` + `/hardware/logs` |
+
+### Rate Limiting
+
+Rate limiting is applied globally to protect the API:
+
+| Tier | Limit | Window |
+|------|-------|--------|
+| Global (authenticated) | 100 requests | 1 minute |
+| Auth endpoints | 5 requests | 1 minute |
+
+**Excluded from rate limiting:**
+- `/health`
+- `/ready`
+- `/docs/*`
+
+**Response when limit exceeded (HTTP 429):**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests. Please try again later."
+  }
+}
+```
 
 ### Response Format
 

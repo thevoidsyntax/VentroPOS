@@ -26,6 +26,7 @@ import { hardwareRoutes } from './api/routes/hardware.routes.js';
 import { printRoutes } from './api/routes/print.routes.js';
 import { edcRoutes } from './api/routes/edc.routes.js';
 import { hardwareMiscRoutes } from './api/routes/hardware-misc.routes.js';
+import { healthRoutes } from './api/routes/health.routes.js';
 import { PostgresConnection } from './infrastructure/database/postgres/index.js';
 
 export async function buildApp() {
@@ -59,27 +60,80 @@ export async function buildApp() {
     verify: { algorithms: ['HS256'] },
   });
 
-  // Rate Limiting - Production-ready configuration
-  await app.register(rateLimit, {
-    max: 100, // requests per window
+  // ============== RATE LIMITING CONFIGURATION ==============
+
+  // Redis Connection (for caching and distributed rate limiting)
+  await RedisClient.getInstance().connect();
+
+  const redisClient = RedisClient.getInstance().getClient();
+
+  if (redisClient) {
+    console.info('[RateLimit] Redis connected - distributed rate limiting enabled');
+  } else {
+    console.warn('[RateLimit] Redis not available - using in-memory rate limiting');
+  }
+
+  // Global rate limit config
+  const globalRateLimitConfig = {
+    max: 100, // requests per minute per IP
     timeWindow: '1 minute',
     keyGenerator: rateLimitKeyGenerator,
     errorResponseBuilder: rateLimitErrorResponse,
-  });
+    // Skip rate limiting for health check endpoints
+    skip: (request: { url?: string }) => {
+      const healthPaths = ['/health', '/ready', '/docs', '/favicon.ico'];
+      return healthPaths.some((path) => request.url?.startsWith(path));
+    },
+    // Use Redis for distributed rate limiting if available
+    ...(redisClient && { redis: redisClient }),
+  };
 
-  // Redis Connection (for caching)
-  await RedisClient.getInstance().connect();
+  // Auth routes rate limit config (stricter for login attempts)
+  const authRateLimitConfig = {
+    max: 5, // 5 requests per minute per IP for auth endpoints
+    timeWindow: '1 minute',
+    keyGenerator: rateLimitKeyGenerator,
+    errorResponseBuilder: () => ({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many login attempts. Please try again later.',
+      },
+    }),
+    // Use Redis for distributed rate limiting if available
+    ...(redisClient && { redis: redisClient }),
+  };
+
+  // Global Rate Limiting
+  await app.register(rateLimit, globalRateLimitConfig);
+
+  // Apply stricter rate limiting to auth routes
+  await app.register(async function (instance) {
+    await instance.register(rateLimit, authRateLimitConfig);
+    await instance.register(authRoutes, { prefix: '/api/v1/auth' });
+  }, { prefix: '/api/v1/auth' });
 
   // Swagger Documentation
+  const packageJson = await import('../package.json', { assert: { type: 'json' } });
+  const apiVersion = packageJson.default.version;
+
   await app.register(swagger, {
     openapi: {
       info: {
-        title: 'VentroPos API',
-        description: 'Point of Sale API for Cafe',
-        version: '1.0.0',
+        title: 'VentroPOS API',
+        description: 'Point of Sale System for Cafe - Complete REST API documentation',
+        version: apiVersion,
+        contact: {
+          name: 'VentroPOS Support',
+        },
+        license: {
+          name: 'MIT',
+        },
       },
       servers: [
-        ...(config.isProduction ? [] : [{ url: `http://localhost:${config.server.port}` }]),
+        ...(config.isProduction
+          ? []
+          : [{ url: `http://localhost:${config.server.port}`, description: 'Development server' }]),
       ],
       components: {
         securitySchemes: {
@@ -87,15 +141,22 @@ export async function buildApp() {
             type: 'http',
             scheme: 'bearer',
             bearerFormat: 'JWT',
+            description: 'Enter your JWT token',
           },
         },
       },
       tags: [
-        { name: 'Auth', description: 'Authentication endpoints' },
-        { name: 'Products', description: 'Product management' },
-        { name: 'Orders', description: 'Order management' },
-        { name: 'Reports', description: 'Reporting & analytics' },
-        { name: 'Hardware', description: 'Hardware integration' },
+        { name: 'Health', description: 'Health check endpoints (liveness/readiness)' },
+        { name: 'Auth', description: 'Authentication and authorization endpoints' },
+        { name: 'Users', description: 'User management (staff accounts)' },
+        { name: 'Products', description: 'Product and menu management' },
+        { name: 'Categories', description: 'Product category management' },
+        { name: 'Orders', description: 'Order creation and management' },
+        { name: 'Tables', description: 'Restaurant table management' },
+        { name: 'Stock', description: 'Inventory and stock management' },
+        { name: 'Modifiers', description: 'Product modifiers and customizations' },
+        { name: 'Reports', description: 'Sales and business reports' },
+        { name: 'Hardware', description: 'Hardware integration (printers, EDC, scanners)' },
       ],
     },
   });
@@ -107,6 +168,13 @@ export async function buildApp() {
       deepLinking: true,
       displayRequestDuration: true,
       tryItOutEnabled: true,
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+    },
+    logo: {
+      type: 'image/svg+xml',
+      content: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3QgZmlsbD0iIzEwYjk4MSIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIvPjx0ZXh0IHg9IjE2IiB5PSIyMiIgZm9udC1zaXplPSIxOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPlY8L3RleHQ+PC9zdmc+',
     },
   });
 
@@ -163,54 +231,11 @@ export async function buildApp() {
 
   // ============== HEALTH CHECKS ==============
 
-  // Liveness probe - basic health check
-  app.get('/health', async () => ({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  }));
-
-  // Readiness probe - checks all dependencies
-  app.get('/ready', async (_request, reply) => {
-    const checks: Record<string, boolean> = {
-      database: false,
-      redis: false,
-    };
-
-    try {
-      const db = PostgresConnection.getInstance();
-      checks.database = await db.healthCheck();
-    } catch {
-      checks.database = false;
-    }
-
-    try {
-      checks.redis = await RedisClient.getInstance().healthCheck();
-    } catch {
-      checks.redis = false;
-    }
-
-    const allHealthy = Object.values(checks).every(Boolean);
-
-    if (!allHealthy) {
-      return reply.status(503).send({
-        status: 'not_ready',
-        checks,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    return {
-      status: 'ready',
-      checks,
-      timestamp: new Date().toISOString(),
-    };
-  });
+  await app.register(healthRoutes, { prefix: '/health' });
 
   // ============== ROUTES ==============
 
-  // Auth routes (public)
-  await app.register(authRoutes, { prefix: '/api/v1/auth' });
+  // Auth routes registered above (within rate-limited scope)
 
   // Protected routes (require auth)
   await app.register(categoryRoutes, { prefix: '/api/v1/categories' });

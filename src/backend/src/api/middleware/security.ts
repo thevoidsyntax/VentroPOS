@@ -9,6 +9,21 @@ interface SecurityHeadersOptions {
   enableHSTS?: boolean;
 }
 
+// Swagger UI has its own CSP requirements - use relaxed settings
+const SWAGGER_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "block-all-mixed-content",
+  "font-src 'self' https: data:",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: https:",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src-attr 'unsafe-inline'",
+  "style-src 'self' https: 'unsafe-inline'",
+  "worker-src 'self' blob:",
+].join('; ');
+
 const DEFAULT_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -25,6 +40,13 @@ const DEFAULT_CSP = [
 
 const HSTS_VALUE = 'max-age=31536000; includeSubDomains';
 
+// Routes that need relaxed security headers
+const RELAXED_HEADER_ROUTES = ['/docs', '/health', '/ready'];
+
+function shouldUseRelaxedHeaders(path: string): boolean {
+  return RELAXED_HEADER_ROUTES.some(route => path.startsWith(route));
+}
+
 export async function registerSecurityHeaders(
   app: FastifyInstance,
   options: SecurityHeadersOptions = {}
@@ -32,14 +54,16 @@ export async function registerSecurityHeaders(
   const { enableCSP = true, enableHSTS = config.isProduction } = options;
 
   // Apply on every request
-  app.addHook('onSend', async (_request: FastifyRequest, reply: FastifyReply) => {
+  app.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply) => {
+    const path = request.url;
+    const useRelaxed = shouldUseRelaxedHeaders(path);
     const headers = reply.getHeaders();
 
     // Prevent MIME type sniffing
     headers['X-Content-Type-Options'] = 'nosniff';
 
-    // Prevent clickjacking
-    headers['X-Frame-Options'] = 'DENY';
+    // Prevent clickjacking (allow swagger UI to work in frames)
+    headers['X-Frame-Options'] = useRelaxed ? 'SAMEORIGIN' : 'DENY';
 
     // XSS Protection (legacy but still useful for older browsers)
     headers['X-XSS-Protection'] = '1; mode=block';
@@ -58,9 +82,9 @@ export async function registerSecurityHeaders(
       'payment=()',
     ].join(', ');
 
-    // Content Security Policy
+    // Content Security Policy - use appropriate CSP for route
     if (enableCSP) {
-      headers['Content-Security-Policy'] = DEFAULT_CSP;
+      headers['Content-Security-Policy'] = useRelaxed ? SWAGGER_CSP : DEFAULT_CSP;
     }
 
     // Strict Transport Security (HTTPS only)
@@ -81,6 +105,9 @@ export async function registerSecurityHeaders(
   app.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
     // Handle OPTIONS requests efficiently
     if (request.method === 'OPTIONS') {
+      const path = request.url;
+      const useRelaxed = shouldUseRelaxedHeaders(path);
+
       const headers: Record<string, string> = {
         'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-Idempotency-Key',
@@ -89,9 +116,9 @@ export async function registerSecurityHeaders(
         'Vary': 'Origin',
       };
 
-      // Only add CSP on preflight if enabled
+      // Use appropriate CSP for route type
       if (enableCSP) {
-        headers['Content-Security-Policy'] = DEFAULT_CSP;
+        headers['Content-Security-Policy'] = useRelaxed ? SWAGGER_CSP : DEFAULT_CSP;
       }
 
       reply.headers(headers);
