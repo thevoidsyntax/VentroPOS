@@ -1,8 +1,8 @@
 # VentroPos - Developer Instructions
 
 > **Project:** VentroPos - Point of Sale System for Cafe
-> **Version:** 1.0.0
-> **Last Updated:** 2024
+> **Version:** 1.0.1
+> **Last Updated:** 2026-01-18
 
 ---
 
@@ -30,13 +30,15 @@
 ## 🎯 Current Status
 
 ```
-Phase 1: ✅ DONE
-Phase 2: ✅ DONE
-Phase 3: ⬜ NEXT (Inventory)
-Phase 4-6: ⬜ TODO
+Phase 1: ✅ DONE  - Foundation, Auth, Database
+Phase 2: ✅ DONE  - Core POS, Cart, Checkout
+Phase 3: ✅ DONE  - Inventory, Stock Management
+Phase 4: ✅ DONE  - Reporting, Dashboard
+Phase 5: ⬜ NEXT   - Hardware Integration
+Phase 6: ⬜ TODO  - Launch, Polish
 ```
 
-**Last work:** Phase 2 completion - Core POS with cart, checkout, modifiers (59 tests passing)
+**Last work:** Phase 4 completion - Reporting module + Audit fixes (142 tests passing)
 
 ---
 
@@ -74,34 +76,36 @@ src/backend/           # Fastify API server
 
 ## 📌 Phase Work
 
-### Current: Phase 3 - Inventory
+### Current: Phase 5 - Hardware Integration
 
-**Requirements:** Lihat `README.md` Section "Phase 3: Inventory"
+**Requirements:** Lihat `README.md` Section "Phase 5: Hardware"
 
 **Skills to invoke:**
-- `/database` - Stock management
-- `/api-design` - Stock APIs
+- `/api-design` - Hardware API design
+- `/deployment` - Hardware integration patterns
+- `/security` - Secure hardware communication
 
 **Deliverables:**
-- Stock overview API
-- Low stock alerts
-- Manual adjustment
-- Stock history
+- Receipt printer integration
+- EDC terminal integration
+- Barcode scanner support
+- Cash drawer control
 
-### Future Phases
+### Completed Phases
 
-| Phase | Focus | Skills |
-|-------|-------|--------|
-| 4 | Reporting | `/frontend`, `/database` |
-| 5 | Hardware | `/api-design`, `/deployment` |
-| 6 | Launch | `/security`, `/performance` |
+| Phase | Status | Key Deliverables |
+|-------|--------|-----------------|
+| 4 | ✅ Done | Sales reports, Product reports, Staff reports, CSV export |
+| 3 | ✅ Done | Stock overview, Alerts, Adjustments, History, Opname |
+| 2 | ✅ Done | Orders, Checkout, Split payment, Idempotency |
+| 1 | ✅ Done | Auth, Users, Products, Categories, Tables |
 
 ---
 
 ## 💬 Prompt Templates
 
 ```
-"lanjutkan phase 3"    → Phase 3 work (Inventory)
+"lanjutkan phase 5"    → Phase 5 work (Hardware)
 "lanjutkan phase N"    → Phase N work
 ```
 
