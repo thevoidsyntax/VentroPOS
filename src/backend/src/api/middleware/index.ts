@@ -1,9 +1,17 @@
-// API Middleware - Auth, Tenant Context, RBAC
-// Handles JWT verification and tenant isolation
+// API Middleware - Auth, Tenant Context, RBAC, Security
+// Handles JWT verification, tenant isolation, and security
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { UserRole } from '../../domain/entities/index.js';
 import { UnauthorizedError, ForbiddenError } from '../../shared/errors/index.js';
+
+// Re-export security utilities
+export {
+  registerSecurityHeaders,
+  rateLimitKeyGenerator,
+  rateLimitErrorResponse,
+  rateLimitHeaders,
+} from './security.js';
 
 // Extend FastifyRequest to include user context
 declare module 'fastify' {

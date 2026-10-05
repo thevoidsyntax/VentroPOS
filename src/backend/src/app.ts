@@ -10,6 +10,8 @@ import swaggerUi from '@fastify/swagger-ui';
 
 import { config } from './shared/config/index.js';
 import { AppError } from './shared/errors/index.js';
+import { registerSecurityHeaders, rateLimitKeyGenerator, rateLimitErrorResponse } from './api/middleware/security.js';
+import { RedisClient } from './infrastructure/cache/redis.js';
 
 import { authRoutes } from './api/routes/auth.routes.js';
 import { categoryRoutes } from './api/routes/category.routes.js';
@@ -41,6 +43,9 @@ export async function buildApp() {
 
   // ============== PLUGINS ==============
 
+  // Security Headers (first, applies to all responses)
+  await registerSecurityHeaders(app);
+
   // CORS
   await app.register(cors, {
     origin: config.cors.origin,
@@ -54,39 +59,56 @@ export async function buildApp() {
     verify: { algorithms: ['HS256'] },
   });
 
-  // Rate Limiting
+  // Rate Limiting - Production-ready configuration
   await app.register(rateLimit, {
-    max: 100,
+    max: 100, // requests per window
     timeWindow: '1 minute',
+    keyGenerator: rateLimitKeyGenerator,
+    errorResponseBuilder: rateLimitErrorResponse,
   });
 
+  // Redis Connection (for caching)
+  await RedisClient.getInstance().connect();
+
   // Swagger Documentation
-  if (config.isDevelopment) {
-    await app.register(swagger, {
-      openapi: {
-        info: {
-          title: 'VentroPos API',
-          description: 'Point of Sale API for Cafe',
-          version: '1.0.0',
-        },
-        servers: [
-          { url: `http://localhost:${config.server.port}` },
-        ],
-        components: {
-          securitySchemes: {
-            bearerAuth: {
-              type: 'http',
-              scheme: 'bearer',
-            },
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'VentroPos API',
+        description: 'Point of Sale API for Cafe',
+        version: '1.0.0',
+      },
+      servers: [
+        ...(config.isProduction ? [] : [{ url: `http://localhost:${config.server.port}` }]),
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
           },
         },
       },
-    });
+      tags: [
+        { name: 'Auth', description: 'Authentication endpoints' },
+        { name: 'Products', description: 'Product management' },
+        { name: 'Orders', description: 'Order management' },
+        { name: 'Reports', description: 'Reporting & analytics' },
+        { name: 'Hardware', description: 'Hardware integration' },
+      ],
+    },
+  });
 
-    await app.register(swaggerUi, {
-      routePrefix: '/docs',
-    });
-  }
+  await app.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: true,
+      displayRequestDuration: true,
+      tryItOutEnabled: true,
+    },
+  });
 
   // ============== ERROR HANDLER ==============
 
@@ -141,26 +163,48 @@ export async function buildApp() {
 
   // ============== HEALTH CHECKS ==============
 
-  app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+  // Liveness probe - basic health check
+  app.get('/health', async () => ({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  }));
 
+  // Readiness probe - checks all dependencies
   app.get('/ready', async (_request, reply) => {
-    // Check database connection
+    const checks: Record<string, boolean> = {
+      database: false,
+      redis: false,
+    };
+
     try {
       const db = PostgresConnection.getInstance();
-      const dbHealthy = await db.healthCheck();
-      if (!dbHealthy) {
-        return reply.status(503).send({
-          status: 'not_ready',
-          checks: { database: false },
-        });
-      }
-      return { status: 'ready', checks: { database: true } };
+      checks.database = await db.healthCheck();
     } catch {
+      checks.database = false;
+    }
+
+    try {
+      checks.redis = await RedisClient.getInstance().healthCheck();
+    } catch {
+      checks.redis = false;
+    }
+
+    const allHealthy = Object.values(checks).every(Boolean);
+
+    if (!allHealthy) {
       return reply.status(503).send({
         status: 'not_ready',
-        checks: { database: false },
+        checks,
+        timestamp: new Date().toISOString(),
       });
     }
+
+    return {
+      status: 'ready',
+      checks,
+      timestamp: new Date().toISOString(),
+    };
   });
 
   // ============== ROUTES ==============
@@ -188,7 +232,17 @@ export async function buildApp() {
   signals.forEach((signal) => {
     process.on(signal, async () => {
       app.log.info(`Received ${signal}, shutting down gracefully...`);
+
+      // Close Redis connection
+      await RedisClient.getInstance().close();
+
+      // Close database connection
+      await PostgresConnection.getInstance().close();
+
+      // Close Fastify
       await app.close();
+
+      app.log.info('Shutdown complete');
       process.exit(0);
     });
   });
