@@ -47,7 +47,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 | 2 | ✅ Done | Core POS, Cart, Checkout |
 | 3 | ✅ Done | Inventory, Stock Management |
 | 4 | ✅ Done | Reporting, Dashboard |
-| 5 | 🔄 In Progress | Hardware Integration |
+| 5 | ✅ Done | Hardware Integration |
 | 6 | ⬜ Todo | Launch, Polish |
 
 ---
@@ -227,10 +227,10 @@ Phase 5.3: EDC Terminal ✅
 ├── Settlement API ✅
 └── Transaction status check ✅
 
-Phase 5.4: Scanner & Drawer
-├── Barcode scan handler
-├── Cash drawer control
-└── Integration tests
+Phase 5.4: Scanner & Drawer ✅
+├── Barcode scan handler ✅
+├── Cash drawer control ✅
+└── Integration tests ✅
 ```
 
 **Database Schema:**
@@ -555,24 +555,34 @@ LOG_LEVEL=info         # Pino log level
 - Settlement (end-of-day batch) API
 - Transaction status check endpoint
 
+**Phase 5.4 - Scanner & Drawer Complete:**
+- ScannerService for barcode scan event handling
+- DrawerService for cash drawer control
+- Support for direct drawer and printer-connected drawer
+- Barcode format validation (EAN-13, UPC, Code 128, QR)
+- Scan event logging
+
 **New Files Structure:**
 ```
 Hardware Module (Phase 5.1+):
-├── src/api/routes/hardware.routes.ts        ✅
-├── src/api/routes/print.routes.ts          ✅ (Phase 5.2)
-├── src/api/routes/edc.routes.ts            ✅ (Phase 5.3)
+├── src/api/routes/
+│   ├── hardware.routes.ts                  ✅
+│   ├── print.routes.ts                     ✅ (Phase 5.2)
+│   ├── edc.routes.ts                      ✅ (Phase 5.3)
+│   └── hardware-misc.routes.ts             ✅ (Phase 5.4)
 ├── src/application/hardware/
-│   ├── index.ts
-│   ├── device.service.ts                  ✅
-│   ├── edc.service.ts                   ✅ (Phase 5.3)
-│   └── print.service.ts                   ✅ (Phase 5.2)
+│   ├── index.ts                           ✅
+│   ├── device.service.ts                   ✅
+│   ├── edc.service.ts                     ✅ (Phase 5.3)
+│   ├── print.service.ts                   ✅ (Phase 5.2)
+│   ├── scanner.service.ts                 ✅ (Phase 5.4)
+│   └── drawer.service.ts                  ✅ (Phase 5.4)
 ├── src/domain/entities/hardware.ts         ✅
 ├── src/infrastructure/hardware/
 │   └── drivers/
 │       ├── escpos.driver.ts               ✅ (Phase 5.2)
 │       └── edc.driver.ts                  ✅ (Phase 5.3)
 ├── src/infrastructure/database/repositories/hardware.ts ✅
-├── tests/unit/hardware.test.ts
 └── migrations/006_hardware_tables.sql     ✅
 ```
 
