@@ -47,7 +47,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 | 2 | ✅ Done | Core POS, Cart, Checkout |
 | 3 | ✅ Done | Inventory, Stock Management |
 | 4 | ✅ Done | Reporting, Dashboard |
-| 5 | ⬜ Todo | Hardware Integration |
+| 5 | 🔄 In Progress | Hardware Integration |
 | 6 | ⬜ Todo | Launch, Polish |
 
 ---
@@ -167,13 +167,107 @@ GET  /api/v1/reports/export      - CSV export ✅
 
 ---
 
-### Phase 5: Hardware (Todo)
+### Phase 5: Hardware Integration ✅ In Progress
 
 **Objectives:**
-- Receipt printer integration
-- Barcode scanner support
-- EDC terminal integration
-- Cash drawer control
+- Receipt printer integration (ESC/POS over TCP/USB)
+- Barcode scanner support (USB HID / Web Serial API)
+- EDC terminal integration (Payment Gateway)
+- Cash drawer control (POS Protocol via Relay)
+
+**Deliverables:**
+
+```
+Hardware Device APIs:
+GET    /api/v1/hardware/devices           - List registered devices
+POST   /api/v1/hardware/devices           - Register new device
+GET    /api/v1/hardware/devices/:id       - Get device details
+PUT    /api/v1/hardware/devices/:id       - Update device config
+DELETE /api/v1/hardware/devices/:id       - Remove device
+POST   /api/v1/hardware/devices/:id/test  - Test device connection
+
+Print Operations:
+POST   /api/v1/hardware/print             - Print receipt
+POST   /api/v1/hardware/print/kitchen     - Print kitchen ticket
+POST   /api/v1/hardware/print/invoice     - Print invoice
+
+EDC Operations:
+POST   /api/v1/hardware/edc/payment        - Initiate EDC payment
+POST   /api/v1/hardware/edc/cancel        - Cancel EDC transaction
+POST   /api/v1/hardware/edc/settle        - Settlement (end of day)
+GET    /api/v1/hardware/edc/status/:id   - Check payment status
+
+Cash Drawer:
+POST   /api/v1/hardware/drawer/open        - Open cash drawer
+
+Scanner:
+POST   /api/v1/hardware/scan              - Record barcode scan event
+
+Logs:
+GET    /api/v1/hardware/logs              - Hardware event logs
+```
+
+**Implementation Phases:**
+
+```
+Phase 5.1: Device Foundation
+├── Database schema (hardware_devices, hardware_logs)
+├── Device CRUD APIs
+└── Hardware logging infrastructure
+
+Phase 5.2: Receipt Printer
+├── ESC/POS driver implementation
+├── Print service
+└── Kitchen/Receipt/Invoice printing
+
+Phase 5.3: EDC Terminal
+├── EDC service
+├── Payment flow with idempotency
+└── Settlement API
+
+Phase 5.4: Scanner & Drawer
+├── Barcode scan handler
+├── Cash drawer control
+└── Integration tests
+```
+
+**Database Schema:**
+
+```sql
+-- hardware_devices table
+CREATE TABLE hardware_devices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    device_type VARCHAR(20) NOT NULL CHECK (device_type IN ('printer', 'edc', 'scanner', 'drawer')),
+    name VARCHAR(100) NOT NULL,
+    connection_type VARCHAR(20) NOT NULL CHECK (connection_type IN ('usb', 'serial', 'tcp', 'bluetooth')),
+    config JSONB NOT NULL DEFAULT '{}',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    is_default BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- hardware_logs table
+CREATE TABLE hardware_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    device_id UUID REFERENCES hardware_devices(id),
+    event_type VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('success', 'failed', 'pending')),
+    request_data JSONB,
+    response_data JSONB,
+    error_message TEXT,
+    duration_ms INTEGER,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+**Phase Gate:**
+- [ ] All tests passing
+- [ ] npm audit: 0 vulnerabilities
+- [ ] tsc --noEmit: no errors
+- [ ] Documentation updated
 
 ---
 
@@ -430,6 +524,27 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### v1.0.2 - Phase 5: Hardware Integration (In Progress)
+
+**Phase 5 Specifications Added:**
+- Device management APIs (CRUD)
+- Print operations (Receipt, Kitchen, Invoice)
+- EDC terminal integration APIs
+- Cash drawer control
+- Barcode scanner support
+- Hardware event logging
+
+**New Files Structure:**
+```
+Hardware Module (Phase 5.1+):
+├── src/api/routes/hardware.routes.ts
+├── src/application/hardware/ (device, print, edc, scanner, drawer services)
+├── src/domain/entities/hardware.ts
+├── src/infrastructure/hardware/ (drivers, repositories)
+├── tests/unit/hardware.test.ts
+└── migrations/006_hardware_tables.sql
+```
 
 ### v1.0.1 - Audit Fixes (2026-01-18)
 
