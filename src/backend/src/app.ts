@@ -21,6 +21,7 @@ import { stockRoutes } from './api/routes/stock.routes.js';
 import { modifierRoutes } from './api/routes/modifier.routes.js';
 import { reportRoutes } from './api/routes/report.routes.js';
 import { hardwareRoutes } from './api/routes/hardware.routes.js';
+import { printRoutes } from './api/routes/print.routes.js';
 import { PostgresConnection } from './infrastructure/database/postgres/index.js';
 
 export async function buildApp() {
@@ -175,6 +176,7 @@ export async function buildApp() {
   await app.register(modifierRoutes, { prefix: '/api/v1/modifiers' });
   await app.register(reportRoutes, { prefix: '/api/v1/reports' });
   await app.register(hardwareRoutes, { prefix: '/api/v1/hardware' });
+  await app.register(printRoutes, { prefix: '/api/v1/hardware/print' });
 
   // ============== GRACEFUL SHUTDOWN ==============
 
