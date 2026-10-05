@@ -218,12 +218,14 @@ Phase 5.1: Device Foundation ✅
 Phase 5.2: Receipt Printer ✅
 ├── ESC/POS driver implementation ✅
 ├── Print service ✅
-├── Kitchen/Receipt/Invoice printing ✅
+└── Kitchen/Receipt/Invoice printing ✅
 
-Phase 5.3: EDC Terminal
-├── EDC service
-├── Payment flow with idempotency
-└── Settlement API
+Phase 5.3: EDC Terminal ✅
+├── EDC driver (TCP socket) ✅
+├── EDC service ✅
+├── Payment flow with idempotency ✅
+├── Settlement API ✅
+└── Transaction status check ✅
 
 Phase 5.4: Scanner & Drawer
 ├── Barcode scan handler
@@ -534,7 +536,7 @@ LOG_LEVEL=info         # Pino log level
 **Phase 5 Specifications Added:**
 - Device management APIs (CRUD) ✅
 - Print operations (Receipt, Kitchen, Invoice) ✅
-- EDC terminal integration APIs
+- EDC terminal integration APIs ✅
 - Cash drawer control
 - Barcode scanner support
 - Hardware event logging ✅
@@ -546,18 +548,29 @@ LOG_LEVEL=info         # Pino log level
 - Invoice printing
 - QR code generation for QRIS payments
 
+**Phase 5.3 - EDC Terminal Complete:**
+- EDCDriver with TCP socket protocol
+- EDCService for payment processing
+- Idempotency key support for duplicate prevention
+- Settlement (end-of-day batch) API
+- Transaction status check endpoint
+
 **New Files Structure:**
 ```
 Hardware Module (Phase 5.1+):
 ├── src/api/routes/hardware.routes.ts        ✅
 ├── src/api/routes/print.routes.ts          ✅ (Phase 5.2)
+├── src/api/routes/edc.routes.ts            ✅ (Phase 5.3)
 ├── src/application/hardware/
 │   ├── index.ts
 │   ├── device.service.ts                  ✅
+│   ├── edc.service.ts                   ✅ (Phase 5.3)
 │   └── print.service.ts                   ✅ (Phase 5.2)
 ├── src/domain/entities/hardware.ts         ✅
 ├── src/infrastructure/hardware/
-│   └── drivers/escpos.driver.ts           ✅ (Phase 5.2)
+│   └── drivers/
+│       ├── escpos.driver.ts               ✅ (Phase 5.2)
+│       └── edc.driver.ts                  ✅ (Phase 5.3)
 ├── src/infrastructure/database/repositories/hardware.ts ✅
 ├── tests/unit/hardware.test.ts
 └── migrations/006_hardware_tables.sql     ✅
