@@ -239,3 +239,48 @@ export interface IdempotencyKey {
   createdAt: Date;
   expiresAt: Date;
 }
+
+// ============== HARDWARE ==============
+export type HardwareDeviceType = 'printer' | 'edc' | 'scanner' | 'drawer';
+export type HardwareConnectionType = 'usb' | 'serial' | 'tcp' | 'bluetooth';
+export type HardwareLogStatus = 'success' | 'failed' | 'pending';
+
+export interface HardwareConfig {
+  ip?: string;
+  port?: number;
+  baudRate?: number;
+  dataBits?: 5 | 6 | 7 | 8;
+  stopBits?: 1 | 1.5 | 2;
+  parity?: 'none' | 'even' | 'odd';
+  vendorId?: string;
+  productId?: string;
+  macAddress?: string;
+  timeout?: number;
+  retryCount?: number;
+}
+
+export interface HardwareDevice {
+  id: string;
+  tenantId: string;
+  deviceType: HardwareDeviceType;
+  name: string;
+  connectionType: HardwareConnectionType;
+  config: HardwareConfig;
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface HardwareLog {
+  id: string;
+  tenantId: string;
+  deviceId: string | null;
+  eventType: string;
+  status: HardwareLogStatus;
+  requestData: Record<string, unknown> | null;
+  responseData: Record<string, unknown> | null;
+  errorMessage: string | null;
+  durationMs: number | null;
+  createdAt: Date;
+}

@@ -179,3 +179,62 @@ export interface IIdempotencyKeyRepository {
    */
   cleanupExpired(): Promise<void>;
 }
+
+// ============== HARDWARE DEVICE ==============
+import type { HardwareDevice, HardwareLog, HardwareDeviceType, HardwareLogStatus, HardwareConfig } from '../entities/index.js';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface HardwareDeviceQuery {
+  deviceType?: HardwareDeviceType;
+  isActive?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface HardwareLogQuery {
+  deviceId?: string;
+  eventType?: string;
+  status?: HardwareLogStatus;
+  startDate?: Date;
+  endDate?: Date;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateHardwareDeviceDTO {
+  deviceType: HardwareDeviceType;
+  name: string;
+  connectionType: 'usb' | 'serial' | 'tcp' | 'bluetooth';
+  config: HardwareConfig;
+  isDefault?: boolean;
+}
+
+export interface UpdateHardwareDeviceDTO {
+  name?: string;
+  connectionType?: 'usb' | 'serial' | 'tcp' | 'bluetooth';
+  config?: HardwareConfig;
+  isActive?: boolean;
+  isDefault?: boolean;
+}
+
+export interface IHardwareDeviceRepository {
+  create(data: CreateHardwareDeviceDTO, tenantId: string): Promise<HardwareDevice>;
+  findById(id: string, tenantId: string): Promise<HardwareDevice | null>;
+  findByTenant(tenantId: string, query?: HardwareDeviceQuery): Promise<PaginatedResult<HardwareDevice>>;
+  findDefault(deviceType: HardwareDeviceType, tenantId: string): Promise<HardwareDevice | null>;
+  update(id: string, tenantId: string, data: UpdateHardwareDeviceDTO): Promise<HardwareDevice | null>;
+  delete(id: string, tenantId: string): Promise<boolean>;
+  testConnection(id: string, tenantId: string): Promise<{ success: boolean; message: string }>;
+}
+
+export interface IHardwareLogRepository {
+  create(log: Omit<HardwareLog, 'id' | 'createdAt'>): Promise<HardwareLog>;
+  findByTenant(tenantId: string, query?: HardwareLogQuery): Promise<PaginatedResult<HardwareLog>>;
+}

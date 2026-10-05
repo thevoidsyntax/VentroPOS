@@ -311,6 +311,7 @@ http://localhost:3000/api/v1
 | Stock | CRUD `/stock/*` |
 | Stock Opname | CRUD `/stock/opnames/*` |
 | Reports | GET `/reports/*` |
+| Hardware | CRUD `/hardware/devices` + `/hardware/logs` |
 
 ### Response Format
 
@@ -354,6 +355,8 @@ http://localhost:3000/api/v1
 | `stock_logs` | Stock movement history |
 | `audit_logs` | Activity audit trail |
 | `idempotency_keys` | Duplicate request prevention |
+| `hardware_devices` | POS hardware configuration |
+| `hardware_logs` | Hardware operation logs |
 
 ### Security
 
@@ -378,11 +381,12 @@ src/backend/           # Fastify API server
 │   ├── tables/      # Table use cases (split into 8 files)
 │   ├── categories/  # Category use cases (split into 4 files)
 │   ├── modifiers/   # Modifier use cases
-│   └── reports/     # Report use cases (6 files + utils)
+│   ├── reports/     # Report use cases (6 files + utils)
+│   └── hardware/    # Hardware device service (Phase 5)
 ├── src/domain/       # Entities, repositories interfaces (Domain Layer)
 ├── src/infrastructure/ # DB, auth implementations (Infrastructure Layer)
 │   └── database/
-│       └── repositories/  # Split into 15 individual files
+│       └── repositories/  # Split into 16 individual files
 └── src/shared/       # Config, errors, utils (Shared Kernel)
 ```
 
