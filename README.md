@@ -277,11 +277,17 @@ CREATE TABLE hardware_logs (
 
 ---
 
-## Phase 7: Frontend Setup
+## Phase 7: Frontend Setup (React + TypeScript)
 
-**Skills to invoke:** `/frontend` - React best practices, component patterns
+**Trigger Conditions untuk auto-invoke skills:**
+| Skill | Auto-invoke | Conditions |
+|-------|------------|-------------|
+| `/frontend` | ✅ | File: `**/*.tsx`, `**/*.jsx` |
+| `/testing` | ✅ | File: `tests/**`, "test", "coverage" |
+| `/performance` | ✅ | Keywords: "performance", "bundle", "core web vitals" |
+| `/diagnosing-bugs` | ✅ | Keywords: "bug", "error", "fix" |
 
-**Requirements:** Lihat `docs/frontend/SPEC.md` untuk detail lengkap
+**Requirements:** Lihat `docs/frontend/SPEC.md` untuk detail lengkap.
 
 **Deliverables:**
 - React + Vite + TypeScript setup
@@ -296,6 +302,36 @@ CREATE TABLE hardware_logs (
 - [ ] Zustand stores
 - [ ] TanStack Query client
 - [ ] React Router setup
+
+### Phase 7.2: POS Interface (Trigger: `/frontend` + `/ui-ux-pro-max-styling`)
+- [ ] Product grid dengan category tabs
+- [ ] Cart drawer dengan qty adjust
+- [ ] Checkout flow
+- [ ] Receipt modal
+
+### Phase 7.3: Orders (Trigger: `/frontend`)
+- [ ] Order list dengan filters
+- [ ] Order detail page
+- [ ] Void order flow
+
+### Phase 7.4: Inventory UI
+- [ ] Stock overview
+- [ ] Stock alerts
+- [ ] Stock opname wizard
+
+### Phase 7.5: Reports Dashboard (Trigger: `/performance`)
+- [ ] Sales charts (Recharts)
+- [ ] Export CSV/PDF
+
+### Phase 7.6: Tables & Settings
+- [ ] Table layout
+- [ ] User management
+- [ ] Hardware config
+
+### Phase 7.7: PWA (Trigger: `/frontend` + `/performance`)
+- [ ] Service worker (vite-plugin-pwa)
+- [ ] Offline mode
+- [ ] Install prompt
 
 ---
 
