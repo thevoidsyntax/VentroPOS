@@ -1,8 +1,8 @@
 # VentroPos - Product Requirements Document
 
-> **Version:** 1.0.0  
-> **Status:** Draft  
-> **Last Updated:** 2024
+> **Version:** 1.1.0
+> **Status:** Draft
+> **Last Updated:** 2026-01-26
 
 ---
 
@@ -13,7 +13,8 @@
 3. [Feature Specifications](#3-feature-specifications)
 4. [Non-Functional Requirements](#4-non-functional-requirements)
 5. [Success Metrics](#5-success-metrics)
-6. [Glossary](#6-glossary)
+6. [Frontend / UI-UX](#6-frontend--uiux)
+7. [Glossary](#7-glossary)
 
 ---
 
@@ -376,7 +377,335 @@ Metrics:
 
 ---
 
-## 6. Glossary
+## 6. Frontend / UI-UX
+
+### 6.1 Tech Stack
+
+| Component | Technology | Justification |
+|-----------|-----------|---------------|
+| Framework | React 18 + Vite | Fast dev, great DX |
+| Language | TypeScript | Type safety |
+| Styling | TailwindCSS + shadcn/ui | Beautiful, accessible |
+| State | Zustand | Lightweight, simple API |
+| Data Fetching | TanStack Query | Caching, offline support |
+| Routing | React Router 6 | Standard, stable |
+| Charts | Recharts | React-native |
+| PWA | vite-plugin-pwa | Easy offline setup |
+| Icons | Lucide React | Consistent, beautiful |
+
+### 6.2 Responsive Strategy
+
+**Primary: Tablet (768px - 1024px)**
+
+Kasir menggunakan tablet di counter kasir.
+
+| Breakpoint | Device | Priority |
+|------------|--------|----------|
+| `< 768px` | Mobile | Secondary |
+| `768px - 1024px` | Tablet | **Primary** |
+| `> 1024px` | Desktop | Backoffice only |
+
+**Layout Principles:**
+- Touch-first: Large tap targets (min 44x44px)
+- Minimal typing: Barcode scanner, dropdowns
+- Glanceable: Clear status indicators
+- Offline-capable: Queue actions when disconnected
+
+### 6.3 Design System
+
+#### Color Palette
+
+```
+Primary:     #2563EB (Blue-600)
+Secondary:   #7C3AED (Violet-600)
+Success:     #16A34A (Green-600)
+Warning:     #CA8A04 (Yellow-600)
+Danger:      #DC2626 (Red-600)
+Background:  #F8FAFC (Slate-50)
+Surface:     #FFFFFF
+Text:        #1E293B (Slate-800)
+Text-muted:  #64748B (Slate-500)
+```
+
+#### Typography
+
+```
+Font:        Inter (system-ui fallback)
+Heading 1:   24px / Bold
+Heading 2:   20px / Semibold
+Heading 3:   16px / Semibold
+Body:        14px / Regular
+Caption:     12px / Regular
+```
+
+#### Spacing
+
+```
+Base unit: 4px
+Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64
+Card padding: 16px
+Section gap: 24px
+Page margin: 16px (mobile), 24px (tablet), 32px (desktop)
+```
+
+#### Components
+
+| Component | States | Notes |
+|-----------|---------|-------|
+| Button | default, hover, active, disabled, loading | Min height 44px |
+| Input | default, focus, error, disabled | Clear visual feedback |
+| Card | default, hover (if clickable) | Elevation for hierarchy |
+| Badge | success, warning, danger, neutral | For status indicators |
+| Modal | - | Backdrop blur, centered |
+| Toast | success, error, info | Auto-dismiss 3s |
+
+### 6.4 Page Structure
+
+#### Dashboard Layout
+
+```
+┌─────────────────────────────────────────────────┐
+│  Header: Logo, User Menu, Notifications          │
+├────────────┬──────────────────────────────────────┤
+│            │                                      │
+│  Sidebar  │  Main Content                        │
+│  (collapsible)  │                              │
+│            │                                      │
+│            │                                      │
+│            │                                      │
+└────────────┴────────────────────────────────────┘
+```
+
+**Header (56px height):**
+- Logo (left)
+- Quick actions (center) - New Order, Search
+- User menu + notifications (right)
+
+**Sidebar (240px width, collapsible to 64px icons):**
+- Navigation items with icons
+- Active state indicator
+- Role-based visibility
+
+#### POS Grid Layout (Tablet Primary)
+
+```
+┌─────────────────────────────────────────────────┐
+│  Category Tabs (horizontal scroll)              │
+├───────────────────────────────────────────────┤
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐           │
+│  │     │ │     │ │     │ │     │  Product    │
+│  │ [img] │ │[img] │ │[img] │ │[img] │  Grid      │
+│  │       │ │       │ │       │ │       │  (3-4 col) │
+│  │ Name  │ │ Name  │ │ Name  │ │ Name  │           │
+│  │ Rp XX │ │ Rp XX │ │ Rp XX │ │ Rp XX │           │
+│  └─────┘ └─────┘ └─────┘ └─────┘           │
+└─────────────────────────────────────────────────┘
+│  Current Order Summary (sticky bottom)         │
+│  [View Cart (X items)] ──────────── [PAY]   │
+└─────────────────────────────────────────────────┘
+```
+
+### 6.5 Page Specifications
+
+#### P0 - Critical (Kasir Flow)
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Login | `/login` | Email + password, remember me |
+| POS Grid | `/pos` | Product catalog, category tabs, cart trigger |
+| Cart Drawer | Slide-in panel | Current items, qty adjust, notes |
+| Checkout | `/checkout` | Payment method, amount, change |
+| Receipt | Modal/Print | Transaction summary |
+
+#### P1 - Important (Manager Flow)
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/dashboard` | Sales overview, today's metrics |
+| Orders | `/orders` | Order history, filters, search |
+| Order Detail | `/orders/:id` | Full order info, actions (void, reprint) |
+| Products | `/products` | CRUD products, categories |
+| Stock | `/stock` | Stock overview, alerts, opname |
+
+#### P2 - Nice to Have (Owner Flow)
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Reports | `/reports` | Sales, products, staff analytics |
+| Reports Export | `/reports/export` | CSV/PDF download |
+| Tables | `/tables` | Visual table layout, status |
+| Users | `/users` | Staff management, roles |
+| Settings | `/settings` | Store config, hardware, taxes |
+
+### 6.6 User Flows
+
+#### Flow 1: Checkout (Kasir)
+
+```
+[POS Grid]
+    │
+    ├─[Tap Product]─→ [Cart Drawer slides in]
+    │                         │
+    │                   [Adjust qty/notes]
+    │                         │
+    │                         ▼
+    │                   [Tap "Bayar"]
+    │                         │
+    ▼                         ▼
+[Badge update]          [Checkout Page]
+                              │
+                    ┌───────────┼───────────┐
+                    ▼           ▼           ▼
+              [Cash]      [QRIS]    [Card/EDC]
+                    │           │           │
+                    ▼           ▼           ▼
+              [Enter amount]  [QR Code   [EDC process]
+                    │    displayed]        │
+                    ▼           ▼           ▼
+               [Change shown] [Wait confirm] [Success]
+                    │           │           │
+                    └───────────┴───────────┘
+                                  │
+                                  ▼
+                           [Receipt Modal]
+                                  │
+                                  ▼
+                           [Print + Return to POS]
+```
+
+#### Flow 2: Stock Opname (Manager)
+
+```
+[Stock Page] → [Tap "Stock Opname"] → [Create Session]
+                                              │
+                                              ▼
+                                    [Select products to count]
+                                              │
+                                              ▼
+                                    [Physical counting mode]
+                                              │
+                                    ┌───────────┴───────────┐
+                                    ▼                       ▼
+                              [Count A]              [Count B]
+                                    │                       │
+                                    ▼                       ▼
+                              [Enter qty]            [Enter qty]
+                                    │                       │
+                                    └───────────┬───────────┘
+                                                ▼
+                                        [Submit Count]
+                                                │
+                                                ▼
+                                        [Review Variance]
+                                                │
+                                    ┌───────────┴───────────┐
+                                    ▼                       ▼
+                              [Confirm Adjust]        [Cancel]
+                                    │                       │
+                                    ▼                       ▼
+                              [Stock Updated]      [Session Cancelled]
+                                    │
+                                    ▼
+                              [Back to Stock Page]
+```
+
+### 6.7 Component Specifications
+
+#### Product Card (POS Grid)
+
+```
+┌──────────────────┐
+│                  │
+│    [Product     │
+│      Image       │
+│     80x80px     │
+│                  │
+├──────────────────┤
+│ Product Name      │  ← 14px, truncate if >2 lines
+│ Rp 25.000       │  ← 16px bold, price formatting
+│                  │
+│ [Stock: 12]     │  ← 12px, danger color if < threshold
+└──────────────────┘
+  Min size: 100x140px
+  Tap area: Full card
+  States: default, low-stock (danger border), out-of-stock (grayed)
+```
+
+#### Cart Item Row
+
+```
+┌─────────────────────────────────────────────┐
+│ [img] Product Name              [Qty: - 2 +] │
+│        Modifier 1, Modifier 2        Rp 50.000 │
+│        [Edit] [Delete]                    │
+└─────────────────────────────────────────────┘
+  Swipe left to delete (mobile)
+  Inline edit for qty (tablet)
+```
+
+#### Order Status Badge
+
+| Status | Color | Background | Text |
+|--------|-------|------------|------|
+| pending | Blue | Blue-50 | Blue-600 |
+| confirmed | Violet | Violet-50 | Violet-600 |
+| preparing | Orange | Orange-50 | Orange-600 |
+| ready | Green | Green-50 | Green-600 |
+| served | Slate | Slate-100 | Slate-600 |
+| paid | Green | Green-100 | Green-700 |
+| voided | Red | Red-50 | Red-600 |
+
+### 6.8 API-UI Mapping
+
+| Backend Endpoint | Frontend Page/Component | Data Fetching |
+|-----------------|-------------------------|---------------|
+| `GET /products` | POS Grid, Product List | TanStack Query + cache |
+| `POST /orders` | Cart → Order | Mutation + optimistic update |
+| `POST /orders/checkout` | Checkout | Mutation + redirect |
+| `GET /reports/sales` | Dashboard | TanStack Query + date filter |
+| `POST /stock/opnames` | Stock Opname | Mutation + wizard state |
+| `GET /hardware/devices` | Settings → Hardware | TanStack Query |
+| `POST /hardware/print` | Receipt print | Mutation + printer queue |
+
+### 6.9 Offline Strategy
+
+**TanStack Query + IndexedDB**
+
+```
+┌─────────────────────────────────────────────────┐
+│  Online Mode (default)                         │
+│  ├─ Fetch from API                            │
+│  ├─ Update cache on mutation                 │
+│  └─ Show stale data briefly on reconnect      │
+├─────────────────────────────────────────────┤
+│  Offline Mode (detected via navigator.onLine)  │
+│  ├─ Show offline banner                      │
+│  ├─ Queue mutations in IndexedDB              │
+│  ├─ Show cached products (TanStack Query)     │
+│  └─ "Sync pending" badge on synced actions   │
+├─────────────────────────────────────────────┤
+│  Reconnect                                  │
+│  ├─ Flush mutation queue                    │
+│  ├─ Refresh critical queries                │
+│  └─ Toast: "Back online, data synced"      │
+└─────────────────────────────────────────────┘
+```
+
+### 6.10 Frontend Phases
+
+| Phase | Pages | Priority | Duration |
+|-------|-------|----------|----------|
+| **Phase 7** | Setup, Login, POS Grid, Cart, Checkout | P0 | 1-2 weeks |
+| **Phase 8** | Orders, Order Detail, Void | P0 | 3-5 days |
+| **Phase 9** | Products, Categories, Modifiers | P1 | 3-5 days |
+| **Phase 10** | Stock, Alerts, Opname | P1 | 3-5 days |
+| **Phase 11** | Dashboard, Reports, Export | P1 | 3-5 days |
+| **Phase 12** | Tables, Users, Settings | P2 | 3-5 days |
+| **Phase 13** | PWA: Offline, Install, Notifications | P2 | 2-3 days |
+
+---
+
+## 7. Glossary
 
 | Term | Definition |
 |------|------------|
@@ -417,6 +746,7 @@ Metrics:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2024 | thevoidsyntax | Initial draft |
+| 1.1.0 | 2026-01-26 | Claude | Added Frontend/UI-UX section (Phase 7-13) |
 
 ---
 
