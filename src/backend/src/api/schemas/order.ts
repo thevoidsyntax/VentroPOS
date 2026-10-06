@@ -54,3 +54,12 @@ export const orderQuerySchema = z.object({
     limit: z.string().optional().describe('Items per page'),
   }),
 });
+
+export const getOrdersQuerySchema = orderQuerySchema;
+
+export const voidOrderSchema = z.object({
+  params: z.object({ id: z.string().uuid().describe('Order ID') }),
+  body: z.object({
+    reason: z.string().min(1).describe('Void reason'),
+  }).optional(),
+});

@@ -18,7 +18,7 @@ import {
   createProductSchema,
   updateProductSchema,
   productIdParamsSchema,
-  getProductsQuerySchema,
+  productQuerySchema,
   createCategorySchema,
   updateCategorySchema,
   categoryIdParamsSchema,
@@ -126,7 +126,7 @@ export async function productRoutes(fastify: FastifyInstance): Promise<void> {
   // ============== PRODUCTS ==============
   fastify.get('/', {
     onRequest: [authMiddleware],
-    schema: getProductsQuerySchema,
+    schema: productQuerySchema,
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const query = request.query as {
       categoryId?: string;

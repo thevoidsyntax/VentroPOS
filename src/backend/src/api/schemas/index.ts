@@ -42,5 +42,17 @@ export {
   updateOrderStatusSchema,
   orderIdParamsSchema,
   orderQuerySchema,
+  getOrdersQuerySchema,
   checkoutSchema,
+  voidOrderSchema,
 } from './order.js';
+
+// Modifier schemas
+export {
+  createModifierGroupSchema,
+  updateModifierGroupSchema,
+  modifierGroupIdParamsSchema,
+  createModifierSchema,
+  updateModifierSchema,
+  modifierIdParamsSchema,
+} from './modifier.js';

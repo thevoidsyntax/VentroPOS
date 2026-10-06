@@ -11,7 +11,7 @@ import {
   GetStockOpnameUseCase,
   ListStockOpnamesUseCase,
 } from '../../application/stock/index.js';
-import { productRepository, stockOpnameRepository } from '../../infrastructure/database/repositories/container.js';
+import { productRepository, stockLogRepository, stockOpnameRepository } from '../../infrastructure/database/repositories/container.js';
 import { AppError } from '../../shared/errors/index.js';
 import { authMiddleware, requireManager } from '../middleware/index.js';
 
@@ -61,11 +61,11 @@ const batchRecordStockCountSchema = {
 
 // Initialize use cases
 const createStockOpnameUseCase = new CreateStockOpnameUseCase(productRepository, stockOpnameRepository);
-const recordStockCountUseCase = new RecordStockCountUseCase(productRepository, stockOpnameRepository);
-const batchRecordStockCountUseCase = new BatchRecordStockCountUseCase(productRepository, stockOpnameRepository);
-const submitStockOpnameUseCase = new SubmitStockOpnameUseCase(productRepository, stockOpnameRepository);
+const recordStockCountUseCase = new RecordStockCountUseCase(stockOpnameRepository);
+const batchRecordStockCountUseCase = new BatchRecordStockCountUseCase(stockOpnameRepository);
+const submitStockOpnameUseCase = new SubmitStockOpnameUseCase(productRepository, stockLogRepository, stockOpnameRepository);
 const cancelStockOpnameUseCase = new CancelStockOpnameUseCase(stockOpnameRepository);
-const getStockOpnameUseCase = new GetStockOpnameUseCase(stockOpnameRepository, productRepository);
+const getStockOpnameUseCase = new GetStockOpnameUseCase(productRepository, stockOpnameRepository);
 const listStockOpnamesUseCase = new ListStockOpnamesUseCase(stockOpnameRepository);
 
 export async function stockOpnameRoutes(fastify: FastifyInstance): Promise<void> {
@@ -76,54 +76,68 @@ export async function stockOpnameRoutes(fastify: FastifyInstance): Promise<void>
   // ============== LIST STOCK OPNAMES ==============
   fastify.get('/stock/opnames', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const user = request.user;
-      const query = request.query as { status?: string; fromDate?: string; toDate?: string; page?: string; limit?: string };
+      const tenantId = request.tenantId!;
+      const query = request.query as { status?: string; fromDate?: string; toDate?: string };
 
-      const result = await listStockOpnamesUseCase.execute(user.tenantId, {
+      const result = await listStockOpnamesUseCase.execute(tenantId, {
         status: query.status as 'draft' | 'in_progress' | 'completed' | 'cancelled',
         fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
         toDate: query.toDate ? new Date(query.toDate) : undefined,
-        page: query.page ? parseInt(query.page, 10) : 1,
-        limit: query.limit ? parseInt(query.limit, 10) : 20,
       });
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
   // ============== CREATE STOCK OPNAME ==============
   fastify.post('/stock/opnames', { schema: createStockOpnameSchema }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
+      const userId = request.userId!;
       const body = request.body as { notes?: string; productIds: string[] };
 
-      const result = await createStockOpnameUseCase.execute(user.tenantId, user.id, {
+      const result = await createStockOpnameUseCase.execute(tenantId, userId, {
         notes: body.notes,
         productIds: body.productIds,
       });
 
       return reply.status(201).send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
   // ============== GET STOCK OPNAME ==============
   fastify.get<{ Params: { id: string } }>('/stock/opnames/:id', async (request, reply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
       const { id } = request.params;
 
-      const result = await getStockOpnameUseCase.execute(user.tenantId, id);
+      const result = await getStockOpnameUseCase.execute(tenantId, id);
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
@@ -132,11 +146,11 @@ export async function stockOpnameRoutes(fastify: FastifyInstance): Promise<void>
     schema: recordStockCountSchema,
   }, async (request, reply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
       const { id } = request.params;
       const body = request.body as { productId: string; actualQuantity: number; notes?: string };
 
-      const result = await recordStockCountUseCase.execute(user.tenantId, id, {
+      const result = await recordStockCountUseCase.execute(tenantId, id, {
         productId: body.productId,
         actualQuantity: body.actualQuantity,
         notes: body.notes,
@@ -144,8 +158,13 @@ export async function stockOpnameRoutes(fastify: FastifyInstance): Promise<void>
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
@@ -154,46 +173,64 @@ export async function stockOpnameRoutes(fastify: FastifyInstance): Promise<void>
     schema: batchRecordStockCountSchema,
   }, async (request, reply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
       const { id } = request.params;
       const body = request.body as { counts: Array<{ productId: string; actualQuantity: number; notes?: string }> };
 
-      const result = await batchRecordStockCountUseCase.execute(user.tenantId, id, body.counts);
+      const result = await batchRecordStockCountUseCase.execute(tenantId, id, body.counts);
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
   // ============== SUBMIT STOCK OPNAME ==============
   fastify.post<{ Params: { id: string } }>('/stock/opnames/:id/submit', async (request, reply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
+      const userId = request.userId!;
       const { id } = request.params;
 
-      const result = await submitStockOpnameUseCase.execute(user.tenantId, id);
+      const result = await submitStockOpnameUseCase.execute(tenantId, userId, id, {
+        applyAdjustments: true,
+      });
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 
   // ============== CANCEL STOCK OPNAME ==============
   fastify.post<{ Params: { id: string } }>('/stock/opnames/:id/cancel', async (request, reply) => {
     try {
-      const user = request.user;
+      const tenantId = request.tenantId!;
       const { id } = request.params;
 
-      const result = await cancelStockOpnameUseCase.execute(user.tenantId, id);
+      const result = await cancelStockOpnameUseCase.execute(tenantId, id);
 
       return reply.send({ success: true, data: result });
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw AppError.from(error);
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
+      }
+      throw error;
     }
   });
 }

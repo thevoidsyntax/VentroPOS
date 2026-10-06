@@ -8,6 +8,8 @@ export interface GetStockHistoryInput {
   fromDate?: Date;
   toDate?: Date;
   type?: StockLog['type'];
+  page?: number;
+  limit?: number;
 }
 
 export class GetStockHistoryUseCase {
