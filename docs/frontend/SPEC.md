@@ -3,6 +3,7 @@
 > **Phase:** 7
 > **Status:** Ready to Implement
 > **Skill:** `/frontend` - React best practices
+> **Sub-skills (invoke manual):** `/ui-ux-pro-max`, `/ui-ux-pro-max-styling`, `/ui-ux-pro-max-design-system`
 > **Last Updated:** 2026-01-26
 
 ---
