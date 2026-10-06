@@ -288,6 +288,8 @@ CREATE TABLE hardware_logs (
 | `/ui-ux-pro-max-styling` | Auto | Styling work | Medium |
 | `/ui-ux-pro-max-design-system` | Manual | Design tokens setup | Initial |
 | `/performance` | Auto | Keywords: "performance", "bundle" | As needed |
+| `/testing` | Auto | File: `tests/**`, "test", "coverage" | As needed |
+| `/diagnosing-bugs` | Auto | Keywords: "bug", "error", "fix" | As needed |
 
 > **Note:** `/ui-ux-pro-max` sekarang auto-invoke untuk semua `.tsx/.jsx` files karena goal project adalah **human-like UI patterns** secara konsisten.
 
@@ -306,7 +308,7 @@ CREATE TABLE hardware_logs (
 - [ ] React Router setup
 
 ### Phase 7.2: POS Interface
-> **Skills:** `/frontend` (auto) + `/ui-ux-pro-max` (manual) + `/ui-ux-pro-max-styling` (manual)
+> **Skills:** `/frontend` (auto) + `/ui-ux-pro-max` (auto) + `/ui-ux-pro-max-styling` (auto)
 
 - [ ] Product grid dengan category tabs
 - [ ] Cart drawer dengan qty adjust
