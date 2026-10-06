@@ -1,8 +1,8 @@
 # VentroPos - Developer Instructions
 
 > **Project:** VentroPos - Point of Sale System for Cafe
-> **Version:** 1.0.1
-> **Last Updated:** 2026-01-18
+> **Version:** 1.1.0
+> **Last Updated:** 2026-01-26
 
 ---
 
@@ -30,15 +30,12 @@
 ## 🎯 Current Status
 
 ```
-Phase 1: ✅ DONE  - Foundation, Auth, Database
-Phase 2: ✅ DONE  - Core POS, Cart, Checkout
-Phase 3: ✅ DONE  - Inventory, Stock Management
-Phase 4: ✅ DONE  - Reporting, Dashboard
-Phase 5: ⬜ NEXT   - Hardware Integration
-Phase 6: ⬜ TODO  - Launch, Polish
+Phase 1-6: ✅ DONE  - Backend Complete
+Phase 7:   ⬜ NEXT   - Frontend Setup
+Phase 8-13: ⬜ TODO  - Frontend Features
 ```
 
-**Last work:** Phase 4 completion - Reporting module + Audit fixes (142 tests passing)
+**Last work:** Phase 6 completion - Audit fixes, 159 tests passing
 
 ---
 
@@ -76,29 +73,34 @@ src/backend/           # Fastify API server
 
 ## 📌 Phase Work
 
-### Current: Phase 5 - Hardware Integration
+### Current: Phase 7 - Frontend Setup
 
-**Requirements:** Lihat `README.md` Section "Phase 5: Hardware"
+**Requirements:** Lihat `README.md` Section "Phase 7" dan `docs/frontend/SPEC.md`
 
 **Skills to invoke:**
-- `/api-design` - Hardware API design
-- `/deployment` - Hardware integration patterns
-- `/security` - Secure hardware communication
+| Skill | Type | Trigger |
+|-------|------|---------|
+| `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` |
+| `/ui-ux-pro-max` | **Manual** | Before UI work |
+| `/ui-ux-pro-max-styling` | **Manual** | Styling components |
+| `/ui-ux-pro-max-design-system` | **Manual** | Design tokens setup |
 
 **Deliverables:**
-- Receipt printer integration
-- EDC terminal integration
-- Barcode scanner support
-- Cash drawer control
+- React + Vite + TypeScript setup
+- shadcn/ui components
+- Zustand stores (cart, auth, ui)
+- TanStack Query hooks
+- PWA configuration
 
 ### Completed Phases
 
 | Phase | Status | Key Deliverables |
 |-------|--------|-----------------|
 | 4 | ✅ Done | Sales reports, Product reports, Staff reports, CSV export |
-| 3 | ✅ Done | Stock overview, Alerts, Adjustments, History, Opname |
-| 2 | ✅ Done | Orders, Checkout, Split payment, Idempotency |
-| 1 | ✅ Done | Auth, Users, Products, Categories, Tables |
+| 5 | ✅ Done | Hardware devices, Receipt printer, EDC, Scanner, Cash drawer |
+| 6 | ✅ Done | Audit fixes, Refactoring, 159 tests passing |
+| 7 | ⬜ Next | React Frontend Setup (Phase 7-13) |
+| 8-13 | ⬜ Todo | Frontend Features |
 
 ---
 

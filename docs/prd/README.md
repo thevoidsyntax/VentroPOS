@@ -691,17 +691,45 @@ Page margin: 16px (mobile), 24px (tablet), 32px (desktop)
 └─────────────────────────────────────────────┘
 ```
 
-### 6.10 Frontend Phases
+### 6.10 Frontend Phases & Skills
 
-| Phase | Pages | Priority | Duration |
-|-------|-------|----------|----------|
-| **Phase 7** | Setup, Login, POS Grid, Cart, Checkout | P0 | 1-2 weeks |
-| **Phase 8** | Orders, Order Detail, Void | P0 | 3-5 days |
-| **Phase 9** | Products, Categories, Modifiers | P1 | 3-5 days |
-| **Phase 10** | Stock, Alerts, Opname | P1 | 3-5 days |
-| **Phase 11** | Dashboard, Reports, Export | P1 | 3-5 days |
-| **Phase 12** | Tables, Users, Settings | P2 | 3-5 days |
-| **Phase 13** | PWA: Offline, Install, Notifications | P2 | 2-3 days |
+| Phase | Pages | Priority | Duration | Skills |
+|-------|-------|----------|----------|--------|
+| **Phase 7** | Setup, Login, POS Grid, Cart, Checkout | P0 | 1-2 weeks | `/frontend` (auto), `/ui-ux-pro-max` (manual) |
+| **Phase 8** | Orders, Order Detail, Void | P0 | 3-5 days | `/frontend` (auto) |
+| **Phase 9** | Products, Categories, Modifiers | P1 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max-styling` (manual) |
+| **Phase 10** | Stock, Alerts, Opname | P1 | 3-5 days | `/frontend` (auto) |
+| **Phase 11** | Dashboard, Reports, Export | P1 | 3-5 days | `/frontend` (auto), `/performance` (auto) |
+| **Phase 12** | Tables, Users, Settings | P2 | 3-5 days | `/frontend` (auto) |
+| **Phase 13** | PWA: Offline, Install, Notifications | P2 | 2-3 days | `/frontend` (auto), `/performance` (auto) |
+
+#### Skill Integration Guide
+
+**Auto-invoke skills** (triggered by file patterns or keywords):
+```
+/frontend      → File: **/*.tsx, **/*.jsx
+/testing       → File: tests/**, "test", "coverage"
+/performance   → Keywords: "performance", "bundle", "core web vitals"
+/diagnosing-bugs → Keywords: "bug", "error", "fix"
+```
+
+**Manual-invoke skills** (call explicitly when needed):
+```
+/ui-ux-pro-max              → Before UI work: "What makes this look human?"
+/ui-ux-pro-max-styling     → Styling components with Tailwind + shadcn
+/ui-ux-pro-max-design-system → Setup design tokens (colors, typography, spacing)
+```
+
+#### Recommended Skill Workflow
+
+```
+1. Start feature: /frontend (auto triggers)
+2. UI assessment: /ui-ux-pro-max (manual)
+3. Design tokens: /ui-ux-pro-max-design-system (manual)
+4. Component styling: /ui-ux-pro-max-styling (manual per component)
+5. Performance: /performance (auto when keywords detected)
+6. Testing: /testing (auto when keywords detected)
+```
 
 ---
 

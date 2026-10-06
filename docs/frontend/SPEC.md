@@ -2,8 +2,11 @@
 
 > **Phase:** 7
 > **Status:** Ready to Implement
-> **Skill:** `/frontend` - React best practices
-> **Sub-skills (invoke manual):** `/ui-ux-pro-max`, `/ui-ux-pro-max-styling`, `/ui-ux-pro-max-design-system`
+> **Primary Skill:** `/frontend` - React best practices
+> **UI/UX Skills (invoke manual):**
+> - `/ui-ux-pro-max` - Human-like UI patterns, responsive, tablet-first
+> - `/ui-ux-pro-max-styling` - Tailwind + shadcn/ui styling patterns
+> - `/ui-ux-pro-max-design-system` - Design tokens, colors, typography, spacing
 > **Last Updated:** 2026-01-26
 
 ---
@@ -12,13 +15,14 @@
 
 1. [Project Setup](#1-project-setup)
 2. [Tech Stack Details](#2-tech-stack-details)
-3. [Folder Structure](#3-folder-structure)
-4. [Component Architecture](#4-component-architecture)
-5. [State Management](#5-state-management)
-6. [API Integration](#6-api-integration)
-7. [Routing](#7-routing)
-8. [PWA Configuration](#8-pwa-configuration)
-9. [Development Workflow](#9-development-workflow)
+3. [UI/UX Skill Integration](#3-uiux-skill-integration)
+4. [Folder Structure](#4-folder-structure)
+5. [Component Architecture](#5-component-architecture)
+6. [State Management](#6-state-management)
+7. [API Integration](#7-api-integration)
+8. [Routing](#8-routing)
+9. [PWA Configuration](#9-pwa-configuration)
+10. [Development Workflow](#10-development-workflow)
 
 ---
 
@@ -84,7 +88,272 @@ npx shadcn@latest init
 
 ---
 
-## 2. Tech Stack Details
+## 3. UI/UX Skill Integration
+
+### 3.1 Skill Overview
+
+| Skill | When to Invoke | Purpose |
+|-------|----------------|---------|
+| `/ui-ux-pro-max` | Before starting UI work | Assessment: "What patterns make this look human-made?" |
+| `/ui-ux-pro-max-styling` | When styling components | Tailwind classes, responsive patterns, animations |
+| `/ui-ux-pro-max-design-system` | Design token setup | Colors, typography, spacing, theme configuration |
+
+### 3.2 Workflow Pattern
+
+```
+Phase 7 Implementation Flow:
+┌─────────────────────────────────────────────────────────────┐
+│  1. Setup Phase                                             │
+│     └─ /frontend (auto) → Project structure, configs        │
+├─────────────────────────────────────────────────────────────┤
+│  2. UI/UX Assessment (Manual Invoke)                        │
+│     └─ /ui-ux-pro-max                                       │
+│         └─ Analyze: "POS grid for cafe kasir"               │
+│         └─ Output: Human-like patterns, touch-first rules   │
+├─────────────────────────────────────────────────────────────┤
+│  3. Design Tokens (Manual Invoke)                            │
+│     └─ /ui-ux-pro-max-design-system                        │
+│         └─ Colors, typography, spacing for POS              │
+│         └─ Tailwind config: brand colors, touch sizing      │
+├─────────────────────────────────────────────────────────────┤
+│  4. Component Styling (Manual Invoke per component)          │
+│     └─ /ui-ux-pro-max-styling                              │
+│         └─ ProductCard, CartDrawer, CheckoutForm            │
+│         └─ Responsive breakpoints, hover states             │
+├─────────────────────────────────────────────────────────────┤
+│  5. Integration                                             │
+│     └─ /frontend (auto) → React components                  │
+│     └─ /performance (auto) → Bundle, Core Web Vitals       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.3 /ui-ux-pro-max Patterns for POS
+
+**Human-like UI Principles:**
+
+| Aspect | AI-Generated (Avoid) | Human-like (Target) |
+|--------|----------------------|---------------------|
+| Spacing | Uniform, mathematical | Organic, slight variations |
+| Colors | Flat, generic | Subtle gradients, warm tones |
+| Typography | System default | Considered font stack |
+| Interactions | Instant, robotic | Micro-animations, feedback |
+| Layout | Perfect grid | Slight asymmetry, breathing room |
+
+**Tablet-First Touch Rules:**
+
+```
+✅ DO:
+- Min tap target: 44x44px
+- Adequate spacing between targets: 8px minimum
+- Clear visual feedback on touch
+- Swipe gestures for common actions
+- Large, readable text: 14px minimum body
+
+❌ DON'T:
+- Dense grids with small gaps
+- Hover-dependent interactions
+- Multiple actions per tap
+- Small, cramped layouts
+- Scroll-heavy forms
+```
+
+### 3.4 /ui-ux-pro-max-design-system Tokens
+
+**Color Palette (POS-Optimized):**
+
+```css
+/* Primary - Trust, Clarity */
+--primary: #2563EB;           /* Blue-600 - main actions */
+--primary-hover: #1D4ED8;     /* Blue-700 */
+--primary-foreground: #FFFFFF;
+
+/* Secondary - Accent */
+--secondary: #7C3AED;         /* Violet-600 */
+--secondary-hover: #6D28D9;
+
+/* Status Colors */
+--success: #16A34A;           /* Green-600 - paid, completed */
+--warning: #CA8A04;           /* Yellow-600 - pending, alerts */
+--danger: #DC2626;            /* Red-600 - void, errors */
+--info: #0891B2;              /* Cyan-600 - in-progress */
+
+/* Surfaces */
+--background: #F8FAFC;       /* Slate-50 - main bg */
+--surface: #FFFFFF;          /* Cards, drawers */
+--surface-elevated: #FFFFFF; /* Modals */
+--border: #E2E8F0;           /* Slate-200 */
+--border-focus: #2563EB;      /* Focus rings */
+
+/* Text */
+--text-primary: #1E293B;     /* Slate-800 */
+--text-secondary: #64748B;    /* Slate-500 */
+--text-muted: #94A3B8;       /* Slate-400 */
+```
+
+**Typography Scale:**
+
+```
+Font: Inter (system-ui fallback)
+Weight: 400 (body), 500 (labels), 600 (headings), 700 (emphasis)
+
+Scale:
+- xs:   12px / 16px line-height   (captions, timestamps)
+- sm:   14px / 20px line-height   (body, prices)
+- base: 16px / 24px line-height   (large body)
+- lg:   18px / 28px line-height   (section headers)
+- xl:   20px / 28px line-height   (page titles)
+- 2xl:  24px / 32px line-height   (major headings)
+- 3xl:  30px / 36px line-height   (dashboard metrics)
+```
+
+**Spacing System:**
+
+```
+Base unit: 4px
+
+Spacing tokens:
+- 0:   0px
+- 1:   4px      (icon gaps)
+- 2:   8px      (inline spacing)
+- 3:   12px     (compact elements)
+- 4:   16px     (card padding, section gaps)
+- 5:   20px     (large padding)
+- 6:   24px     (section margins)
+- 8:   32px     (page margins)
+- 10:  40px     (major sections)
+- 12:  48px     (page padding top/bottom)
+
+Touch-specific:
+- button-height: 44px     (minimum)
+- input-height: 44px      (touch-friendly)
+- list-item-height: 56px  (comfortable tap)
+- card-min-padding: 16px
+```
+
+**Border Radius:**
+
+```
+- none: 0px
+- sm:   4px      (small chips, badges)
+- md:   6px      (inputs, small cards)
+- lg:   8px      (buttons, cards)
+- xl:   12px     (modals, large cards)
+- 2xl:  16px     (drawers, sheets)
+- full: 9999px   (pills, avatars)
+```
+
+### 3.5 /ui-ux-pro-max-styling Patterns
+
+**Component Patterns:**
+
+```tsx
+// ProductCard - Human-like touch target
+<div className="
+  relative flex flex-col items-center p-4
+  bg-white rounded-lg border border-slate-200
+  shadow-sm hover:shadow-md active:scale-[0.98]
+  transition-all duration-150 cursor-pointer
+  min-h-[140px] min-w-[100px]
+">
+  {/* Product image with subtle shadow */}
+  <div className="w-20 h-20 rounded-md overflow-hidden shadow-sm">
+    <img src={image} alt={name} className="w-full h-full object-cover" />
+  </div>
+  
+  {/* Name with ellipsis for overflow */}
+  <span className="mt-2 text-sm font-medium text-slate-800 line-clamp-2 text-center">
+    {name}
+  </span>
+  
+  {/* Price - prominent but not shouting */}
+  <span className="text-sm font-semibold text-slate-900">
+    Rp {formatPrice(price)}
+  </span>
+  
+  {/* Low stock indicator - subtle but visible */}
+  {stock <= lowStockThreshold && (
+    <span className="absolute top-2 right-2 text-xs px-1.5 py-0.5 bg-red-50 text-red-600 rounded">
+      {stock} left
+    </span>
+  )}
+</div>
+
+// CartDrawer - Slide-in with backdrop
+<Sheet>
+  <SheetContent side="right" className="w-[360px] sm:w-[400px]">
+    <SheetHeader>
+      <SheetTitle>Keranjang</SheetTitle>
+      <SheetDescription>
+        {items.length} item{items.length !== 1 ? 's' : ''}
+      </SheetDescription>
+    </SheetHeader>
+    
+    {/* Scrollable cart items */}
+    <ScrollArea className="flex-1 px-1">
+      {items.map(item => <CartItem key={item.id} item={item} />)}
+    </ScrollArea>
+    
+    {/* Sticky checkout footer */}
+    <div className="border-t pt-4 mt-4">
+      <div className="flex justify-between text-sm text-slate-600 mb-2">
+        <span>Subtotal</span>
+        <span>Rp {formatPrice(subtotal)}</span>
+      </div>
+      <Button className="w-full h-12 text-base font-semibold">
+        Bayar Rp {formatPrice(total)}
+      </Button>
+    </div>
+  </SheetContent>
+</Sheet>
+```
+
+**Responsive Breakpoints:**
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    screens: {
+      'xs': '320px',   // Small mobile
+      'sm': '640px',   // Large mobile
+      'md': '768px',   // Tablet portrait (PRIMARY)
+      'lg': '1024px',  // Tablet landscape
+      'xl': '1280px',  // Desktop
+    },
+  },
+}
+
+// POS Grid - Responsive columns
+<div className="
+  grid gap-3 p-4
+  grid-cols-3 xs:grid-cols-4 sm:grid-cols-5
+  md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6
+">
+  {/* Products auto-fill */}
+</div>
+```
+
+### 3.6 Quality Checklist
+
+```
+Before calling /ui-ux-pro-max-styling:
+
+□ Component has clear purpose
+□ States defined (default, hover, active, disabled, loading)
+□ Touch target ≥ 44x44px
+□ Spacing follows 4px grid
+□ Text readable at arm's length (tablet use case)
+□ Colors pass contrast ratio (WCAG AA)
+□ Animations subtle and purposeful
+
+After styling with /ui-ux-pro-max-styling:
+
+□ Human-like, not template-generated feel
+□ Touch-friendly interactions
+□ Consistent spacing and typography
+□ Accessible (keyboard, screen reader)
+□ Performant (no janky animations)
+```
 
 ### 2.1 Framework & Build
 
@@ -125,7 +394,7 @@ npx shadcn@latest init
 
 ---
 
-## 3. Folder Structure
+## 4. Folder Structure
 
 ```
 frontend/
@@ -199,7 +468,7 @@ frontend/
 
 ---
 
-## 4. Component Architecture
+## 5. Component Architecture
 
 ### 4.1 Layer Separation
 
@@ -253,7 +522,7 @@ npx shadcn@latest add select popover command
 
 ---
 
-## 5. State Management
+## 6. State Management
 
 ### 5.1 Zustand Stores
 
@@ -347,7 +616,7 @@ export function useProduct(id: string) {
 
 ---
 
-## 6. API Integration
+## 7. API Integration
 
 ### 6.1 API Client
 
@@ -408,7 +677,7 @@ export const api = {
 
 ---
 
-## 7. Routing
+## 8. Routing
 
 ### 7.1 Route Structure
 
@@ -450,7 +719,7 @@ function ProtectedRoute({ children }) {
 
 ---
 
-## 8. PWA Configuration
+## 9. PWA Configuration
 
 ### 8.1 vite.config.ts
 
@@ -519,7 +788,7 @@ export function useOffline() {
 
 ---
 
-## 9. Development Workflow
+## 10. Development Workflow
 
 ### 9.1 Branch Strategy
 

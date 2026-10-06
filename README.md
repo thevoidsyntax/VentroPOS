@@ -279,13 +279,26 @@ CREATE TABLE hardware_logs (
 
 ## Phase 7: Frontend Setup (React + TypeScript)
 
-**Trigger Conditions untuk auto-invoke skills:**
-| Skill | Auto-invoke | Conditions |
-|-------|------------|-------------|
-| `/frontend` | ✅ | File: `**/*.tsx`, `**/*.jsx` |
-| `/testing` | ✅ | File: `tests/**`, "test", "coverage" |
-| `/performance` | ✅ | Keywords: "performance", "bundle", "core web vitals" |
-| `/diagnosing-bugs` | ✅ | Keywords: "bug", "error", "fix" |
+### Skill Triggers
+
+| Skill | Type | Trigger | Purpose |
+|-------|------|---------|---------|
+| `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` | React best practices, component patterns |
+| `/ui-ux-pro-max` | **Manual** | Explicit invoke | Human-like UI, tablet-first design |
+| `/ui-ux-pro-max-styling` | **Manual** | Styling work | Tailwind + shadcn/ui patterns |
+| `/ui-ux-pro-max-design-system` | **Manual** | Design tokens | Colors, typography, spacing |
+
+**Workflow Pattern:**
+```
+User: "lanjutkan phase 7"
+  │
+  ├─ /frontend (auto dari file patterns)
+  │
+  └─ Invoke manual saat needed:
+     ├─ /ui-ux-pro-max (assessment UI patterns)
+     ├─ /ui-ux-pro-max-styling (component styling)
+     └─ /ui-ux-pro-max-design-system (tokens, themes)
+```
 
 **Requirements:** Lihat `docs/frontend/SPEC.md` untuk detail lengkap.
 
@@ -303,11 +316,15 @@ CREATE TABLE hardware_logs (
 - [ ] TanStack Query client
 - [ ] React Router setup
 
-### Phase 7.2: POS Interface (Trigger: `/frontend` + `/ui-ux-pro-max-styling`)
+### Phase 7.2: POS Interface
+> **Skills:** `/frontend` (auto) + `/ui-ux-pro-max` (manual) + `/ui-ux-pro-max-styling` (manual)
+
 - [ ] Product grid dengan category tabs
 - [ ] Cart drawer dengan qty adjust
 - [ ] Checkout flow
 - [ ] Receipt modal
+
+**UI/UX Priority:** Tablet-first, touch-friendly (min 44px tap targets), glanceable status
 
 ### Phase 7.3: Orders (Trigger: `/frontend`)
 - [ ] Order list dengan filters
@@ -328,7 +345,9 @@ CREATE TABLE hardware_logs (
 - [ ] User management
 - [ ] Hardware config
 
-### Phase 7.7: PWA (Trigger: `/frontend` + `/performance`)
+### Phase 7.7: PWA
+> **Skills:** `/frontend` (auto) + `/performance` (auto)
+
 - [ ] Service worker (vite-plugin-pwa)
 - [ ] Offline mode
 - [ ] Install prompt
