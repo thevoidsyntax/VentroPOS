@@ -30,24 +30,35 @@
 ## 🎯 Current Status
 
 ```
-Phase 1-6: ✅ DONE  - Backend Complete
-Phase 7:   ⬜ NEXT   - Frontend Setup
-Phase 8-13: ⬜ TODO  - Frontend Features
+Phase 1-6: ✅ DONE  - Backend Complete (159 tests)
+Phase 7:   ✅ DONE  - Frontend Setup Complete
+Phase 8:   ⬜ NEXT  - Orders Management
+Phase 9-13: ⬜ TODO - Frontend Features
 ```
 
-**Last work:** Phase 6 completion - Audit fixes, 159 tests passing
+**Last work:** Phase 7 completion - React + Vite + TypeScript frontend setup
 
 ---
 
 ## 📁 Project Structure
 
 ```
-src/backend/           # Fastify API server
-├── src/api/          # Routes, middleware, schemas
-├── src/application/   # Use cases (DDD)
-├── src/domain/        # Entities, repositories interfaces
-├── src/infrastructure/ # DB, auth implementations
-└── src/shared/        # Config, errors, utils
+src/
+├── backend/           # Fastify API server (Phase 1-6)
+│   ├── src/api/          # Routes, middleware, schemas
+│   ├── src/application/  # Use cases (DDD)
+│   ├── src/domain/       # Entities, repositories interfaces
+│   ├── src/infrastructure/ # DB, auth implementations
+│   └── src/shared/       # Config, errors, utils
+
+├── frontend/          # React + Vite frontend (Phase 7+)
+│   └── src/
+│       ├── components/   # UI components, POS components
+│       ├── hooks/        # TanStack Query hooks
+│       ├── lib/          # API client, utils
+│       ├── pages/        # Route pages
+│       ├── routes/       # React Router config
+│       └── stores/        # Zustand stores
 
 docs/
 ├── roadmap/          # Phase specifications (phase-1-foundation.md, etc.)
@@ -79,31 +90,38 @@ docs/
 | Logging | Pino 9.x |
 | Testing | Vitest 2.x |
 
+### Frontend (Phase 7+)
+| Layer | Technology |
+|-------|------------|
+| Framework | React 18 + Vite 6 |
+| Language | TypeScript 5 (strict) |
+| Styling | TailwindCSS 3 + shadcn/ui |
+| State | Zustand 5 (global) + TanStack Query 5 (server) |
+| Routing | React Router 6 |
+| Icons | Lucide React |
+| PWA | vite-plugin-pwa |
+
 ---
 
 ## 📌 Phase Work
 
-### Current: Phase 7 - Frontend Setup
+### Current: Phase 8 - Orders Management
 
-**Requirements:** Lihat `README.md` Section "Phase 7" dan `docs/frontend/SPEC.md`
+**Requirements:** Lihat `README.md` Section "Phase 8" dan `docs/roadmap/phase-8-orders.md`
 
 **Skills to invoke:**
 | Skill | Type | Trigger |
 |-------|------|---------|
 | `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` |
 | `/ui-ux-pro-max` | Auto* | File: `**/*.tsx`, `**/*.jsx` (HIGH priority) |
-| `/ui-ux-pro-max-styling` | Auto* | Styling work |
-| `/ui-ux-pro-max-design-system` | Manual | Design tokens setup |
 | `/performance` | Auto | Keywords: "performance", "bundle" |
 
 *Note: `/ui-ux-pro-max` sekarang auto-invoke untuk frontend files karena goal adalah human-like UI patterns
 
 **Deliverables:**
-- React + Vite + TypeScript setup
-- shadcn/ui components
-- Zustand stores (cart, auth, ui)
-- TanStack Query hooks
-- PWA configuration
+- Order list with filters
+- Order detail page
+- Void order flow
 
 ### Phase 8-13 Overview
 
@@ -123,8 +141,9 @@ docs/
 | 4 | ✅ Done | Sales reports, Product reports, Staff reports, CSV export |
 | 5 | ✅ Done | Hardware devices, Receipt printer, EDC, Scanner, Cash drawer |
 | 6 | ✅ Done | Audit fixes, Refactoring, 159 tests passing |
-| 7 | ⬜ Next | React Frontend Setup (Phase 7-13) |
-| 8-13 | ⬜ Todo | Frontend Features |
+| 7 | ✅ Done | React + Vite, shadcn/ui, Zustand, TanStack Query, PWA |
+| 8 | ⬜ Next | Orders Management (in progress) |
+| 9-13 | ⬜ Todo | Frontend Features |
 
 ---
 
