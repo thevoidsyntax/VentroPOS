@@ -5,6 +5,7 @@ import { PrintService, type ReceiptData, type KitchenTicketData, type InvoiceDat
 import { HardwareDeviceService } from '../../application/hardware/device.service.js';
 import { hardwareDeviceRepository, hardwareLogRepository, orderRepository, transactionRepository } from '../../infrastructure/database/repositories/container.js';
 import { authMiddleware } from '../middleware/index.js';
+import { config } from '../../shared/config/index.js';
 import type { UserRole, HardwareDevice } from '../../domain/entities/index.js';
 
 // Zod Schemas
@@ -136,7 +137,7 @@ export async function printRoutes(app: FastifyInstance) {
           })),
           subtotal: order.subtotal,
           taxAmount: order.taxAmount,
-          taxRate: 0.11, // Default PPN
+          taxRate: config.tax.rate,
           discountAmount: order.discountAmount,
           totalAmount: order.totalAmount,
           paymentMethod: transaction?.paymentMethod?.toUpperCase() || 'CASH',

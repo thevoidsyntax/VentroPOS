@@ -1,6 +1,8 @@
 // ESC/POS Driver - Receipt Printer Communication Protocol
 // Supports thermal receipt printers via TCP or USB
 
+import { DEFAULT_PRINTER_IP, DEFAULT_PRINTER_PORT, DEFAULT_HARDWARE_TIMEOUT_MS } from '../../../shared/constants/index.js';
+
 export interface ESCPOSConfig {
   ip?: string;
   port?: number;
@@ -23,9 +25,9 @@ export class ESCPOSDriver {
 
   constructor(config: ESCPOSConfig) {
     this.config = {
-      ip: config.ip ?? '192.168.1.100',
-      port: config.port ?? 9100,
-      timeout: config.timeout ?? 5000,
+      ip: config.ip ?? DEFAULT_PRINTER_IP,
+      port: config.port ?? DEFAULT_PRINTER_PORT,
+      timeout: config.timeout ?? DEFAULT_HARDWARE_TIMEOUT_MS,
       encoding: config.encoding ?? 'utf8',
     };
   }
@@ -82,6 +84,8 @@ export class ESCPOSDriver {
   async disconnect(): Promise<void> {
     return new Promise((resolve) => {
       if (this.socket) {
+        // Remove all event listeners to prevent memory leaks
+        this.socket.removeAllListeners();
         this.socket.end(() => {
           this.socket = null;
           resolve();

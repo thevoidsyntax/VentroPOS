@@ -4,6 +4,7 @@
 import { ESCPOSDriver } from '../../infrastructure/hardware/drivers/escpos.driver.js';
 import { HardwareDeviceService } from './device.service.js';
 import { hardwareDeviceRepository, hardwareLogRepository } from '../../infrastructure/database/repositories/container.js';
+import { DEFAULT_HARDWARE_TIMEOUT_MS } from '../../shared/constants/index.js';
 import type { HardwareDevice } from '../../domain/entities/index.js';
 
 export interface OpenDrawerResult {
@@ -107,7 +108,7 @@ export class DrawerService {
     const driver = new ESCPOSDriver({
       ip: printer.config.ip,
       port: printer.config.port,
-      timeout: printer.config.timeout ?? 5000,
+      timeout: printer.config.timeout ?? DEFAULT_HARDWARE_TIMEOUT_MS,
     });
 
     try {

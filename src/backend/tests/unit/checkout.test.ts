@@ -20,6 +20,7 @@ const mockProductRepo = {
 
 const mockLogRepo = {
   create: vi.fn(),
+  batchCreate: vi.fn(),
 };
 
 const mockIdemRepo = {
@@ -310,7 +311,7 @@ describe('CheckoutUseCase', () => {
         'tenant-456',
         expect.arrayContaining([expect.objectContaining({ id: 'product-1' })])
       );
-      expect(mockLogRepo.create).toHaveBeenCalled();
+      expect(mockLogRepo.batchCreate).toHaveBeenCalled();
     });
   });
 

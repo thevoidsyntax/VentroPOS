@@ -9,6 +9,7 @@ const { Pool } = pg;
 export class PostgresConnection {
   private pool: pg.Pool;
   private static instance: PostgresConnection;
+  private static initPromise: Promise<PostgresConnection> | null = null;
 
   private constructor() {
     this.pool = new Pool({
@@ -27,7 +28,13 @@ export class PostgresConnection {
 
   static getInstance(): PostgresConnection {
     if (!PostgresConnection.instance) {
-      PostgresConnection.instance = new PostgresConnection();
+      // Double-checked locking with promise for async initialization
+      if (!PostgresConnection.initPromise) {
+        PostgresConnection.initPromise = Promise.resolve().then(() => {
+          PostgresConnection.instance = new PostgresConnection();
+          return PostgresConnection.instance;
+        });
+      }
     }
     return PostgresConnection.instance;
   }

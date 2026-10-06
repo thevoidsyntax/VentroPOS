@@ -14,6 +14,25 @@ export class PostgresStockLogRepository extends BaseRepository implements IStock
     return rows[0];
   }
 
+  async batchCreate(tenantId: string, logs: Array<Omit<StockLog, 'id' | 'createdAt'>>): Promise<void> {
+    if (logs.length === 0) return;
+
+    const values: unknown[] = [];
+    const placeholders: string[] = [];
+    let paramIndex = 1;
+
+    for (const log of logs) {
+      placeholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+      values.push(tenantId, log.productId, log.type, log.quantity, log.balanceAfter, log.referenceType, log.referenceId, log.notes ?? null, log.userId ?? null);
+    }
+
+    await this.query(
+      `INSERT INTO stock_logs (tenant_id, product_id, type, quantity, balance_after, reference_type, reference_id, notes, user_id)
+       VALUES ${placeholders.join(', ')}`,
+      values
+    );
+  }
+
   async findByProduct(tenantId: string, productId: string): Promise<StockLog[]> {
     return this.query<StockLog>(
       'SELECT * FROM stock_logs WHERE product_id = $1 AND tenant_id = $2 ORDER BY created_at DESC',

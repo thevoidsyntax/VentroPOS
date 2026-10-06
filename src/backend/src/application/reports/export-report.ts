@@ -85,8 +85,7 @@ export async function exportReport(
 
       csvContent = 'Product Performance Report\n';
       csvContent += `Period,${getPeriodLabel(fromDate, toDate, preset)}\n\n`;
-
-      csvContent = 'Rank,Product Name,Category,Quantity Sold,Revenue,% of Total,Average Price\n';
+      csvContent += 'Rank,Product Name,Category,Quantity Sold,Revenue,% of Total,Average Price\n';
       let rank = 1;
       for (const p of products) {
         const percentOfTotal = totals.revenue > 0 ? ((p.revenue / totals.revenue) * 100).toFixed(2) : '0.00';
@@ -105,8 +104,7 @@ export async function exportReport(
 
       csvContent = 'Staff Performance Report\n';
       csvContent += `Period,${getPeriodLabel(fromDate, toDate, preset)}\n\n`;
-
-      csvContent = 'Rank,Staff Name,Role,Transactions,Total Sales,% of Total,AOV\n';
+      csvContent += 'Rank,Staff Name,Role,Transactions,Total Sales,% of Total,AOV\n';
       let rank = 1;
       for (const s of staffSales) {
         const percentOfTotal = totalSales > 0 ? ((s.totalSales / totalSales) * 100).toFixed(2) : '0.00';
@@ -125,8 +123,7 @@ export async function exportReport(
 
       csvContent = 'Category Breakdown Report\n';
       csvContent += `Period,${getPeriodLabel(fromDate, toDate, preset)}\n\n`;
-
-      csvContent = 'Rank,Category,Quantity Sold,Revenue,% of Total,Order Count\n';
+      csvContent += 'Rank,Category,Quantity Sold,Revenue,% of Total,Order Count\n';
       let rank = 1;
       for (const c of categorySales.filter(cat => cat.categoryId !== 'uncategorized')) {
         const percentOfTotal = totalRevenue > 0 ? ((c.revenue / totalRevenue) * 100).toFixed(2) : '0.00';

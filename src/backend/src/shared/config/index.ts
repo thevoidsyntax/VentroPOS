@@ -4,6 +4,15 @@
 import { z } from 'zod';
 import { config as dotenv } from 'dotenv';
 import { resolve } from 'path';
+import {
+  HTTP_PORT,
+  HTTP_HOST,
+  JWT_ACCESS_EXPIRES_IN,
+  JWT_REFRESH_EXPIRES_IN,
+  BCRYPT_ROUNDS_DEFAULT,
+  TAX_RATE_DEFAULT,
+  VITE_DEFAULT_PORT,
+} from '../constants/index.js';
 
 // Load environment-specific .env file
 const envName = process.env.NODE_ENV || 'development';
@@ -14,8 +23,8 @@ dotenv({ path: resolve(__dirname, '..', '..', envFile) });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(3000),
-  HOST: z.string().default('0.0.0.0'),
+  PORT: z.coerce.number().default(HTTP_PORT),
+  HOST: z.string().default(HTTP_HOST),
 
   // Database
   DATABASE_URL: z.string().url().optional(),
@@ -27,23 +36,23 @@ const envSchema = z.object({
 
   // JWT
   JWT_SECRET: z.string().min(32).optional(),
-  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
-  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  JWT_ACCESS_EXPIRES_IN: z.string().default(JWT_ACCESS_EXPIRES_IN),
+  JWT_REFRESH_EXPIRES_IN: z.string().default(JWT_REFRESH_EXPIRES_IN),
 
   // Redis
   REDIS_URL: z.string().url().optional(),
 
   // Security
-  BCRYPT_ROUNDS: z.coerce.number().default(12),
+  BCRYPT_ROUNDS: z.coerce.number().default(BCRYPT_ROUNDS_DEFAULT),
 
   // Business
-  TAX_RATE: z.coerce.number().min(0).max(1).default(0.11),
+  TAX_RATE: z.coerce.number().min(0).max(1).default(TAX_RATE_DEFAULT),
 
   // Logging
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
   // CORS
-  CORS_ORIGIN: z.string().default('*'),
+  CORS_ORIGIN: z.string().default('http://localhost:' + VITE_DEFAULT_PORT),
 });
 
 // Simple startup logger (runs before app logger is available)
@@ -80,7 +89,7 @@ if (env && env.NODE_ENV === 'production') {
   }
 }
 
-const defaultCors = process.env.NODE_ENV === 'test' ? 'http://localhost:3000' : '*';
+const defaultCors = process.env.NODE_ENV === 'test' ? 'http://localhost:3000' : 'http://localhost:5173';
 
 export const config = {
   env: env!.NODE_ENV,

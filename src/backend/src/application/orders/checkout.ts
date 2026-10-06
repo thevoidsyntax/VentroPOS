@@ -87,17 +87,16 @@ export class CheckoutUseCase {
 
     await this.productRepo.batchUpdateStock(tenantId, stockUpdates);
 
-    for (const log of stockLogs) {
-      await this.logRepo.create(tenantId, {
-        tenantId,
-        productId: log.productId,
-        type: 'sale',
-        quantity: -log.quantity,
-        balanceAfter: log.newQty,
-        referenceType: 'order',
-        referenceId: order.id,
-      });
-    }
+    // Batch insert stock logs - single DB round-trip instead of N
+    await this.logRepo.batchCreate(tenantId, stockLogs.map(log => ({
+      tenantId,
+      productId: log.productId,
+      type: 'sale',
+      quantity: -log.quantity,
+      balanceAfter: log.newQty,
+      referenceType: 'order',
+      referenceId: order.id,
+    })));
 
     const updated = await this.orderRepo.updateStatus(tenantId, order.id, 'paid');
     const result: CheckoutResult = { transaction: tx, order: updated, changeAmount: changeAmount > 0 ? changeAmount : undefined };

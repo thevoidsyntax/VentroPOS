@@ -140,30 +140,37 @@ export class PostgresStockOpnameRepository extends BaseRepository implements ISt
   ): Promise<StockOpnameItem[]> {
     if (items.length === 0) return [];
 
-    const results: StockOpnameItem[] = [];
+    // Optimized: Single query using UNNEST to fetch all system quantities at once
+    const productIds = items.map(i => i.productId);
+    const existing = await this.query<{ product_id: string; system_quantity: number }>(
+      `SELECT product_id, system_quantity FROM stock_opname_items WHERE opname_id = $1 AND product_id = ANY($2)`,
+      [opnameId, productIds]
+    );
 
-    for (const item of items) {
-      const existing = await this.query<{ system_quantity: number }>(
-        `SELECT system_quantity FROM stock_opname_items WHERE opname_id = $1 AND product_id = $2`,
-        [opnameId, item.productId]
-      );
-      const systemQuantity = existing[0]?.system_quantity ?? 0;
-      const variance = item.actualQuantity - systemQuantity;
+    // Build a map of product_id -> system_quantity
+    const systemQtyMap = new Map(existing.map(r => [r.product_id, r.system_quantity ?? 0]));
 
-      const rows = await this.query<StockOpnameItemRow>(
-        `UPDATE stock_opname_items
-         SET actual_quantity = $1, variance = $2, notes = $3
-         WHERE opname_id = $4 AND product_id = $5
-         RETURNING *`,
-        [item.actualQuantity, variance, item.notes, opnameId, item.productId]
-      );
+    // Build the batch UPDATE query using UNNEST
+    const productIdList = items.map(i => i.productId);
+    const actualQtyList = items.map(i => i.actualQuantity);
+    const notesList = items.map(i => i.notes ?? null);
+    const varianceList = items.map(i => {
+      const sysQty = systemQtyMap.get(i.productId) ?? 0;
+      return i.actualQuantity - sysQty;
+    });
 
-      if (rows[0]) {
-        results.push(this.mapItemRow(rows[0]));
-      }
-    }
+    const rows = await this.query<StockOpnameItemRow>(
+      `UPDATE stock_opname_items AS soi
+       SET actual_quantity = u.actual_qty,
+           variance = u.variance,
+           notes = u.notes
+       FROM UNNEST($1::uuid[], $2::numeric[], $3::numeric[], $4::text[]) AS u(product_id, actual_qty, variance, notes)
+       WHERE soi.opname_id = $5 AND soi.product_id = u.product_id
+       RETURNING *`,
+      [productIdList, actualQtyList, varianceList, notesList, opnameId]
+    );
 
-    return results;
+    return rows.map(r => this.mapItemRow(r));
   }
 
   async delete(tenantId: string, id: string): Promise<void> {

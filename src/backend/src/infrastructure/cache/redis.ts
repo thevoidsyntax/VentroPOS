@@ -3,16 +3,27 @@
 
 import Redis from 'ioredis';
 import { config } from '../../shared/config/index.js';
+import { RETRY_BASE_DELAY, RETRY_MAX_DELAY, RETRY_MAX_ATTEMPTS, CACHE_TTL_15_MIN, CACHE_TTL_1_HOUR, RATE_LIMIT_WINDOW_SECONDS } from '../../shared/constants/index.js';
+import pino from 'pino';
+
+const logger = pino({ level: config.logging.level });
 
 export class RedisClient {
   private client: Redis | null = null;
   private static instance: RedisClient;
+  private static initPromise: Promise<RedisClient> | null = null;
 
   private constructor() {}
 
   static getInstance(): RedisClient {
     if (!RedisClient.instance) {
-      RedisClient.instance = new RedisClient();
+      // Double-checked locking with promise for async initialization
+      if (!RedisClient.initPromise) {
+        RedisClient.initPromise = Promise.resolve().then(() => {
+          RedisClient.instance = new RedisClient();
+          return RedisClient.instance;
+        });
+      }
     }
     return RedisClient.instance;
   }
@@ -27,34 +38,34 @@ export class RedisClient {
 
   async connect(): Promise<void> {
     if (!config.redis.url) {
-      console.warn('[Redis] REDIS_URL not configured, caching disabled');
+      logger.warn('[Redis] REDIS_URL not configured, caching disabled');
       return;
     }
 
     try {
       this.client = new Redis(config.redis.url, {
-        maxRetriesPerRequest: 3,
+        maxRetriesPerRequest: RETRY_MAX_ATTEMPTS,
         retryStrategy: (times: number) => {
-          if (times > 3) {
-            console.warn('[Redis] Max retries reached, disabling cache');
+          if (times > RETRY_MAX_ATTEMPTS) {
+            logger.warn('[Redis] Max retries reached, disabling cache');
             return null;
           }
-          return Math.min(times * 200, 2000);
+          return Math.min(times * RETRY_BASE_DELAY, RETRY_MAX_DELAY);
         },
         lazyConnect: true,
       });
 
       this.client.on('error', (err) => {
-        console.error('[Redis] Connection error:', err.message);
+        logger.error({ err }, '[Redis] Connection error');
       });
 
       this.client.on('connect', () => {
-        console.info('[Redis] Connected successfully');
+        logger.info('[Redis] Connected successfully');
       });
 
       await this.client.connect();
     } catch (error) {
-      console.warn('[Redis] Failed to connect, caching disabled:', error);
+      logger.warn({ error }, '[Redis] Failed to connect, caching disabled');
       this.client = null;
     }
   }
@@ -126,7 +137,7 @@ export class RedisClient {
 // Cart caching helpers
 export const CartCache = {
   key: (tenantId: string, cartId: string) => `cart:${tenantId}:${cartId}`,
-  ttl: 3600, // 1 hour
+  ttl: CACHE_TTL_1_HOUR, // 1 hour
 
   async get(tenantId: string, cartId: string) {
     return RedisClient.getInstance().get(CartCache.key(tenantId, cartId));
@@ -144,7 +155,7 @@ export const CartCache = {
 // Session caching helpers
 export const SessionCache = {
   key: (tenantId: string, userId: string) => `session:${tenantId}:${userId}`,
-  ttl: 900, // 15 minutes (aligned with JWT access token)
+  ttl: CACHE_TTL_15_MIN, // 15 minutes (aligned with JWT access token)
 
   async get(tenantId: string, userId: string) {
     return RedisClient.getInstance().get(SessionCache.key(tenantId, userId));
@@ -165,12 +176,10 @@ export const SessionCache = {
 };
 
 // Rate limit counter helper (for distributed rate limiting)
-const RATE_LIMIT_DEFAULT_WINDOW = 60; // 1 minute in seconds
-
 export const RateLimitCache = {
   key: (identifier: string, window: string) => `ratelimit:${identifier}:${window}`,
 
-  async increment(identifier: string, windowSeconds: number = RATE_LIMIT_DEFAULT_WINDOW): Promise<number> {
+  async increment(identifier: string, windowSeconds: number = RATE_LIMIT_WINDOW_SECONDS): Promise<number> {
     const client = RedisClient.getInstance().getClient();
     if (!client) return 0;
 
@@ -190,7 +199,7 @@ export const RateLimitCache = {
     }
   },
 
-  async getCount(identifier: string, windowSeconds: number = RATE_LIMIT_DEFAULT_WINDOW): Promise<number> {
+  async getCount(identifier: string, windowSeconds: number = RATE_LIMIT_WINDOW_SECONDS): Promise<number> {
     const client = RedisClient.getInstance().getClient();
     if (!client) return 0;
 

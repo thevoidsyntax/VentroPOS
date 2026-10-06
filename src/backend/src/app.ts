@@ -10,6 +10,7 @@ import swaggerUi from '@fastify/swagger-ui';
 
 import { config } from './shared/config/index.js';
 import { AppError } from './shared/errors/index.js';
+import { RATE_LIMIT_MAX_REQUESTS, AUTH_RATE_LIMIT_MAX_REQUESTS } from './shared/constants/index.js';
 import { registerSecurityHeaders, rateLimitKeyGenerator, rateLimitErrorResponse } from './api/middleware/security.js';
 import { RedisClient } from './infrastructure/cache/redis.js';
 
@@ -20,6 +21,7 @@ import { orderRoutes } from './api/routes/order.routes.js';
 import { userRoutes } from './api/routes/user.routes.js';
 import { tableRoutes } from './api/routes/table.routes.js';
 import { stockRoutes } from './api/routes/stock.routes.js';
+import { stockOpnameRoutes } from './api/routes/stock-opname.routes.js';
 import { modifierRoutes } from './api/routes/modifier.routes.js';
 import { reportRoutes } from './api/routes/report.routes.js';
 import { hardwareRoutes } from './api/routes/hardware.routes.js';
@@ -68,14 +70,14 @@ export async function buildApp() {
   const redisClient = RedisClient.getInstance().getClient();
 
   if (redisClient) {
-    console.info('[RateLimit] Redis connected - distributed rate limiting enabled');
+    app.log.info('[RateLimit] Redis connected - distributed rate limiting enabled');
   } else {
-    console.warn('[RateLimit] Redis not available - using in-memory rate limiting');
+    app.log.warn('[RateLimit] Redis not available - using in-memory rate limiting');
   }
 
   // Global rate limit config
   const globalRateLimitConfig = {
-    max: 100, // requests per minute per IP
+    max: RATE_LIMIT_MAX_REQUESTS, // requests per minute per IP
     timeWindow: '1 minute',
     keyGenerator: rateLimitKeyGenerator,
     errorResponseBuilder: rateLimitErrorResponse,
@@ -90,7 +92,7 @@ export async function buildApp() {
 
   // Auth routes rate limit config (stricter for login attempts)
   const authRateLimitConfig = {
-    max: 5, // 5 requests per minute per IP for auth endpoints
+    max: AUTH_RATE_LIMIT_MAX_REQUESTS, // requests per minute per IP for auth endpoints
     timeWindow: '1 minute',
     keyGenerator: rateLimitKeyGenerator,
     errorResponseBuilder: () => ({
@@ -244,6 +246,7 @@ export async function buildApp() {
   await app.register(orderRoutes, { prefix: '/api/v1/orders' });
   await app.register(tableRoutes, { prefix: '/api/v1/tables' });
   await app.register(stockRoutes, { prefix: '/api/v1/stock' });
+  await app.register(stockOpnameRoutes, { prefix: '/api/v1/stock' });
   await app.register(modifierRoutes, { prefix: '/api/v1/modifiers' });
   await app.register(reportRoutes, { prefix: '/api/v1/reports' });
   await app.register(hardwareRoutes, { prefix: '/api/v1/hardware' });

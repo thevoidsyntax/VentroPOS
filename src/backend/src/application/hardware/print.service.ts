@@ -1,6 +1,7 @@
 // Print Service - Receipt Generation and Printing
 import { ESCPOSDriver, QRCodeGenerator } from '../../infrastructure/hardware/drivers/escpos.driver.js';
 import type { HardwareDevice, HardwareConfig } from '../../domain/entities/index.js';
+import { DEFAULT_HARDWARE_TIMEOUT_MS, THERMAL_PRINTER_WIDTH } from '../../shared/constants/index.js';
 
 // Receipt data structure
 export interface ReceiptData {
@@ -89,7 +90,7 @@ export class PrintService {
     this.driver = new ESCPOSDriver({
       ip: config.ip,
       port: config.port,
-      timeout: config.timeout ?? 5000,
+      timeout: config.timeout ?? DEFAULT_HARDWARE_TIMEOUT_MS,
     });
 
     await this.driver.connect();
@@ -110,7 +111,7 @@ export class PrintService {
       throw new Error('Printer not initialized. Call initializeDriver first.');
     }
 
-    const width = 48; // Standard 80mm thermal printer width
+    const width = THERMAL_PRINTER_WIDTH; // Standard 80mm thermal printer width
 
     // Header
     await this.driver.printText(data.storeName, { align: 'center', bold: true, fontSize: 'double' });
@@ -272,7 +273,7 @@ export class PrintService {
       throw new Error('Printer not initialized. Call initializeDriver first.');
     }
 
-    const width = 48;
+    const width = THERMAL_PRINTER_WIDTH;
 
     // Header
     await this.driver.printText('INVOICE', { align: 'center', bold: true, fontSize: 'double' });

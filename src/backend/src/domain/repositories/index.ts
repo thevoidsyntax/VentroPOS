@@ -108,6 +108,7 @@ export interface TransactionFilters {
 
 export interface IStockLogRepository {
   create(tenantId: string, log: Omit<StockLog, 'id' | 'createdAt'>): Promise<StockLog>;
+  batchCreate(tenantId: string, logs: Array<Omit<StockLog, 'id' | 'createdAt'>>): Promise<void>;
   findByProduct(tenantId: string, productId: string): Promise<StockLog[]>;
   findAll(tenantId: string, filters?: StockLogFilters): Promise<StockLog[]>;
 }

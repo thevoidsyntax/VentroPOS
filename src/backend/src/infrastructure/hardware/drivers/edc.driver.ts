@@ -1,6 +1,8 @@
 // EDC Driver - Electronic Data Capture Terminal Communication
 // Supports common EDC protocols via TCP
 
+import { DEFAULT_EDC_IP, DEFAULT_EDC_PORT, DEFAULT_EDC_TIMEOUT_MS } from '../../../shared/constants/index.js';
+
 export interface EDCConfig {
   ip?: string;
   port?: number;
@@ -48,11 +50,11 @@ export class EDCDriver {
 
   constructor(config: EDCConfig) {
     this.config = {
-      ip: config.ip ?? '192.168.1.101',
-      port: config.port ?? 9101,
+      ip: config.ip ?? DEFAULT_EDC_IP,
+      port: config.port ?? DEFAULT_EDC_PORT,
       merchantId: config.merchantId ?? 'MERCHANT001',
       terminalId: config.terminalId ?? 'TERM001',
-      timeout: config.timeout ?? 30000,
+      timeout: config.timeout ?? DEFAULT_EDC_TIMEOUT_MS,
     };
   }
 
@@ -94,6 +96,8 @@ export class EDCDriver {
   async disconnect(): Promise<void> {
     return new Promise((resolve) => {
       if (this.socket) {
+        // Remove all event listeners to prevent memory leaks
+        this.socket.removeAllListeners();
         this.socket.end(() => {
           this.socket = null;
           this.connected = false;
