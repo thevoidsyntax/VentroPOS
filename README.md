@@ -281,26 +281,15 @@ CREATE TABLE hardware_logs (
 
 ### Skill Triggers
 
-| Skill | Type | Trigger | Purpose |
-|-------|------|---------|---------|
-| `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` | React best practices, component patterns |
-| `/ui-ux-pro-max` | **Manual** | Explicit invoke | Human-like UI, tablet-first design |
-| `/ui-ux-pro-max-styling` | **Manual** | Styling work | Tailwind + shadcn/ui patterns |
-| `/ui-ux-pro-max-design-system` | **Manual** | Design tokens | Colors, typography, spacing |
+| Skill | Type | Trigger | Priority |
+|-------|------|---------|----------|
+| `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` | Primary |
+| `/ui-ux-pro-max` | **Auto** | File: `**/*.tsx`, `**/*.jsx` | **HIGH** |
+| `/ui-ux-pro-max-styling` | Auto | Styling work | Medium |
+| `/ui-ux-pro-max-design-system` | Manual | Design tokens setup | Initial |
+| `/performance` | Auto | Keywords: "performance", "bundle" | As needed |
 
-**Workflow Pattern:**
-```
-User: "lanjutkan phase 7"
-  │
-  ├─ /frontend (auto dari file patterns)
-  │
-  └─ Invoke manual saat needed:
-     ├─ /ui-ux-pro-max (assessment UI patterns)
-     ├─ /ui-ux-pro-max-styling (component styling)
-     └─ /ui-ux-pro-max-design-system (tokens, themes)
-```
-
-**Requirements:** Lihat `docs/frontend/SPEC.md` untuk detail lengkap.
+> **Note:** `/ui-ux-pro-max` sekarang auto-invoke untuk semua `.tsx/.jsx` files karena goal project adalah **human-like UI patterns** secara konsisten.
 
 **Deliverables:**
 - React + Vite + TypeScript setup

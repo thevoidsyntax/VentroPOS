@@ -48,10 +48,20 @@ src/backend/           # Fastify API server
 ├── src/domain/        # Entities, repositories interfaces
 ├── src/infrastructure/ # DB, auth implementations
 └── src/shared/        # Config, errors, utils
+
+docs/
+├── roadmap/          # Phase specifications (phase-1-foundation.md, etc.)
+├── frontend/          # Frontend specs (SPEC.md)
+├── prd/              # Product Requirements Document
+├── audit/            # Code audit reports
+├── flowchart/        # Architecture flowcharts
+└── skills/           # Skill specifications
 ```
 
 **Reference:**
 - `README.md` — Requirements, specs, progress
+- `docs/roadmap/` — Detailed phase specifications
+- `docs/frontend/SPEC.md` — Frontend setup spec
 - `docs/prd/README.md` — Full business requirements (PRD)
 
 ---
@@ -81,9 +91,12 @@ src/backend/           # Fastify API server
 | Skill | Type | Trigger |
 |-------|------|---------|
 | `/frontend` | Auto | File: `**/*.tsx`, `**/*.jsx` |
-| `/ui-ux-pro-max` | **Manual** | Before UI work |
-| `/ui-ux-pro-max-styling` | **Manual** | Styling components |
-| `/ui-ux-pro-max-design-system` | **Manual** | Design tokens setup |
+| `/ui-ux-pro-max` | Auto* | File: `**/*.tsx`, `**/*.jsx` (HIGH priority) |
+| `/ui-ux-pro-max-styling` | Auto* | Styling work |
+| `/ui-ux-pro-max-design-system` | Manual | Design tokens setup |
+| `/performance` | Auto | Keywords: "performance", "bundle" |
+
+*Note: `/ui-ux-pro-max` sekarang auto-invoke untuk frontend files karena goal adalah human-like UI patterns
 
 **Deliverables:**
 - React + Vite + TypeScript setup
@@ -91,6 +104,17 @@ src/backend/           # Fastify API server
 - Zustand stores (cart, auth, ui)
 - TanStack Query hooks
 - PWA configuration
+
+### Phase 8-13 Overview
+
+| Phase | Description | Pages | Priority |
+|-------|-------------|-------|----------|
+| 8 | Orders Management | Order list, Order detail, Void | P0 |
+| 9 | Product Management | Products CRUD, Categories, Modifiers | P1 |
+| 10 | Stock Management | Stock overview, Alerts, Opname | P1 |
+| 11 | Reports & Dashboard | Sales charts, Export CSV/PDF | P1 |
+| 12 | Settings & Config | Tables, Users, Hardware | P2 |
+| 13 | PWA Polish | Offline mode, Install prompt | P2 |
 
 ### Completed Phases
 

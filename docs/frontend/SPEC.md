@@ -3,10 +3,10 @@
 > **Phase:** 7
 > **Status:** Ready to Implement
 > **Primary Skill:** `/frontend` - React best practices
-> **UI/UX Skills (invoke manual):**
-> - `/ui-ux-pro-max` - Human-like UI patterns, responsive, tablet-first
-> - `/ui-ux-pro-max-styling` - Tailwind + shadcn/ui styling patterns
-> - `/ui-ux-pro-max-design-system` - Design tokens, colors, typography, spacing
+> **UI/UX Skills (auto-invoke for .tsx/.jsx):**
+> - `/ui-ux-pro-max` - Human-like UI patterns, responsive, tablet-first (**AUTO**)
+> - `/ui-ux-pro-max-styling` - Tailwind + shadcn/ui styling patterns (auto)
+> - `/ui-ux-pro-max-design-system` - Design tokens, colors, typography, spacing (manual - initial setup)
 > **Last Updated:** 2026-01-26
 
 ---

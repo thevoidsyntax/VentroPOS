@@ -695,40 +695,40 @@ Page margin: 16px (mobile), 24px (tablet), 32px (desktop)
 
 | Phase | Pages | Priority | Duration | Skills |
 |-------|-------|----------|----------|--------|
-| **Phase 7** | Setup, Login, POS Grid, Cart, Checkout | P0 | 1-2 weeks | `/frontend` (auto), `/ui-ux-pro-max` (manual) |
-| **Phase 8** | Orders, Order Detail, Void | P0 | 3-5 days | `/frontend` (auto) |
-| **Phase 9** | Products, Categories, Modifiers | P1 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max-styling` (manual) |
-| **Phase 10** | Stock, Alerts, Opname | P1 | 3-5 days | `/frontend` (auto) |
-| **Phase 11** | Dashboard, Reports, Export | P1 | 3-5 days | `/frontend` (auto), `/performance` (auto) |
-| **Phase 12** | Tables, Users, Settings | P2 | 3-5 days | `/frontend` (auto) |
-| **Phase 13** | PWA: Offline, Install, Notifications | P2 | 2-3 days | `/frontend` (auto), `/performance` (auto) |
+| **Phase 7** | Setup, Login, POS Grid, Cart, Checkout | P0 | 1-2 weeks | `/frontend` (auto), `/ui-ux-pro-max` (auto) |
+| **Phase 8** | Orders, Order Detail, Void | P0 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max` (auto) |
+| **Phase 9** | Products, Categories, Modifiers | P1 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max` (auto) |
+| **Phase 10** | Stock, Alerts, Opname | P1 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max` (auto) |
+| **Phase 11** | Dashboard, Reports, Export | P1 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max` (auto), `/performance` (auto) |
+| **Phase 12** | Tables, Users, Settings | P2 | 3-5 days | `/frontend` (auto), `/ui-ux-pro-max` (auto) |
+| **Phase 13** | PWA: Offline, Install, Notifications | P2 | 2-3 days | `/frontend` (auto), `/ui-ux-pro-max` (auto), `/performance` (auto) |
 
 #### Skill Integration Guide
 
-**Auto-invoke skills** (triggered by file patterns or keywords):
+**Auto-invoke skills** (triggered automatically for frontend files):
 ```
-/frontend      → File: **/*.tsx, **/*.jsx
-/testing       → File: tests/**, "test", "coverage"
-/performance   → Keywords: "performance", "bundle", "core web vitals"
-/diagnosing-bugs → Keywords: "bug", "error", "fix"
+/frontend              → File: **/*.tsx, **/*.jsx (React patterns)
+/ui-ux-pro-max        → File: **/*.tsx, **/*.jsx (Human-like UI - ALWAYS)
+/ui-ux-pro-max-styling → Styling work (component patterns)
+/performance          → Keywords: "performance", "bundle", "core web vitals"
+/testing               → File: tests/**, "test", "coverage"
 ```
 
 **Manual-invoke skills** (call explicitly when needed):
 ```
-/ui-ux-pro-max              → Before UI work: "What makes this look human?"
-/ui-ux-pro-max-styling     → Styling components with Tailwind + shadcn
-/ui-ux-pro-max-design-system → Setup design tokens (colors, typography, spacing)
+/ui-ux-pro-max-design-system → Design tokens: colors, typography, spacing (initial setup)
 ```
+
+> **Note:** `/ui-ux-pro-max` adalah **AUTO** untuk semua `.tsx/.jsx` karena goal project adalah human-like UI patterns secara konsisten.
 
 #### Recommended Skill Workflow
 
 ```
-1. Start feature: /frontend (auto triggers)
-2. UI assessment: /ui-ux-pro-max (manual)
-3. Design tokens: /ui-ux-pro-max-design-system (manual)
-4. Component styling: /ui-ux-pro-max-styling (manual per component)
-5. Performance: /performance (auto when keywords detected)
-6. Testing: /testing (auto when keywords detected)
+1. Initial setup: /ui-ux-pro-max-design-system (manual - design tokens)
+2. Start feature: /frontend (auto) + /ui-ux-pro-max (auto)
+3. Component styling: /ui-ux-pro-max-styling (auto when styling)
+4. Performance: /performance (auto when keywords detected)
+5. Testing: /testing (auto when keywords detected)
 ```
 
 ---
