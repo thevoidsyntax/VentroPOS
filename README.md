@@ -273,14 +273,25 @@ CREATE TABLE hardware_logs (
 
 ---
 
-### Phase 6: Launch (Todo)
+## Phase 7: Frontend Setup
 
-**Objectives:**
-- Performance optimization
-- Security hardening
-- PWA implementation
-- Documentation completion
-- Deployment setup
+**Skills to invoke:** `/frontend` - React best practices, component patterns
+
+**Requirements:** Lihat `docs/frontend/SPEC.md` untuk detail lengkap
+
+**Deliverables:**
+- React + Vite + TypeScript setup
+- shadcn/ui components
+- Zustand stores (cart, auth, ui)
+- TanStack Query hooks
+- PWA configuration
+
+### Phase 7.1: Project Foundation
+- [ ] Vite project initialization
+- [ ] Tailwind + shadcn/ui setup
+- [ ] Zustand stores
+- [ ] TanStack Query client
+- [ ] React Router setup
 
 ---
 

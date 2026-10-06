@@ -1,7 +1,8 @@
 # VentroPOS Frontend - Setup Specification
 
-> **Phase:** 7  
-> **Status:** Ready to Implement  
+> **Phase:** 7
+> **Status:** Ready to Implement
+> **Skill:** `/frontend` - React best practices
 > **Last Updated:** 2026-01-26
 
 ---
