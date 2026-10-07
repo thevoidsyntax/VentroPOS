@@ -3,67 +3,59 @@ import { useUIStore } from '@/stores/ui-store';
 
 describe('useUIStore', () => {
   beforeEach(() => {
-    useUIStore.setState({
-      sidebarCollapsed: false,
-      sidebarMobileOpen: false,
-      cartDrawerOpen: false,
-      checkoutModalOpen: false,
-      receiptModalOpen: false,
-      receiptData: null,
-      offline: false,
-    });
+    useUIStore.getState().$reset();
   });
 
   describe('sidebar', () => {
     it('toggles sidebar collapsed state', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      expect(result.sidebarCollapsed).toBe(false);
+      expect(store.sidebarCollapsed).toBe(false);
 
-      result.toggleSidebar();
-      expect(result.sidebarCollapsed).toBe(true);
+      store.toggleSidebar();
+      expect(useUIStore.getState().sidebarCollapsed).toBe(true);
 
-      result.toggleSidebar();
-      expect(result.sidebarCollapsed).toBe(false);
+      store.toggleSidebar();
+      expect(useUIStore.getState().sidebarCollapsed).toBe(false);
     });
 
     it('toggles sidebar mobile open state', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      expect(result.sidebarMobileOpen).toBe(false);
+      expect(store.sidebarMobileOpen).toBe(false);
 
-      result.toggleSidebarMobile();
-      expect(result.sidebarMobileOpen).toBe(true);
+      store.toggleSidebarMobile();
+      expect(useUIStore.getState().sidebarMobileOpen).toBe(true);
 
-      result.toggleSidebarMobile();
-      expect(result.sidebarMobileOpen).toBe(false);
+      store.toggleSidebarMobile();
+      expect(useUIStore.getState().sidebarMobileOpen).toBe(false);
     });
 
     it('sets sidebar collapsed state', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      result.setSidebarCollapsed(true);
-      expect(result.sidebarCollapsed).toBe(true);
+      store.setSidebarCollapsed(true);
+      expect(useUIStore.getState().sidebarCollapsed).toBe(true);
 
-      result.setSidebarCollapsed(false);
-      expect(result.sidebarCollapsed).toBe(false);
+      store.setSidebarCollapsed(false);
+      expect(useUIStore.getState().sidebarCollapsed).toBe(false);
     });
   });
 
   describe('cart drawer', () => {
     it('opens cart drawer', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      expect(result.cartDrawerOpen).toBe(false);
+      expect(store.cartDrawerOpen).toBe(false);
 
-      result.setCartDrawerOpen(true);
-      expect(result.cartDrawerOpen).toBe(true);
+      store.setCartDrawerOpen(true);
+      expect(useUIStore.getState().cartDrawerOpen).toBe(true);
     });
   });
 
   describe('receipt', () => {
     it('opens receipt with data', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
       const receiptData = {
         orderId: 'order-1',
@@ -78,16 +70,17 @@ describe('useUIStore', () => {
         timestamp: new Date(),
       };
 
-      result.openReceipt(receiptData);
+      store.openReceipt(receiptData);
 
-      expect(result.receiptModalOpen).toBe(true);
-      expect(result.receiptData?.orderNumber).toBe('ORD-001');
+      const state = useUIStore.getState();
+      expect(state.receiptModalOpen).toBe(true);
+      expect(state.receiptData?.orderNumber).toBe('ORD-001');
     });
 
     it('closes receipt', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      result.openReceipt({
+      store.openReceipt({
         orderId: 'order-1',
         orderNumber: 'ORD-001',
         items: [],
@@ -100,21 +93,22 @@ describe('useUIStore', () => {
         timestamp: new Date(),
       });
 
-      result.closeReceipt();
+      store.closeReceipt();
 
-      expect(result.receiptModalOpen).toBe(false);
-      expect(result.receiptData).toBeNull();
+      const state = useUIStore.getState();
+      expect(state.receiptModalOpen).toBe(false);
+      expect(state.receiptData).toBeNull();
     });
   });
 
   describe('offline', () => {
     it('sets offline state', () => {
-      const { result } = useUIStore();
+      const store = useUIStore.getState();
 
-      expect(result.offline).toBe(false);
+      expect(store.offline).toBe(false);
 
-      result.setOffline(true);
-      expect(result.offline).toBe(true);
+      store.setOffline(true);
+      expect(useUIStore.getState().offline).toBe(true);
     });
   });
 });
