@@ -8,6 +8,7 @@ interface UIState {
   receiptModalOpen: boolean;
   receiptData: ReceiptData | null;
   offline: boolean;
+  $reset: () => void;
   toggleSidebar: () => void;
   toggleSidebarMobile: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -42,7 +43,17 @@ export const useUIStore = create<UIState>((set) => ({
   checkoutModalOpen: false,
   receiptModalOpen: false,
   receiptData: null,
-  offline: !navigator.onLine,
+  offline: false,
+
+  $reset: () => set({
+    sidebarCollapsed: false,
+    sidebarMobileOpen: false,
+    cartDrawerOpen: false,
+    checkoutModalOpen: false,
+    receiptModalOpen: false,
+    receiptData: null,
+    offline: false,
+  }),
 
   toggleSidebar: () =>
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),

@@ -3,13 +3,15 @@ import { useAuthStore } from '@/stores/auth-store';
 
 describe('useAuthStore', () => {
   beforeEach(() => {
-    useAuthStore.getState().$reset();
+    // Clear localStorage and reset store
+    localStorage.clear();
+    const store = useAuthStore.getState();
+    store.logout(); // Use logout to reset (it clears all auth state)
   });
 
   describe('setAuth', () => {
     it('sets user, token, and refreshToken', () => {
       const store = useAuthStore.getState();
-
       store.setAuth(
         { id: 'user-1', email: 'test@test.com', name: 'Test User', role: 'admin', tenantId: 'tenant-1', isActive: true, createdAt: new Date().toISOString() },
         'access-token',
@@ -27,7 +29,6 @@ describe('useAuthStore', () => {
   describe('updateUser', () => {
     it('updates user data', () => {
       const store = useAuthStore.getState();
-
       store.setAuth(
         { id: 'user-1', email: 'test@test.com', name: 'Test User', role: 'admin', tenantId: 'tenant-1', isActive: true, createdAt: new Date().toISOString() },
         'access-token',
@@ -45,7 +46,6 @@ describe('useAuthStore', () => {
   describe('logout', () => {
     it('clears all auth data', () => {
       const store = useAuthStore.getState();
-
       store.setAuth(
         { id: 'user-1', email: 'test@test.com', name: 'Test User', role: 'admin', tenantId: 'tenant-1', isActive: true, createdAt: new Date().toISOString() },
         'access-token',

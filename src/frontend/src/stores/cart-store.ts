@@ -21,6 +21,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   tableId: string | null;
+  $reset: () => void;
   addItem: (item: Omit<CartItem, 'id'>) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   removeItem: (itemId: string) => void;
@@ -40,6 +41,8 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       tableId: null,
+
+      $reset: () => set({ items: [], tableId: null }),
 
       addItem: (item) => {
         const existingItem = get().items.find(

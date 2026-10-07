@@ -3,13 +3,18 @@ import { useUIStore } from '@/stores/ui-store';
 
 describe('useUIStore', () => {
   beforeEach(() => {
-    useUIStore.getState().$reset();
+    // Reset store to default state
+    const store = useUIStore.getState();
+    // Manually reset all states
+    store.setSidebarCollapsed(false);
+    store.setCartDrawerOpen(false);
+    store.closeReceipt();
+    store.setOffline(false);
   });
 
   describe('sidebar', () => {
     it('toggles sidebar collapsed state', () => {
       const store = useUIStore.getState();
-
       expect(store.sidebarCollapsed).toBe(false);
 
       store.toggleSidebar();
@@ -21,7 +26,6 @@ describe('useUIStore', () => {
 
     it('toggles sidebar mobile open state', () => {
       const store = useUIStore.getState();
-
       expect(store.sidebarMobileOpen).toBe(false);
 
       store.toggleSidebarMobile();
@@ -33,7 +37,6 @@ describe('useUIStore', () => {
 
     it('sets sidebar collapsed state', () => {
       const store = useUIStore.getState();
-
       store.setSidebarCollapsed(true);
       expect(useUIStore.getState().sidebarCollapsed).toBe(true);
 
@@ -45,7 +48,6 @@ describe('useUIStore', () => {
   describe('cart drawer', () => {
     it('opens cart drawer', () => {
       const store = useUIStore.getState();
-
       expect(store.cartDrawerOpen).toBe(false);
 
       store.setCartDrawerOpen(true);
@@ -56,7 +58,6 @@ describe('useUIStore', () => {
   describe('receipt', () => {
     it('opens receipt with data', () => {
       const store = useUIStore.getState();
-
       const receiptData = {
         orderId: 'order-1',
         orderNumber: 'ORD-001',
@@ -79,7 +80,6 @@ describe('useUIStore', () => {
 
     it('closes receipt', () => {
       const store = useUIStore.getState();
-
       store.openReceipt({
         orderId: 'order-1',
         orderNumber: 'ORD-001',
@@ -104,7 +104,6 @@ describe('useUIStore', () => {
   describe('offline', () => {
     it('sets offline state', () => {
       const store = useUIStore.getState();
-
       expect(store.offline).toBe(false);
 
       store.setOffline(true);

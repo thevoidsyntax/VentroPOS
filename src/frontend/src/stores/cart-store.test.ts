@@ -3,14 +3,15 @@ import { useCartStore } from '@/stores/cart-store';
 
 describe('useCartStore', () => {
   beforeEach(() => {
-    // Reset store state before each test using getState().setState()
-    useCartStore.getState().$reset();
+    // Clear localStorage and reset store
+    localStorage.clear();
+    const store = useCartStore.getState();
+    store.clearCart();
   });
 
   describe('addItem', () => {
     it('adds a new item to cart', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -27,7 +28,6 @@ describe('useCartStore', () => {
 
     it('increases quantity when adding same product', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -51,7 +51,6 @@ describe('useCartStore', () => {
 
     it('creates separate items for different products', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -76,7 +75,6 @@ describe('useCartStore', () => {
   describe('updateQuantity', () => {
     it('updates item quantity', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -94,7 +92,6 @@ describe('useCartStore', () => {
 
     it('removes item when quantity becomes zero', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -114,7 +111,6 @@ describe('useCartStore', () => {
   describe('removeItem', () => {
     it('removes item from cart', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -142,7 +138,6 @@ describe('useCartStore', () => {
   describe('clearCart', () => {
     it('clears all items', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -159,7 +154,6 @@ describe('useCartStore', () => {
   describe('calculations', () => {
     it('calculates subtotal correctly', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -173,7 +167,6 @@ describe('useCartStore', () => {
 
     it('includes modifiers in subtotal', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -187,7 +180,6 @@ describe('useCartStore', () => {
 
     it('calculates tax at 11%', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -201,7 +193,6 @@ describe('useCartStore', () => {
 
     it('calculates total correctly', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
@@ -215,7 +206,6 @@ describe('useCartStore', () => {
 
     it('calculates item count', () => {
       const store = useCartStore.getState();
-
       store.addItem({
         productId: 'prod-1',
         name: 'Kopi Hitam',
