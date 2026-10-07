@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
+    --background: 0 0% 100%;
     --foreground: 0 0% 9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
@@ -38,7 +38,6 @@
     overscroll-behavior: none;
   }
 
-  /* Touch-optimized scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -58,24 +57,20 @@
 }
 
 @layer components {
-  /* POS-specific touch-friendly button */
   .btn-touch {
     @apply min-h-touch min-w-touch flex items-center justify-center;
   }
 
-  /* POS card hover effect */
   .card-touch {
-    @apply transition-all duration-150 active:scale-[0.98] active:shadow-sm;
+    @apply transition-all duration-150 active:scale-95 active:shadow-sm;
   }
 
-  /* Skeleton loading animation */
   .skeleton {
     @apply bg-muted animate-pulse rounded;
   }
 }
 
 @layer utilities {
-  /* Safe area padding for PWA */
   .safe-area-inset {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -83,7 +78,6 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

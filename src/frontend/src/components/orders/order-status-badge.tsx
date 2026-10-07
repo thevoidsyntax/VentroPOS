@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { OrderStatus } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 

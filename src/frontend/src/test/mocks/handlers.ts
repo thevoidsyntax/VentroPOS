@@ -187,13 +187,13 @@ export const handlers = [
   }),
 
   http.post('/api/v1/orders', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as { items?: unknown[] };
     return HttpResponse.json({
       id: 'order-new',
       orderNumber: 'ORD-NEW',
       status: 'pending',
       userId: 'user-1',
-      items: body.items,
+      items: body.items ?? [],
       subtotal: 0,
       tax: 0,
       discount: 0,

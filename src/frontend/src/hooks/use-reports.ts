@@ -28,7 +28,7 @@ export function useStaffReport(filters: ReportFilters) {
 
 export function useCategoryBreakdown(filters: ReportFilters) {
   return useQuery({
-    queryKey: queryKeys.reports.categoryBreakdown(filters),
+    queryKey: queryKeys.reports.categories(filters),
     queryFn: () => api.reports.categoryBreakdown(filters),
     enabled: !!filters.startDate && !!filters.endDate,
   });

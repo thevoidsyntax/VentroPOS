@@ -8,6 +8,10 @@ interface ApiError {
   status?: number;
 }
 
+interface RequestOptions extends RequestInit {
+  params?: Record<string, string | number | boolean | undefined>;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -30,13 +34,13 @@ class ApiClient {
 
   async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestOptions = {}
   ): Promise<T> {
     const url = new URL(endpoint, this.baseUrl);
 
     // Handle query params
     if (options.params) {
-      Object.entries(options.params as Record<string, string | number | boolean>).forEach(
+      Object.entries(options.params).forEach(
         ([key, value]) => {
           if (value !== undefined && value !== null) {
             url.searchParams.append(key, String(value));
@@ -45,11 +49,13 @@ class ApiClient {
       );
     }
 
+    const { params, ...rest } = options;
+
     const response = await fetch(url.toString(), {
-      ...options,
+      ...rest,
       headers: {
         ...this.getHeaders(),
-        ...options.headers,
+        ...rest.headers,
       },
     });
 
@@ -92,7 +98,7 @@ class ApiClient {
   // Products endpoints
   products = {
     list: (params?: ProductFilters) =>
-      this.request<PaginatedResponse<Product>>('/products', { params }),
+      this.request<PaginatedResponse<Product>>('/products', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
     get: (id: string) =>
       this.request<Product>(`/products/${id}`),
     create: (data: CreateProductData) =>
@@ -132,7 +138,7 @@ class ApiClient {
   // Orders endpoints
   orders = {
     list: (params?: OrderFilters) =>
-      this.request<PaginatedResponse<Order>>('/orders', { params }),
+      this.request<PaginatedResponse<Order>>('/orders', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
     get: (id: string) =>
       this.request<Order>(`/orders/${id}`),
     create: (data: CreateOrderData) =>
@@ -210,13 +216,13 @@ class ApiClient {
   // Reports endpoints
   reports = {
     sales: (params?: ReportFilters) =>
-      this.request<SalesReport>('/reports/sales', { params }),
+      this.request<SalesReport>('/reports/sales', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
     products: (params?: ReportFilters) =>
-      this.request<ProductReport>('/reports/products', { params }),
+      this.request<ProductReport>('/reports/products', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
     staff: (params?: ReportFilters) =>
-      this.request<StaffReport[]>('/reports/staff', { params }),
+      this.request<StaffReport[]>('/reports/staff', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
     categoryBreakdown: (params?: ReportFilters) =>
-      this.request<CategoryBreakdown[]>('/reports/categories', { params }),
+      this.request<CategoryBreakdown[]>('/reports/categories', { params: params as unknown as Record<string, string | number | boolean | undefined> }),
   };
 
   // Users endpoints

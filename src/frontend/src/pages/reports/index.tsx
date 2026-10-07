@@ -14,14 +14,21 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useSalesReport, useProductReport, useStaffReport } from '@/hooks';
+import type { ReportFilters } from '@/lib/api';
 
 const today = new Date();
 const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
+function formatDateString(date: Date): string {
+  const isoString = date.toISOString();
+  const [datePart] = isoString.split('T');
+  return datePart ?? '';
+}
+
 export function ReportsPage() {
-  const [dateRange, setDateRange] = useState({
-    startDate: firstDayOfMonth.toISOString().split('T')[0],
-    endDate: today.toISOString().split('T')[0],
+  const [dateRange, setDateRange] = useState<ReportFilters>({
+    startDate: formatDateString(firstDayOfMonth),
+    endDate: formatDateString(today),
   });
 
   const { data: salesData, isLoading: salesLoading } = useSalesReport(dateRange);

@@ -1,4 +1,4 @@
-import * as React from 'react';
-import { Toaster as SonnerToaster } from 'sonner';
+import { toast } from 'sonner';
 
-export { SonnerToaster as Toaster };
+export { toast };
+export type {} from 'sonner';

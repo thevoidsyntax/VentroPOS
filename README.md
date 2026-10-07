@@ -1,9 +1,9 @@
 # VentroPos - Cloud POS for Small & Medium Business
 
-> **Version:** 1.1.0
+> **Version:** 1.2.0
 > **Status:** Development
 > **License:** MIT
-> **Last Updated:** 2026-10-02 (Phase 7 - Frontend Setup)
+> **Last Updated:** 2026-10-07 (Phase 8 - Orders Management)
 
 ---
 
@@ -41,10 +41,8 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 
 ## Progress
 
-## Progress
-
 | Phase | Status | Description |
-|-------|---------|-------------|
+|-------|--------|-------------|
 | 1 | ✅ Done | Foundation, Database, Auth |
 | 2 | ✅ Done | Core POS, Cart, Checkout |
 | 3 | ✅ Done | Inventory, Stock Management |
@@ -52,7 +50,7 @@ VentroPos is a cloud-based Point of Sale (POS) system designed for small to medi
 | 5 | ✅ Done | Hardware Integration |
 | 6 | ✅ Done | Audit Fixes, Refactoring |
 | 7 | ✅ Done | React Frontend Setup |
-| 8 | ⬜ Next | Orders Management |
+| 8 | ✅ Done | Orders Management |
 | 9-13 | ⬜ Todo | Frontend Features |
 
 ---
@@ -343,6 +341,51 @@ CREATE TABLE hardware_logs (
 - [ ] Service worker (vite-plugin-pwa)
 - [ ] Offline mode
 - [ ] Install prompt
+
+---
+
+## Phase 8: Orders Management ✅ Done
+
+**Objectives:**
+- [x] Order list page with filters
+- [x] Order detail page
+- [x] Search orders by ID
+- [x] Filter by status, date range, cashier
+- [x] Void order flow
+- [x] Print receipt functionality
+- [x] Pagination
+
+**Pages:**
+- `/orders` - Order list with filters
+- `/orders/:id` - Order detail
+
+**Features Implemented:**
+| Feature | Status |
+|---------|--------|
+| Order list | ✅ |
+| Status filter dropdown | ✅ |
+| Date range filter | ✅ |
+| Cashier filter | ✅ |
+| Search by order number | ✅ |
+| Order status badge | ✅ |
+| Void order modal | ✅ |
+| Print receipt button | ✅ |
+| Pagination | ✅ |
+| Empty state | ✅ |
+
+**New Frontend Components:**
+```
+components/ui/popover.tsx    - Radix Popover
+components/ui/calendar.tsx    - Custom date picker
+components/ui/textarea.tsx   - Textarea input
+hooks/use-users.ts          - User list hook
+pages/orders/OrdersPage.tsx - Full featured order list
+pages/orders/$id.tsx        - Enhanced order detail
+```
+
+**Phase Gate:**
+- [x] npm run build: Success
+- [x] Documentation updated
 
 ---
 
@@ -653,6 +696,38 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### v1.2.0 - Phase 8: Orders Management (Complete)
+
+**Phase 8 Features:**
+- ✅ Order list page (`/orders`) with filters
+- ✅ Order detail page (`/orders/:id`)
+- ✅ Status filter dropdown
+- ✅ Date range filter with calendar picker
+- ✅ Cashier filter by user
+- ✅ Search by order number
+- ✅ Order status badge component
+- ✅ Void order modal with reason presets
+- ✅ Print receipt button
+- ✅ Pagination support
+- ✅ Empty state for no orders
+
+**New Frontend Files:**
+```
+components/ui/popover.tsx      - Radix UI Popover
+components/ui/calendar.tsx      - Custom Calendar date picker
+components/ui/textarea.tsx       - Textarea input
+hooks/use-users.ts              - User list hook
+pages/orders/OrdersPage.tsx    - Full featured order list
+pages/orders/$id.tsx           - Enhanced order detail with modifiers
+```
+
+**Frontend Dependencies Updated:**
+- Added `@radix-ui/react-popover` for date filter
+
+**Build:** `npm run build` passes ✅
+
+---
 
 ### v1.0.2 - Phase 5: Hardware Integration (Complete)
 

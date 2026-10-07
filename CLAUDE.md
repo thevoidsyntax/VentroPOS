@@ -1,8 +1,8 @@
 # VentroPos - Developer Instructions
 
 > **Project:** VentroPos - Point of Sale System for Cafe
-> **Version:** 1.1.0
-> **Last Updated:** 2026-01-26
+> **Version:** 1.2.0
+> **Last Updated:** 2026-10-07
 
 ---
 
@@ -11,7 +11,7 @@
 **WAJIB** baca di setiap chat baru:
 
 1. **`README.md`** — Single source of truth untuk:
-   - Progress tracker (Phase 1-6)
+   - Progress tracker (Phase 1-8)
    - Phase specifications (requirements, deliverables, user stories)
    - API reference
    - Database schema
@@ -30,13 +30,12 @@
 ## 🎯 Current Status
 
 ```
-Phase 1-6: ✅ DONE  - Backend Complete (159 tests)
-Phase 7:   ✅ DONE  - Frontend Setup Complete
-Phase 8:   ⬜ NEXT  - Orders Management
+Phase 1-7:  ✅ DONE  - Backend + Frontend Setup
+Phase 8:    ✅ DONE  - Orders Management
 Phase 9-13: ⬜ TODO - Frontend Features
 ```
 
-**Last work:** Phase 7 completion - React + Vite + TypeScript frontend setup
+**Last work:** Phase 8 completion - Orders Management (list, detail, filters, void, print)
 
 ---
 
@@ -105,9 +104,9 @@ docs/
 
 ## 📌 Phase Work
 
-### Current: Phase 8 - Orders Management
+### Current: Phase 9 - Product Management
 
-**Requirements:** Lihat `README.md` Section "Phase 8" dan `docs/roadmap/phase-8-orders.md`
+**Requirements:** Lihat `README.md` Section "Phase 9" dan `docs/roadmap/phase-9-products.md`
 
 **Skills to invoke:**
 | Skill | Type | Trigger |
@@ -116,7 +115,26 @@ docs/
 | `/ui-ux-pro-max` | Auto* | File: `**/*.tsx`, `**/*.jsx` (HIGH priority) |
 | `/performance` | Auto | Keywords: "performance", "bundle" |
 
-*Note: `/ui-ux-pro-max` sekarang auto-invoke untuk frontend files karena goal adalah human-like UI patterns
+*Note: `/frontend` = `ui-ux-pro-max` skill untuk UI/UX decisions
+
+### Phase 8-13 Overview
+
+| Phase | Description | Pages | Priority |
+|-------|-------------|-------|----------|
+| 8 | ✅ Done | Orders list, detail, void | P0 |
+| 9 | ⬜ Next | Products CRUD, Categories, Modifiers | P1 |
+| 10 | ⬜ Todo | Stock overview, Alerts, Opname | P1 |
+| 11 | ⬜ Todo | Sales charts, Export CSV/PDF | P1 |
+| 12 | ⬜ Todo | Tables, Users, Hardware config | P2 |
+| 13 | ⬜ Todo | Offline mode, Install prompt | P2 |
+
+### Completed Phases
+
+| Phase | Status | Key Deliverables |
+|-------|--------|-----------------|
+| 1-6 | ✅ Done | Backend API (159 tests) |
+| 7 | ✅ Done | React + Vite + shadcn/ui setup |
+| 8 | ✅ Done | Orders Management (list, detail, filters, void) |
 
 **Deliverables:**
 - Order list with filters

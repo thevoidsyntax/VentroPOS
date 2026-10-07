@@ -14,7 +14,7 @@ export const queryClient = new QueryClient({
 export const queryKeys = {
   products: {
     all: ['products'] as const,
-    list: (filters?: Record<string, unknown>) => [...queryKeys.products.all, 'list', filters] as const,
+    list: (filters?: object) => [...queryKeys.products.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.products.all, 'detail', id] as const,
   },
   categories: {
@@ -23,7 +23,7 @@ export const queryKeys = {
   },
   orders: {
     all: ['orders'] as const,
-    list: (filters?: Record<string, unknown>) => [...queryKeys.orders.all, 'list', filters] as const,
+    list: (filters?: object) => [...queryKeys.orders.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.orders.all, 'detail', id] as const,
   },
   tables: {
@@ -38,9 +38,10 @@ export const queryKeys = {
   },
   reports: {
     all: ['reports'] as const,
-    sales: (filters?: Record<string, unknown>) => [...queryKeys.reports.all, 'sales', filters] as const,
-    products: (filters?: Record<string, unknown>) => [...queryKeys.reports.all, 'products', filters] as const,
-    staff: (filters?: Record<string, unknown>) => [...queryKeys.reports.all, 'staff', filters] as const,
+    sales: (filters?: object) => [...queryKeys.reports.all, 'sales', filters] as const,
+    products: (filters?: object) => [...queryKeys.reports.all, 'products', filters] as const,
+    staff: (filters?: object) => [...queryKeys.reports.all, 'staff', filters] as const,
+    categories: (filters?: object) => [...queryKeys.reports.all, 'categories', filters] as const,
   },
   users: {
     all: ['users'] as const,

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { OrderStatusBadge } from '@/components/orders/order-status-badge';
-import type { OrderStatus } from '@/lib/api';
 
 describe('OrderStatusBadge', () => {
   it('displays pending status correctly', () => {
