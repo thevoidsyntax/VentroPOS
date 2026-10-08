@@ -7,7 +7,7 @@
 > - `/ui-ux-pro-max` - Human-like UI patterns, responsive, tablet-first (**AUTO**)
 > - `/ui-ux-pro-max-styling` - Tailwind + shadcn/ui styling patterns (auto)
 > - `/ui-ux-pro-max-design-system` - Design tokens, colors, typography, spacing (manual - initial setup)
-> **Last Updated:** 2026-01-26
+> **Last Updated:** 2026-10-08
 
 ---
 
@@ -463,6 +463,7 @@ frontend/
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── tsconfig.json
+├── eslint.config.js        # ESLint 9 flat config
 └── package.json
 ```
 
@@ -823,7 +824,7 @@ VITE_APP_NAME=VentroPOS
 | Check | Command | Threshold |
 |-------|---------|------------|
 | TypeScript | `tsc --noEmit` | 0 errors |
-| Lint | `eslint src --ext .ts,.tsx` | 0 errors |
+| Lint | `eslint src` | 0 errors (ESLint 9 flat config) |
 | Tests | `vitest --coverage` | >70% coverage |
 | Build | `vite build` | Success |
 | Lighthouse | `lhci autorun` | Performance >90 |

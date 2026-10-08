@@ -1,9 +1,9 @@
 # VentroPos - Cloud POS for Small & Medium Business
 
-> **Version:** 1.2.0
+> **Version:** 1.2.1
 > **Status:** Development
 > **License:** MIT
-> **Last Updated:** 2026-10-07 (Phase 8 - Orders Management)
+> **Last Updated:** 2026-10-08 (Audit Fixes & ESLint Configuration)
 
 ---
 
@@ -599,9 +599,11 @@ Audit Log Table: audit_logs
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| ESLint | ✅ Configured | TypeScript + Prettier support |
+| ESLint Backend | ✅ 0 errors | TypeScript + Prettier support |
+| ESLint Frontend | ✅ 0 errors | ESLint 9 flat config (2 warnings) |
 | TypeScript | ✅ Strict | No `any` types |
-| Tests | ✅ 159 passing | Vitest unit tests (142 + 17 hardware) |
+| Tests Backend | ✅ 187 passing | Vitest unit tests |
+| Tests Frontend | ⚠️ 42/60 | Infrastructure issue (jsdom) |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 | Max File Size | ✅ <250 ln | Fat class split complete |
 
@@ -634,16 +636,18 @@ Audit Log Table: audit_logs
 | ORM/Query | Knex 3.x + pg 8.x |
 | Logging | Pino 9.x |
 | Testing | Vitest 2.x |
-| Linting | ESLint 8.x + @typescript-eslint |
-| Frontend | React 18 (Phase 4+) |
+| Linting | ESLint 8.x + @typescript-eslint (Backend) / ESLint 9.x (Frontend) |
+| Frontend | React 18 + Vite 6 |
 
 ### Dependencies Status
 
 ```
 npm audit: 0 vulnerabilities ✅
 TypeScript: 5.9.3 ✅
-Tests: 142 passing ✅
-ESLint: Configured ✅
+Backend Tests: 187 passing ✅
+Frontend Tests: 42/60 (infrastructure issue) ⚠️
+ESLint Backend: Configured ✅
+ESLint Frontend: ESLint 9 flat config ✅
 Architecture: Split complete ✅
 Fastify: 5.x compatible ✅
 Audit Logging: Implemented ✅
@@ -696,6 +700,34 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### v1.2.1 - Audit Fixes & Code Quality (2026-10-08)
+
+**Code Quality Improvements:**
+- ✅ Added `eslint.config.js` for ESLint 9 flat config
+- ✅ Fixed type imports in backend (`import type` syntax)
+- ✅ Added eslint-disable for regex escape in password validator
+- ✅ Removed 36+ unused imports across frontend codebase
+- ✅ Added vitest test mode configuration
+
+**Backend Quality:**
+- ✅ ESLint: 0 errors
+- ✅ TypeScript: Compiles cleanly
+- ✅ Tests: 187/187 passing
+
+**Frontend Quality:**
+- ✅ ESLint: 0 errors (2 acceptable Fast Refresh warnings)
+- ✅ TypeScript: Compiles cleanly
+- ⚠️ Tests: 42/60 passing (18 fail due to jsdom/React production build config - infrastructure issue)
+
+**Files Modified:**
+- `src/frontend/eslint.config.js` (NEW)
+- `src/backend/src/api/middleware/security.ts`
+- `src/backend/src/infrastructure/database/repositories/base.ts`
+- `src/backend/src/shared/utils/password.ts`
+- 15+ frontend component and hook files (unused import cleanup)
+
+---
 
 ### v1.2.0 - Phase 8: Orders Management (Complete)
 
