@@ -9,6 +9,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Ensure React runs in development mode during tests
+    'import.meta.env.NODE_ENV': '"test"',
+  },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -28,7 +32,5 @@ export default defineConfig({
     testTimeout: 10000,
     // Hook timeout
     hookTimeout: 10000,
-    // Prevent React production build error
-    mode: process.env.NODE_ENV === 'production' ? 'test' : undefined,
   },
 });
