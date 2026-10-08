@@ -49,13 +49,13 @@ class ApiClient {
       );
     }
 
-    const { params, ...rest } = options;
+    const { params: _params, ...fetchOptions } = options;
 
     const response = await fetch(url.toString(), {
-      ...rest,
+      ...fetchOptions,
       headers: {
         ...this.getHeaders(),
-        ...rest.headers,
+        ...fetchOptions.headers,
       },
     });
 

@@ -1,5 +1,5 @@
 // Base Repository - Shared database utilities
-import pg from 'pg';
+import type pg from 'pg';
 
 export abstract class BaseRepository {
   protected db = () => import('../../../infrastructure/database/postgres/index.js').then(m => m.getDb());

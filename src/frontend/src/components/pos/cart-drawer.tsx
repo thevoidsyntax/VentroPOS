@@ -1,5 +1,5 @@
 import { useCartStore } from '@/stores';
-import { cn, formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,

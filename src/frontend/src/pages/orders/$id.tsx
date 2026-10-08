@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Printer, XCircle, CreditCard, Banknote, QrCode } from 'lucide-react';
+import { ArrowLeft, Printer, XCircle } from 'lucide-react';
 import { useOrder, useVoidOrder } from '@/hooks';
 import { OrderStatusBadge } from '@/components/orders';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,20 +26,6 @@ const voidReasonPresets = [
   'Double charge',
   'Lainnya',
 ];
-
-const paymentMethodIcons: Record<string, React.ReactNode> = {
-  cash: <Banknote className="h-4 w-4" />,
-  qris: <QrCode className="h-4 w-4" />,
-  debit: <CreditCard className="h-4 w-4" />,
-  credit: <CreditCard className="h-4 w-4" />,
-};
-
-const paymentMethodLabels: Record<string, string> = {
-  cash: 'Tunai',
-  qris: 'QRIS',
-  debit: 'Debit',
-  credit: 'Kredit',
-};
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();

@@ -1,4 +1,3 @@
-import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 
 // Browser-specific handlers (for E2E tests)

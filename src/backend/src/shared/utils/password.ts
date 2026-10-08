@@ -38,6 +38,7 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
   }
 
   // Special character (optional but recommended)
+  // eslint-disable-next-line no-useless-escape
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
     errors.push('Password should contain at least one special character');
   }

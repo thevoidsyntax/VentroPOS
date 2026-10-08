@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,6 @@ interface LoginForm {
 }
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const login = useLogin();
   const [error, setError] = useState<string | null>(null);
 

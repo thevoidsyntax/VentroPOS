@@ -1,7 +1,7 @@
 // Security Headers Middleware
 // Implements defense-in-depth security headers
 
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { config } from '../../shared/config/index.js';
 
 interface SecurityHeadersOptions {

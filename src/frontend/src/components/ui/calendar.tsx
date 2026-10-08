@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn, formatDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Button } from './button';
 
 export interface CalendarProps {
@@ -41,11 +41,11 @@ export function Calendar({
   mode = 'single',
   selected,
   onSelect,
-  numberOfMonths = 1,
   disabled,
   minDate,
   maxDate,
 }: CalendarProps) {
+  // numberOfMonths is accepted but not used in this simplified implementation
   const today = new Date();
   const [currentMonth, setCurrentMonth] = React.useState(
     selected?.from || today

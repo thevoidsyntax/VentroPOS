@@ -28,5 +28,7 @@ export default defineConfig({
     testTimeout: 10000,
     // Hook timeout
     hookTimeout: 10000,
+    // Prevent React production build error
+    mode: process.env.NODE_ENV === 'production' ? 'test' : undefined,
   },
 });

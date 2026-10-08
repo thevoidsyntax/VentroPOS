@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api, type Category } from '@/lib/api';
+import { api } from '@/lib/api';
 import { queryKeys } from '@/lib/query-client';
 
 export function useCategories() {

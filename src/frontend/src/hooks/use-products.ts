@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type Product, type ProductFilters, type CreateProductData, type UpdateProductData } from '@/lib/api';
+import { api, type ProductFilters, type CreateProductData, type UpdateProductData } from '@/lib/api';
 import { queryKeys } from '@/lib/query-client';
 
 export function useProducts(filters?: ProductFilters) {

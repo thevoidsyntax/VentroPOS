@@ -70,7 +70,7 @@ export function OrdersPage() {
     } catch {
       toast.error('Gagal memperbarui data');
     }
-  }, [refetch, toast]);
+  }, [refetch]);
 
   const clearFilters = () => {
     setSearchParams({});

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type Order, type OrderFilters, type CreateOrderData, type CheckoutData, type OrderStatus } from '@/lib/api';
+import { api, type OrderFilters, type CreateOrderData, type CheckoutData, type OrderStatus } from '@/lib/api';
 import { queryKeys } from '@/lib/query-client';
 import { useCartStore } from '@/stores';
 

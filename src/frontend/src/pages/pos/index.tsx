@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ShoppingCart } from 'lucide-react';
@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ProductCard, CategoryTabs, CartDrawer } from '@/components/pos';
 import { useProducts, useCategories, useCreateOrder, useCheckoutOrder } from '@/hooks';
 import { useCartStore, useUIStore } from '@/stores';
-import { formatCurrency } from '@/lib/utils';
 
 export function POSPage() {
   const navigate = useNavigate();
@@ -16,10 +15,10 @@ export function POSPage() {
   const { data: productsData, isLoading: productsLoading } = useProducts(
     selectedCategoryId ? { categoryId: selectedCategoryId } : undefined
   );
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const { data: categoriesData } = useCategories();
 
   // Cart
-  const { items, subtotal, tax, total, itemCount, clearCart } = useCartStore();
+  const { items, total, itemCount, clearCart } = useCartStore();
   const cartDrawerOpen = useUIStore((state) => state.cartDrawerOpen);
   const setCartDrawerOpen = useUIStore((state) => state.setCartDrawerOpen);
 
@@ -58,7 +57,7 @@ export function POSPage() {
 
       // Navigate to receipt or print
       navigate(`/orders/${order.id}`);
-    } catch (error) {
+    } catch {
       toast.error('Gagal memproses pembayaran');
     }
   };
