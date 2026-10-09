@@ -1,6 +1,13 @@
 import { useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Search, RefreshCw, AlertTriangle } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  RefreshCw,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { useProducts, useCategories, useDeleteProduct } from '@/hooks';
 import { ProductCard } from '@/components/products';
 import { Button } from '@/components/ui/button';
@@ -22,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/lib/api';
 
 const ITEMS_PER_PAGE = 24;
@@ -249,9 +257,6 @@ export function ProductsPage() {
 }
 
 // Pagination Component
-import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 interface PaginationProps {
   page: number;
   totalPages: number;

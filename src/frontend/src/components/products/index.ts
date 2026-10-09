@@ -4,3 +4,4 @@ export { ImageUpload } from './ImageUpload';
 export { CategoryDialog, CategoryList } from './CategoryDialog';
 export { ModifierGroupEditor } from './ModifierGroupEditor';
 export { ProductForm } from './ProductForm';
+export { PriceInput } from './PriceInput';

@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom';
-import { Edit, AlertTriangle, Copy } from 'lucide-react';
+import { Edit, AlertTriangle, Copy, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { CategoryBadge } from './CategoryBadge';
 import { formatCurrency } from '@/lib/utils';
 import type { Product } from '@/lib/api';
@@ -12,7 +19,7 @@ interface ProductCardProps {
   onDelete?: (product: Product) => void;
 }
 
-export function ProductCard({ product, onDuplicate, onDelete: _onDelete }: ProductCardProps) {
+export function ProductCard({ product, onDuplicate, onDelete }: ProductCardProps) {
   const isLowStock = product.stock <= product.lowStockThreshold;
   const isOutOfStock = product.stock === 0;
 
@@ -69,27 +76,35 @@ export function ProductCard({ product, onDuplicate, onDelete: _onDelete }: Produ
             {formatCurrency(product.price)}
           </span>
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {onDuplicate && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onDuplicate(product);
-                }}
-              >
-                <Copy className="h-4 w-4" />
-                <span className="sr-only">Salin</span>
-              </Button>
-            )}
-            <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-              <Link to={`/products/${product.id}/edit`}>
-                <Edit className="h-4 w-4" />
-                <span className="sr-only">Edit</span>
-              </Link>
-            </Button>
+          <div className="flex items-center justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to={`/products/${product.id}/edit`}>
+                    <Edit className="mr-2 h-4 w-4" /> Edit
+                  </Link>
+                </DropdownMenuItem>
+                {onDuplicate && (
+                  <DropdownMenuItem onClick={() => onDuplicate(product)}>
+                    <Copy className="mr-2 h-4 w-4" /> Duplikat
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                {onDelete && (
+                  <DropdownMenuItem
+                    onClick={() => onDelete(product)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
