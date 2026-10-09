@@ -246,6 +246,40 @@ class ApiClient {
         method: 'POST',
       }),
   };
+
+  // Modifiers endpoints
+  modifiers = {
+    listGroups: () =>
+      this.request<ModifierGroup[]>('/modifiers/groups'),
+    getGroup: (id: string) =>
+      this.request<ModifierGroup>(`/modifiers/groups/${id}`),
+    createGroup: (data: CreateModifierGroupData) =>
+      this.request<ModifierGroup>('/modifiers/groups', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateGroup: (id: string, data: UpdateModifierGroupData) =>
+      this.request<ModifierGroup>(`/modifiers/groups/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    deleteGroup: (id: string) =>
+      this.request<void>(`/modifiers/groups/${id}`, { method: 'DELETE' }),
+    listModifiers: (groupId: string) =>
+      this.request<Modifier[]>(`/modifiers/groups/${groupId}/modifiers`),
+    createModifier: (groupId: string, data: CreateModifierData) =>
+      this.request<Modifier>(`/modifiers/groups/${groupId}/modifiers`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateModifier: (id: string, data: UpdateModifierData) =>
+      this.request<Modifier>(`/modifiers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    deleteModifier: (id: string) =>
+      this.request<void>(`/modifiers/${id}`, { method: 'DELETE' }),
+  };
 }
 
 export const api = new ApiClient(API_BASE);
@@ -291,6 +325,7 @@ export interface Product {
   name: string;
   description?: string;
   price: number;
+  cost?: number;
   categoryId: string;
   category?: Category;
   sku?: string;
@@ -313,23 +348,27 @@ export interface CreateProductData {
   name: string;
   description?: string;
   price: number;
+  cost?: number;
   categoryId: string;
   sku?: string;
   imageUrl?: string;
   stock?: number;
   lowStockThreshold?: number;
+  modifierGroupIds?: string[];
 }
 
 export interface UpdateProductData {
   name?: string;
   description?: string;
   price?: number;
+  cost?: number;
   categoryId?: string;
   sku?: string;
   imageUrl?: string;
   stock?: number;
   lowStockThreshold?: number;
   isActive?: boolean;
+  modifierGroupIds?: string[];
 }
 
 export interface Category {
@@ -532,6 +571,48 @@ export interface CategoryBreakdown {
   totalQuantity: number;
   totalRevenue: number;
   percentage: number;
+}
+
+export type ModifierGroupType = 'size' | 'extras' | 'topping' | 'custom';
+
+export interface ModifierGroup {
+  id: string;
+  name: string;
+  type: ModifierGroupType;
+  isRequired: boolean;
+  minSelections: number;
+  maxSelections: number;
+  modifiers: Modifier[];
+  createdAt: string;
+}
+
+export interface CreateModifierGroupData {
+  name: string;
+  type: ModifierGroupType;
+  isRequired?: boolean;
+  minSelections?: number;
+  maxSelections?: number;
+}
+
+export interface UpdateModifierGroupData {
+  name?: string;
+  type?: ModifierGroupType;
+  isRequired?: boolean;
+  minSelections?: number;
+  maxSelections?: number;
+}
+
+export interface CreateModifierData {
+  name: string;
+  priceAdjustment?: number;
+  sortOrder?: number;
+}
+
+export interface UpdateModifierData {
+  name?: string;
+  priceAdjustment?: number;
+  isActive?: boolean;
+  sortOrder?: number;
 }
 
 export interface PaginatedResponse<T> {

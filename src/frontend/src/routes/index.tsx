@@ -7,6 +7,7 @@ import { OrdersPage, OrderDetailPage } from '@/pages/orders';
 import { StockPage } from '@/pages/stock';
 import { ReportsPage } from '@/pages/reports';
 import { SettingsPage } from '@/pages/settings';
+import { ProductsPage, ProductFormPage } from '@/pages/products';
 import { Navigate } from 'react-router-dom';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -73,6 +74,18 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsPage />,
+      },
+      {
+        path: 'products',
+        element: <ProductsPage />,
+      },
+      {
+        path: 'products/new',
+        element: <ProductFormPage />,
+      },
+      {
+        path: 'products/:id/edit',
+        element: <ProductFormPage />,
       },
     ],
   },

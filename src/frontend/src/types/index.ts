@@ -22,6 +22,12 @@ export type {
   StaffReport,
   CategoryBreakdown,
   PaginatedResponse,
+  Modifier,
+  ModifierGroup,
+  CreateModifierGroupData,
+  UpdateModifierGroupData,
+  CreateModifierData,
+  UpdateModifierData,
 } from '@/lib/api';
 
 // Cart types are exported from cart-store

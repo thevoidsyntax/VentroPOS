@@ -48,4 +48,9 @@ export const queryKeys = {
     list: () => [...queryKeys.users.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.users.all, 'detail', id] as const,
   },
+  modifierGroups: {
+    all: ['modifier-groups'] as const,
+    list: () => [...queryKeys.modifierGroups.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.modifierGroups.all, 'detail', id] as const,
+  },
 };

@@ -10,6 +10,7 @@ import {
   X,
   LogOut,
   User,
+  Package2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Kasir', path: '/pos', icon: LayoutDashboard },
   { label: 'Pesanan', path: '/orders', icon: ShoppingCart },
+  { label: 'Produk', path: '/products', icon: Package2 },
   { label: 'Stok', path: '/stock', icon: Package },
   { label: 'Laporan', path: '/reports', icon: BarChart3 },
   { label: 'Pengaturan', path: '/settings', icon: Settings },
