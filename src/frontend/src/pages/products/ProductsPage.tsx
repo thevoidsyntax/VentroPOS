@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -35,10 +35,29 @@ import type { Product } from '@/lib/api';
 const ITEMS_PER_PAGE = 24;
 
 export function ProductsPage() {
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        navigate('/products/new');
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   const categoryId = searchParams.get('categoryId') || undefined;
   const isActive = searchParams.get('isActive');
@@ -126,7 +145,8 @@ export function ProductsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Cari nama atau SKU produk..."
+            ref={searchInputRef}
+            placeholder="Cari nama atau SKU produk... (Ctrl+F)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"

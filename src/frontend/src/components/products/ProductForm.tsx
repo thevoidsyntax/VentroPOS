@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ImageUpload } from './ImageUpload';
+import { PriceInput } from './PriceInput';
 import { ModifierGroupEditor } from './ModifierGroupEditor';
 import { CategoryDialog } from './CategoryDialog';
 import { useCategories, useCreateProduct, useUpdateProduct } from '@/hooks';
@@ -228,21 +229,11 @@ export function ProductForm({ product }: ProductFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="price">Harga *</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                Rp
-              </span>
-              <Input
-                id="price"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="25000"
-                className={`pl-10 ${errors.price ? 'border-destructive' : ''}`}
-                min="0"
-                step="100"
-              />
-            </div>
+            <PriceInput
+              value={price}
+              onChange={setPrice}
+              error={!!errors.price}
+            />
             {errors.price && (
               <p className="text-xs text-destructive">{errors.price}</p>
             )}
@@ -252,21 +243,10 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="cost">Harga Pokok</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                Rp
-              </span>
-              <Input
-                id="cost"
-                type="number"
-                value={cost}
-                onChange={(e) => setCost(e.target.value)}
-                placeholder="12000"
-                className="pl-10"
-                min="0"
-                step="100"
-              />
-            </div>
+            <PriceInput
+              value={cost}
+              onChange={setCost}
+            />
           </div>
 
           <div className="space-y-2">

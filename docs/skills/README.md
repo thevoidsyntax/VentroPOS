@@ -1,0 +1,176 @@
+# Skills Documentation
+
+Dokumentasi skill yang aktif untuk project VentroPos.
+
+---
+
+## 📋 Skills Overview
+
+| Skill | Status | Score | Purpose |
+|-------|--------|-------|---------|
+| `/git` | ✅ Core | 50 | Version Control |
+| `/testing` | ✅ Core | 50 | Testing & Coverage (187 backend, 60 frontend) |
+| `/code-quality` | ✅ Core | 50 | Linting & Standards (ESLint 9) |
+| `/mem-search` | ✅ Core | 50 | Persistent Memory |
+| `/logging` | ✅ Core | 50 | Pino structured logging |
+| `/config` | ✅ Core | 50 | Environment & app configuration |
+| `/tdd` | ✅ Core | 50 | Test-driven development |
+| `/ui-ux-pro-max` | ✅ Context | 80 | Design Intelligence (React + shadcn/ui) |
+| `/database` | ✅ Context | 75 | PostgreSQL with RLS multi-tenancy |
+| `/typescript-pro` | ✅ Context | 75 | TypeScript strict mode |
+| `/api-design` | ✅ Context | 75 | Fastify REST API |
+| `/security` | ✅ Context | 70 | JWT authentication |
+| `/domain-modeling` | ✅ Context | 70 | DDD-Lite architecture |
+| `/performance` | ⭐ Ready | 45 | Bundle optimization |
+| `/docker` | ⭐ Ready | 35 | Containerization |
+| `/feature-forge` | ⭐ Ready | 30 | Feature specification |
+| `/diagnosing-bugs` | ⭐ Ready | 20 | Debugging utilities |
+
+---
+
+## 🎯 Phase 9 - Product Management
+
+**Current Phase:** 9 (Product Management)
+**Version:** 1.2.1
+
+### Required Skills for Phase 9
+
+| Skill | Priority | Use Case |
+|-------|----------|----------|
+| `/ui-ux-pro-max` | CRITICAL | Product CRUD UI, Category management |
+| `/database` | HIGH | PostgreSQL queries for products |
+| `/typescript-pro` | HIGH | Type definitions for products |
+| `/api-design` | HIGH | REST endpoints (already exist) |
+| `/code-quality` | HIGH | ESLint review |
+| `/testing` | HIGH | Unit tests for product features |
+
+### Deliverables
+
+- [ ] Products list page (`/products`)
+- [ ] Add/Edit product form
+- [ ] Category management modal
+- [ ] Modifier group editor
+- [ ] Image upload component
+- [ ] Search & filter functionality
+- [ ] Delete product confirmation
+- [ ] Unit tests
+
+---
+
+## 📊 Quality Status
+
+```
+Backend Tests:  ✅ 187/187 passing
+Frontend Tests: ✅ 60/60 passing
+ESLint Backend: ✅ 0 errors
+ESLint Frontend: ✅ 0 errors (2 warnings)
+npm audit:      ✅ 0 vulnerabilities
+TypeScript:     ✅ Strict mode
+Build:          ✅ Success
+```
+
+---
+
+## 📄 Documentation
+
+| File | Description |
+|------|-------------|
+| [ACTIVE-SKILLS.md](./ACTIVE-SKILLS.md) | Full skill documentation with all details |
+
+---
+
+## 🗂️ Skill Categories
+
+### Core Skills (Always Auto-Invoke)
+Pengaturan development fundamental yang selalu aktif untuk setiap project.
+
+- `/git` - Version control workflow
+- `/testing` - Vitest + MSW testing strategy
+- `/code-quality` - ESLint 9 flat config, code review
+- `/mem-search` - Persistent memory search
+- `/logging` - Pino structured logging
+- `/config` - Environment configuration
+- `/tdd` - Test-driven development cycle
+
+### Context-Matched Skills (Tech-Based)
+Skill yang aktif berdasarkan tech stack yang terdeteksi.
+
+- `/ui-ux-pro-max` - React 18 + shadcn/ui + TailwindCSS
+- `/database` - PostgreSQL 16 with RLS
+- `/typescript-pro` - TypeScript 5.6 strict mode
+- `/api-design` - Fastify 5.x REST API
+- `/security` - JWT authentication + rate limiting
+- `/domain-modeling` - DDD-lite patterns
+
+### Phase-Based Skills
+Skill yang aktif berdasarkan phase project saat ini.
+
+- Phase 9: `/api-design`, `/database` - Products API & schema
+
+---
+
+## ⚡ Workflow Execution Modes (v8.0)
+
+Auto-router sekarang mendukung inline/background execution:
+
+| Task Type | Mode | Reason |
+|-----------|------|--------|
+| Discovery/Analysis | Background | Fast, no decisions needed |
+| Implementation | **Inline** | User visibility, course-correct |
+| Testing | Background | Deterministic |
+| Documentation | **Inline** | Needs user approval |
+
+### Why Inline for Implementation?
+
+- User lihat setiap file yang dibuat
+- Bisa koreksi langsung kalau salah
+- Error langsung surfaced
+
+---
+
+## 🔗 Related Documentation
+
+- [README.md](../../README.md) — Project overview, progress tracker
+- [Phase 9 Specs](../roadmap/phase-9-products.md) — Phase 9 requirements
+- [Frontend Specs](../frontend/SPEC.md) — Frontend setup
+- [PRD](../prd/README.md) — Business requirements
+
+---
+
+## 🛠️ Quick Commands
+
+```bash
+# Run all tests
+npm test                    # Backend
+cd src/frontend && npm test # Frontend
+
+# Lint check
+npm run lint                # Backend
+cd src/frontend && npm run lint # Frontend
+
+# Build
+npm run build               # Backend
+cd src/frontend && npm run build # Frontend
+
+# Docker development
+docker-compose -f docker/docker-compose.yml up -d
+```
+
+---
+
+## 📈 Tech Stack
+
+```
+Frontend:  React 18 + Vite 6 + TypeScript 5.6
+Backend:   Node.js 20 + Fastify 5.12 + TypeScript 5.9
+Database:  PostgreSQL 16 (RLS multi-tenant)
+Testing:   Vitest 2.x + MSW
+UI:        TailwindCSS 3 + shadcn/ui
+State:     Zustand 5 + TanStack Query 5
+```
+
+---
+
+*Generated by: /autor (Auto-Router v8.0)*
+*Features: Auto-Invoke | Tech-Based | Phase-Aware | Workflow Execution Modes*
+*Last Updated: 2026-10-09*
