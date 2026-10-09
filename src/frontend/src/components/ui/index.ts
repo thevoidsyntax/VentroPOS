@@ -1,8 +1,10 @@
-export { Button, buttonVariants } from './button';
+export { Button } from './button';
+export { buttonVariants } from './button.constants';
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card';
 export { Input } from './input';
 export { Label } from './label';
-export { Badge, badgeVariants } from './badge';
+export { Badge } from './badge';
+export { badgeVariants } from './badge.constants';
 export {
   Dialog,
   DialogPortal,

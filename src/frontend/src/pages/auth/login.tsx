@@ -18,8 +18,8 @@ export function LoginPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     defaultValues: {
-      email: 'admin@ventropos.com',
-      password: 'admin123',
+      email: 'owner@demo.com',
+      password: 'owner123',
     },
   });
 
@@ -96,7 +96,7 @@ export function LoginPage() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo credentials:</p>
-            <p className="font-mono">admin@ventropos.com / admin123</p>
+            <p className="font-mono">owner@demo.com / owner123</p>
           </div>
         </CardContent>
       </Card>

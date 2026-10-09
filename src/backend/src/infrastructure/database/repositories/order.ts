@@ -197,11 +197,22 @@ export class PostgresOrderRepository extends BaseRepository implements IOrderRep
   async generateOrderNumber(tenantId: string): Promise<string> {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-    const rows = await this.query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM orders WHERE tenant_id = $1 AND created_at >= CURRENT_DATE`,
-      [tenantId]
-    );
-    const seq = (parseInt(rows[0]?.count ?? '0') + 1).toString().padStart(4, '0');
-    return `ORD-${dateStr}-${seq}`;
+
+    // Use advisory lock within transaction to prevent race conditions
+    const result = await this.transaction(async (client) => {
+      // Acquire advisory lock based on tenantId hash - held for duration of transaction
+      await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [tenantId]);
+
+      // Now safe to count and generate
+      const countResult = await client.query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM orders WHERE tenant_id = $1 AND created_at >= CURRENT_DATE`,
+        [tenantId]
+      );
+      const seq = (parseInt(countResult.rows[0]?.count ?? '0') + 1).toString().padStart(4, '0');
+
+      return { seq };
+    });
+
+    return `ORD-${dateStr}-${result.seq}`;
   }
 }

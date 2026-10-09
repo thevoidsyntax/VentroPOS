@@ -4,10 +4,16 @@
 import pg from 'pg';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
+import { config as dotenv } from 'dotenv';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// Load .env file explicitly
+dotenv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '.env' });
 
 const { Pool } = pg;
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://ventropos:ventropos123@localhost:5432/ventropos';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ventropos';
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12');
 
 async function seed() {

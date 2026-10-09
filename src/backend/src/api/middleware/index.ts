@@ -1,7 +1,8 @@
-// API Middleware - Auth, Tenant Context, RBAC, Security
-// Handles JWT verification, tenant isolation, and security
+// API Middleware - Auth, Tenant Context, RBAC, Security, Correlation
+// Handles JWT verification, tenant isolation, correlation IDs, and security
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import { randomUUID } from 'crypto';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { UserRole } from '../../domain/entities/index.js';
 import { UnauthorizedError, ForbiddenError } from '../../shared/errors/index.js';
 
@@ -13,14 +14,27 @@ export {
   rateLimitHeaders,
 } from './security.js';
 
-// Extend FastifyRequest to include user context
+// Extend FastifyRequest to include user context and correlation ID
 declare module 'fastify' {
   interface FastifyRequest {
     userId?: string;
     tenantId?: string;
     userEmail?: string;
     userRole?: UserRole;
+    correlationId?: string;
   }
+}
+
+// ============== CORRELATION ID MIDDLEWARE ==============
+export function correlationMiddleware(fastify: FastifyInstance) {
+  fastify.addHook('onRequest', async (request, reply) => {
+    const correlationId = (request.headers['x-request-id'] as string) || randomUUID();
+    request.correlationId = correlationId;
+    reply.header('X-Request-ID', correlationId);
+
+    // Add to logger context for structured logging
+    request.log = request.log.child({ correlationId });
+  });
 }
 
 // ============== AUTH MIDDLEWARE ==============

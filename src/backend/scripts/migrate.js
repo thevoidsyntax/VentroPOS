@@ -5,12 +5,16 @@ import pg from 'pg';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { config as dotenv } from 'dotenv';
+
+// Load .env file explicitly
+dotenv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '.env' });
 
 const { Pool } = pg;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Get database URL from environment or use default
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://ventropos:ventropos123@localhost:5432/ventropos';
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ventropos';
 
 async function runMigration(direction = 'up', migrationNumber = null) {
   const pool = new Pool({ connectionString: DATABASE_URL });

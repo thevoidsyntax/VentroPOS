@@ -113,11 +113,11 @@ export const config = {
 
   jwt: {
     secret: (() => {
-      const secret = env!.JWT_SECRET;
-      if (!secret && env!.NODE_ENV === 'production') {
+      if (env!.JWT_SECRET) return env!.JWT_SECRET;
+      if (env!.NODE_ENV === 'production') {
         throw new Error('JWT_SECRET environment variable is required in production');
       }
-      return secret || 'test-secret-key-for-unit-testing-only-minimum-32-chars';
+      return 'test-secret-key-for-unit-testing-only-minimum-32-chars';
     })(),
     accessExpiresIn: env!.JWT_ACCESS_EXPIRES_IN,
     refreshExpiresIn: env!.JWT_REFRESH_EXPIRES_IN,

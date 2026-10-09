@@ -36,7 +36,14 @@ class ApiClient {
     endpoint: string,
     options: RequestOptions = {}
   ): Promise<T> {
-    const url = new URL(endpoint, this.baseUrl);
+    // Use absolute URL construction for proxy
+    const baseUrl = this.baseUrl.startsWith('http')
+      ? this.baseUrl
+      : (this.baseUrl.startsWith('/') ? this.baseUrl : `/${this.baseUrl}`);
+    const urlString = endpoint.startsWith('/')
+      ? `${baseUrl}${endpoint}`
+      : `${baseUrl}/${endpoint}`;
+    const url = new URL(urlString, window.location.origin);
 
     // Handle query params
     if (options.params) {

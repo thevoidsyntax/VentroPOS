@@ -65,9 +65,14 @@ export async function buildApp() {
   // ============== RATE LIMITING CONFIGURATION ==============
 
   // Redis Connection (for caching and distributed rate limiting)
-  await RedisClient.getInstance().connect();
+  const redisInstance = RedisClient.getInstance();
+  if (redisInstance && config.redis.url) {
+    await redisInstance.connect().catch((err) => {
+      app.log.warn({ err }, '[Redis] Connection failed, continuing without Redis');
+    });
+  }
 
-  const redisClient = RedisClient.getInstance().getClient();
+  const redisClient = redisInstance?.getClient();
 
   if (redisClient) {
     app.log.info('[RateLimit] Redis connected - distributed rate limiting enabled');
@@ -112,8 +117,8 @@ export async function buildApp() {
   // Apply stricter rate limiting to auth routes
   await app.register(async function (instance) {
     await instance.register(rateLimit, authRateLimitConfig);
-    await instance.register(authRoutes, { prefix: '/api/v1/auth' });
-  }, { prefix: '/api/v1/auth' });
+    await instance.register(authRoutes, { prefix: '/auth' });
+  }, { prefix: '/api/v1' });
 
   // Swagger Documentation
   const packageJson = await import('../package.json', { assert: { type: 'json' } });
