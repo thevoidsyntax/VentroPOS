@@ -1,9 +1,9 @@
 # VentroPos - Cloud POS for Small & Medium Business
 
-> **Version:** 1.3.0
+> **Version:** 1.3.1
 > **Status:** Development
 > **License:** MIT
-> **Last Updated:** 2026-10-08 (Phase 9 - Product Management)
+> **Last Updated:** 2026-10-09 (Audit Fixes & Code Quality)
 
 ---
 
@@ -663,12 +663,14 @@ Audit Log Table: audit_logs
 | Check | Status | Notes |
 |-------|--------|-------|
 | ESLint Backend | ✅ 0 errors | TypeScript + Prettier support |
-| ESLint Frontend | ✅ 0 errors | ESLint 9 flat config (2 warnings) |
+| ESLint Frontend | ✅ 0 errors | ESLint 9 flat config, 0 warnings |
 | TypeScript | ✅ Strict | No `any` types |
 | Tests Backend | ✅ 187 passing | Vitest unit tests |
 | Tests Frontend | ✅ 60 passing | Vitest unit tests |
 | npm audit | ✅ 0 vulnerabilities | Regular dependency scanning |
 | Max File Size | ✅ <250 ln | Fat class split complete |
+| Pagination | ✅ Implemented | DEFAULT_LIMIT/MAX_LIMIT in base repository |
+| Correlation ID | ✅ Implemented | X-Request-ID header middleware |
 
 ### Code Complexity
 
@@ -763,6 +765,55 @@ LOG_LEVEL=info         # Pino log level
 ---
 
 ## Changelog
+
+### v1.3.1 - Audit Fixes & Code Quality (2026-10-09)
+
+**Security Improvements:**
+- ✅ JWT_SECRET production check now throws error if missing (no fallback)
+- ✅ All database queries use parameterized queries (SQL injection protected)
+- ✅ Multi-tenancy: All queries filter by tenant_id
+- ✅ Rate limiting on auth endpoints
+
+**Performance Improvements:**
+- ✅ Added pagination defaults (DEFAULT_LIMIT=100, MAX_LIMIT=1000)
+- ✅ New `applyPagination()` helper method in BaseRepository
+- ✅ Order number generation uses advisory lock (prevents race conditions)
+
+**Monitoring & Observability:**
+- ✅ Correlation ID middleware (`X-Request-ID` header)
+- ✅ Request logging with correlation context
+- ✅ Fastify request extension for correlation ID
+
+**UI/UX Improvements:**
+- ✅ Extracted variant constants to separate files (badge.constants.ts, button.constants.ts)
+- ✅ Fixed React refresh HMR warnings in shadcn/ui components
+- ✅ Playwright E2E test configuration added
+
+**Code Quality:**
+- ✅ ESLint: 0 errors, 0 warnings (both backend and frontend)
+- ✅ TypeScript: No compilation errors
+- ✅ No `any` types, no `@ts-ignore` pragmas
+- ✅ Strong typing throughout codebase
+
+**Files Changed:**
+```
+Modified:
+- src/backend/src/shared/config/index.ts
+- src/backend/src/infrastructure/database/repositories/base.ts
+- src/backend/src/infrastructure/database/repositories/order.ts
+- src/backend/src/api/middleware/index.ts
+- src/frontend/src/components/ui/badge.tsx
+- src/frontend/src/components/ui/button.tsx
+- src/frontend/src/components/ui/index.ts
+
+New:
+- src/frontend/src/components/ui/badge.constants.ts
+- src/frontend/src/components/ui/button.constants.ts
+- src/frontend/playwright.config.ts
+- src/frontend/tests/e2e/ventropos.spec.ts
+```
+
+---
 
 ### v1.3.0 - Phase 9: Product Management (2026-10-08)
 
